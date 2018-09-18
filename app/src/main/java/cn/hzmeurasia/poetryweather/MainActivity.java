@@ -1,5 +1,6 @@
 package cn.hzmeurasia.poetryweather;
 
+import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -7,6 +8,7 @@ import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +20,9 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
+    /**
+     * 模拟数据
+     */
     private CardEntity[] cardEntities = {new CardEntity("京兆府", "(西安)", "大雨", "16°",R.drawable.bg),
             new CardEntity("应天府", "(商丘)", "多云", "26°",R.drawable.bg)};
     private List<CardEntity> cardEntityList = new ArrayList<>();
@@ -53,5 +58,17 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < cardEntities.length; i++) {
             cardEntityList.add(cardEntities[i]);
         }
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch(item.getItemId()) {
+            case android.R.id.home:
+                drawerLayout.openDrawer(GravityCompat.START);
+                break;
+            default:
+                break;
+        }
+        return true;
     }
 }

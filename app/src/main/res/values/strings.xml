@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">诗语天气</string>
+    <string name="nav_item_home">首页</string>
+    <string name="nav_item_personalInformation">个人信息</string>
+    <string name="nav_item_care">亲情关怀</string>
+    <string name="nav_item_poetry">诗词管理</string>
 </resources>
