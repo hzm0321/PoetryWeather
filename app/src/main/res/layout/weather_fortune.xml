@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:layout_marginLeft="20dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="1"
+        android:text="今日"
+        android:textSize="40sp"
+        android:id="@+id/tv_weather_today"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="1"
+        android:text="宜忌"
+        android:id="@+id/tv_weather_fortune"
+        android:textSize="40sp"
+        android:layout_toRightOf="@id/tv_weather_today"/>
+
+    <TextView
+        android:paddingTop="5dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:lines="2"
+        android:text="祈福 任职表彰 祈福 任职表彰 "
+        android:textSize="16sp"
+        android:layout_toRightOf="@id/tv_weather_fortune"
+        android:gravity="center_vertical"
+        android:id="@+id/tv_weather_suitable"/>
+
+    <TextView
+        android:layout_marginRight="20dp"
+        android:paddingTop="5dp"
+        android:paddingBottom="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:lines="2"
+        android:text="祈福 任职表彰 祈福 任职表彰 祈福 任职表彰 祈福 任职表彰 "
+        android:textSize="16sp"
+        android:gravity="center_vertical"
+        android:layout_below="@id/tv_weather_suitable"
+        android:layout_toRightOf="@id/tv_weather_fortune"
+        android:id="@+id/tv_weather_avoid"/>
+
+</RelativeLayout>

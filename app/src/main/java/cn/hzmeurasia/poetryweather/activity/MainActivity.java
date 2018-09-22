@@ -1,4 +1,4 @@
-package cn.hzmeurasia.poetryweather;
+package cn.hzmeurasia.poetryweather.activity;
 
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -13,6 +13,7 @@ import android.view.MenuItem;
 import java.util.ArrayList;
 import java.util.List;
 
+import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
 
@@ -23,7 +24,7 @@ public class MainActivity extends AppCompatActivity {
     /**
      * 模拟数据
      */
-    private CardEntity[] cardEntities = {new CardEntity("京兆府", "(西安)", "大雨", "16°",R.drawable.bg),
+    private CardEntity[] cardEntities = {new CardEntity("京兆府", "(西安)", "大雨", "16°", R.drawable.bg),
             new CardEntity("应天府", "(商丘)", "多云", "26°",R.drawable.bg)};
     private List<CardEntity> cardEntityList = new ArrayList<>();
     private CardAdapter cardAdapter;

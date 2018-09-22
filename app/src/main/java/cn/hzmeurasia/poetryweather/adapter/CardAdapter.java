@@ -1,6 +1,7 @@
 package cn.hzmeurasia.poetryweather.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.R;
+import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
 
 /**
@@ -55,7 +57,19 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
             mcontext = parent.getContext();
         }
         View view = LayoutInflater.from(mcontext).inflate(R.layout.card_item, parent, false);
-        return new ViewHolder(view);
+        //点击事件
+        final ViewHolder holder = new ViewHolder(view);
+        holder.cardView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+//                //位置
+//                int position = holder.getAdapterPosition();
+//                CardEntity cardEntity = mCardEntityList.get(position);
+                Intent intent = new Intent(mcontext, WeatherActivity.class);
+                mcontext.startActivity(intent);
+            }
+        });
+        return holder;
     }
 
     @Override
