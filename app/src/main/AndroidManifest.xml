@@ -21,6 +21,9 @@
             </intent-filter>
         </activity>
         <activity android:name=".activity.WeatherActivity" />
+        <activity
+            android:name=".activity.SearchCityActivity"
+            android:theme="@style/DefaultCityPickerTheme" />
     </application>
 
 </manifest>
