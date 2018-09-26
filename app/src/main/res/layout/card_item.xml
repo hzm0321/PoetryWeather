@@ -17,57 +17,42 @@
             android:scaleType="centerCrop"
             android:id="@+id/iv_bg"/>
 
-    <TableLayout
-        android:layout_margin="15dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:gravity="center">
-
-
-
-
-        <TableRow
+        <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <TextView
+                android:padding="15dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="京兆府"
                 android:textColor="@color/li"
                 android:textSize="35sp"
-                android:id="@+id/tv_oldCityName"/>
+                android:id="@+id/tv_CityName"/>
 
             <TextView
-                android:layout_gravity="end"
+                android:paddingTop="15dp"
+                android:paddingRight="15dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="多云"
+                android:layout_alignParentRight="true"
                 android:textColor="@color/blueAsh"
                 android:textSize="35sp"
                 android:id="@+id/tv_weather"/>
-        </TableRow>
-
-        <TableRow>
 
             <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="(西安)"
-                android:textColor="@color/li"
-                android:textSize="20sp"
-                android:id="@+id/tv_nowCityName"/>
-
-            <TextView
+                android:paddingRight="30dp"
                 android:layout_gravity="end"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_below="@id/tv_weather"
+                android:layout_alignParentRight="true"
                 android:text="28°"
                 android:textColor="@color/blueAsh"
                 android:textSize="20sp"
                 android:id="@+id/tv_temperature"/>
-        </TableRow>
 
-    </TableLayout>
+        </RelativeLayout>
     </FrameLayout>
 </android.support.v7.widget.CardView>

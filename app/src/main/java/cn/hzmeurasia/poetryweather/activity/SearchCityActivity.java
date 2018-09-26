@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.zaaach.citypicker.CityPicker;
@@ -13,10 +14,15 @@ import com.zaaach.citypicker.model.HotCity;
 import com.zaaach.citypicker.model.LocateState;
 import com.zaaach.citypicker.model.LocatedCity;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
+import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 
 
 /**
@@ -26,9 +32,11 @@ import cn.hzmeurasia.poetryweather.MyApplication;
  * 日期:2018/9/24 13:54
  */
 public class SearchCityActivity extends AppCompatActivity {
+    private static final String TAG = "SearchCityActivity";
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         /**
          * 添加热门城市
          */
@@ -49,6 +57,15 @@ public class SearchCityActivity extends AppCompatActivity {
                     @Override
                     public void onPick(int position, City data) {
                         Toast.makeText(MyApplication.getContext(),data.getName(),Toast.LENGTH_SHORT).show();
+                        //组合cityCode
+                        StringBuilder stringBuilder = new StringBuilder();
+                        stringBuilder.append("CN").append(data.getCode());
+
+                        //发送EventBus事件
+                        EventBus.getDefault().post(new SearchCityEntity(stringBuilder.toString()));
+                        finish();
+                        Log.d(TAG, "onPick: "+data.getCode());
+
                     }
 
                     @Override
@@ -67,4 +84,6 @@ public class SearchCityActivity extends AppCompatActivity {
                 .show();
 
     }
+
+
 }

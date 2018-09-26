@@ -32,16 +32,14 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
     static class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
         ImageView bgImage;
-        TextView oldCityName;
-        TextView nowCityName;
+        TextView cityName;
         TextView weatherMessage;
         TextView temperature;
         public ViewHolder(View view) {
             super(view);
             cardView = (CardView) view;
             bgImage = view.findViewById(R.id.iv_bg);
-            oldCityName = view.findViewById(R.id.tv_oldCityName);
-            nowCityName = view.findViewById(R.id.tv_nowCityName);
+            cityName = view.findViewById(R.id.tv_CityName);
             weatherMessage = view.findViewById(R.id.tv_weather);
             temperature = view.findViewById(R.id.tv_temperature);
         }
@@ -75,8 +73,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
         CardEntity cardEntity = mCardEntityList.get(position);
-        holder.oldCityName.setText(cardEntity.getAdress());
-        holder.nowCityName.setText(cardEntity.getAdress2());
+        holder.cityName.setText(cardEntity.getAddress());
         holder.weatherMessage.setText(cardEntity.getWeatherMessage());
         holder.temperature.setText(cardEntity.getTemperature());
         Glide.with(mcontext).load(cardEntity.getImageId()).into(holder.bgImage);
