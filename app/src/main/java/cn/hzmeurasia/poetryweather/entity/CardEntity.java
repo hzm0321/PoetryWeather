@@ -8,13 +8,15 @@ package cn.hzmeurasia.poetryweather.entity;
  */
 public class CardEntity {
 
+    private String cid;
     private String address;
     private String weatherMessage;
     private String temperature;
     private int imageId;
 
-    public CardEntity(String adress, String weatherMessage, String temperature,int imageId) {
-        this.address = adress;
+    public CardEntity(String cid, String address, String weatherMessage, String temperature, int imageId) {
+        this.cid = cid;
+        this.address = address;
         this.weatherMessage = weatherMessage;
         this.temperature = temperature;
         this.imageId = imageId;
@@ -35,5 +37,13 @@ public class CardEntity {
 
     public int getImageId() {
         return imageId;
+    }
+
+    public String getCid() {
+        return cid;
+    }
+
+    public void setCid(String cid) {
+        this.cid = cid;
     }
 }

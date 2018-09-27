@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
@@ -39,11 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
-    /**
-     * 模拟数据
-     */
-    private CardEntity[] cardEntities = {new CardEntity("京兆府", "大雨", "16°", R.drawable.bg),
-            new CardEntity("应天府", "多云", "26°", R.drawable.bg)};
+    private TextView tvTip;
 
     private List<CardEntity> cardEntityList = new ArrayList<>();
     private CardAdapter cardAdapter;
@@ -52,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        //控件初始化
+        tvTip = findViewById(R.id.tv_tip);
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
         HeConfig.switchToFreeServerNode();
@@ -81,8 +80,9 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
-        //初始化Card布局
-        initCard();
+
+        //判断是否添加了城市
+        isCardEmpty();
         RecyclerView recyclerView = findViewById(R.id.rv_main);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         recyclerView.setLayoutManager(gridLayoutManager);
@@ -90,10 +90,16 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(cardAdapter);
     }
 
-    private void initCard() {
-        cardEntityList.clear();
-        for (int i = 0; i < cardEntities.length; i++) {
-            cardEntityList.add(cardEntities[i]);
+
+
+    /**
+     * 判断是否添加了城市
+     */
+    private void isCardEmpty() {
+        if (cardEntityList.isEmpty()) {
+            tvTip.setVisibility(View.VISIBLE);
+        } else {
+            tvTip.setVisibility(View.GONE);
         }
     }
 
@@ -109,8 +115,11 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    /**
+     * EventBus事件处理
+     */
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void Event(SearchCityEntity searchCityEntity) {
+    public void searchCityEvent(SearchCityEntity searchCityEntity) {
         Log.d(TAG, "Event: "+searchCityEntity.getCityCode());
         HeWeather.getWeatherNow(this, searchCityEntity.getCityCode(), new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
@@ -123,12 +132,21 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(List<Now> list) {
                 Log.i(TAG, "onSuccess: "+ new Gson().toJson(list));
                 for (Now now : list) {
-                    cardEntityList.add(new CardEntity(now.getBasic().getLocation(),now.getNow().getCond_txt(),now.getNow().getFl(),R.drawable.bg));
+                    cardEntityList.add(new CardEntity(now.getBasic().getCid(),now.getBasic().getLocation(),now.getNow().getCond_txt(),now.getNow().getFl(),R.drawable.bg));
                 }
                 //刷新Card视图
                 cardAdapter.notifyDataSetChanged();
+                isCardEmpty();
+
 
             }
         });
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        //解除注册EventBus
+        EventBus.getDefault().unregister(this);
     }
 }

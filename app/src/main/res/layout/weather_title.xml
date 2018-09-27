@@ -8,17 +8,15 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:textSize="30sp"
-        android:id="@+id/tv_cityName"
-        android:text="西安"/>
+        android:id="@+id/tv_cityName"/>
 
     <TextView
-        android:paddingRight="20dp"
+        android:paddingRight="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
-        android:textSize="16sp"
-        android:id="@+id/tv_updateTime"
-        android:text="2019-3-4"/>
+        android:textSize="14sp"
+        android:id="@+id/tv_updateTime"/>
 
 </RelativeLayout>

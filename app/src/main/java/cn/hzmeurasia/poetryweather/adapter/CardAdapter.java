@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,11 +13,15 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
+import org.greenrobot.eventbus.EventBus;
+
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
+import cn.hzmeurasia.poetryweather.entity.CityEntity;
+import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 
 /**
  * 类名: CardAdapter<br>
@@ -25,6 +30,8 @@ import cn.hzmeurasia.poetryweather.entity.CardEntity;
  * 日期:2018/9/15 14:48
  */
 public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
+
+    private static final String TAG = "CardAdapter";
 
     private Context mcontext;
     private List<CardEntity> mCardEntityList;
@@ -60,11 +67,15 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
         holder.cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                //位置
-//                int position = holder.getAdapterPosition();
-//                CardEntity cardEntity = mCardEntityList.get(position);
+                //位置
+                int position = holder.getAdapterPosition();
+                Log.d(TAG, "onClick: "+position);
+                CardEntity cardEntity = mCardEntityList.get(position);
+                Log.d(TAG, "onClick: "+cardEntity.getCid());
                 Intent intent = new Intent(mcontext, WeatherActivity.class);
+                intent.putExtra("cityCode", cardEntity.getCid());
                 mcontext.startActivity(intent);
+
             }
         });
         return holder;

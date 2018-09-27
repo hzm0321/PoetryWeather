@@ -25,21 +25,25 @@
         android:id="@+id/v_line"/>
 
     <ImageView
-        android:layout_marginLeft="10dp"
+
+        android:layout_marginLeft="20dp"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_toRightOf="@id/v_line"
         android:layout_alignTop="@id/v_line"
-        android:id="@+id/tv_weather_icon"/>
+        android:id="@+id/iv_weather_icon"/>
 
     <TextView
         android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/tv_weather_icon"
+        android:layout_below="@id/iv_weather_icon"
         android:layout_toEndOf="@id/v_line"
         android:textSize="30sp"
-        android:text="多云"/>
+        android:gravity="center"
+        android:ems="2"
+        android:text="云"
+        android:id="@+id/tv_weather"/>
 
     </RelativeLayout>
 
