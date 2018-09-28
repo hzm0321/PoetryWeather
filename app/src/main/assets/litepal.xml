@@ -1,0 +1,7 @@
+<litepal>
+    <dbname value="CityList"/>
+    <version value="1"/>
+    <list>
+        <mapping class="cn.hzmeurasia.poetryweather.db.CityDb"/>
+    </list>
+</litepal>

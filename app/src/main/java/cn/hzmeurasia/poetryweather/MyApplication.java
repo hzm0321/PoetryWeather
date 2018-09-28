@@ -3,6 +3,8 @@ package cn.hzmeurasia.poetryweather;
 import android.app.Application;
 import android.content.Context;
 
+import org.litepal.LitePal;
+
 /**
  * 类名: MyApplication<br>
  * 功能:(全局Context)<br>
@@ -17,6 +19,7 @@ public class MyApplication extends Application {
     public void onCreate() {
         super.onCreate();
         context = getApplicationContext();
+        LitePal.initialize(context);
     }
 
     public static Context getContext() {

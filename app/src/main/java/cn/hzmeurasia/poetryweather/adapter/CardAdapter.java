@@ -13,15 +13,12 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 
-import org.greenrobot.eventbus.EventBus;
-
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
+import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
-import cn.hzmeurasia.poetryweather.entity.CityEntity;
-import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 
 /**
  * 类名: CardAdapter<br>
@@ -34,7 +31,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
     private static final String TAG = "CardAdapter";
 
     private Context mcontext;
-    private List<CardEntity> mCardEntityList;
+    private List<CityDb> mCityDbList;
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
@@ -52,8 +49,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
         }
     }
 
-    public CardAdapter(List<CardEntity> cardEntityList) {
-        mCardEntityList = cardEntityList;
+    public CardAdapter(List<CityDb> cityDbList) {
+        mCityDbList = cityDbList;
     }
 
     @Override
@@ -70,10 +67,10 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
                 //位置
                 int position = holder.getAdapterPosition();
                 Log.d(TAG, "onClick: "+position);
-                CardEntity cardEntity = mCardEntityList.get(position);
-                Log.d(TAG, "onClick: "+cardEntity.getCid());
+                CityDb cityDb = mCityDbList.get(position);
+                Log.d(TAG, "onClick: "+cityDb.getCityDb_cid());
                 Intent intent = new Intent(mcontext, WeatherActivity.class);
-                intent.putExtra("cityCode", cardEntity.getCid());
+                intent.putExtra("cityCode", cityDb.getCityDb_cid());
                 mcontext.startActivity(intent);
 
             }
@@ -83,16 +80,16 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        CardEntity cardEntity = mCardEntityList.get(position);
-        holder.cityName.setText(cardEntity.getAddress());
-        holder.weatherMessage.setText(cardEntity.getWeatherMessage());
-        holder.temperature.setText(cardEntity.getTemperature());
-        Glide.with(mcontext).load(cardEntity.getImageId()).into(holder.bgImage);
+        CityDb cityDb = mCityDbList.get(position);
+        holder.cityName.setText(cityDb.getCityDb_cityName());
+        holder.weatherMessage.setText(cityDb.getCityDb_txt());
+        holder.temperature.setText(cityDb.getCityDb_temperature());
+        Glide.with(mcontext).load(cityDb.getCityDb_imageId()).into(holder.bgImage);
     }
 
     @Override
     public int getItemCount() {
-        return mCardEntityList.size();
+        return mCityDbList.size();
     }
 
 }

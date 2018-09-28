@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ import java.util.List;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
+import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
@@ -42,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
     private Toolbar toolbar;
     private TextView tvTip;
 
-    private List<CardEntity> cardEntityList = new ArrayList<>();
+    private List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
 
     @Override
@@ -54,7 +56,8 @@ public class MainActivity extends AppCompatActivity {
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
         HeConfig.switchToFreeServerNode();
-
+        //主页城市列表本地数据库创建
+        LitePal.getDatabase();
         //启用toolbar
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -76,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(MyApplication.getContext(), SearchCityActivity.class);
+                Intent intent = new Intent(MainActivity.this, SearchCityActivity.class);
                 startActivity(intent);
             }
         });
@@ -86,7 +89,9 @@ public class MainActivity extends AppCompatActivity {
         RecyclerView recyclerView = findViewById(R.id.rv_main);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         recyclerView.setLayoutManager(gridLayoutManager);
-        cardAdapter = new CardAdapter(cardEntityList);
+        //查询数据库
+        cityDbList = LitePal.findAll(CityDb.class);
+        cardAdapter = new CardAdapter(cityDbList);
         recyclerView.setAdapter(cardAdapter);
     }
 
@@ -96,7 +101,8 @@ public class MainActivity extends AppCompatActivity {
      * 判断是否添加了城市
      */
     private void isCardEmpty() {
-        if (cardEntityList.isEmpty()) {
+        Log.d(TAG, "isCardEmpty: "+LitePal.count(CityDb.class));
+        if (LitePal.count(CityDb.class) == 0) {
             tvTip.setVisibility(View.VISIBLE);
         } else {
             tvTip.setVisibility(View.GONE);
@@ -119,7 +125,7 @@ public class MainActivity extends AppCompatActivity {
      * EventBus事件处理
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void searchCityEvent(SearchCityEntity searchCityEntity) {
+    public void searchCityEvent(final SearchCityEntity searchCityEntity) {
         Log.d(TAG, "Event: "+searchCityEntity.getCityCode());
         HeWeather.getWeatherNow(this, searchCityEntity.getCityCode(), new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
@@ -131,13 +137,25 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Now> list) {
                 Log.i(TAG, "onSuccess: "+ new Gson().toJson(list));
-                for (Now now : list) {
-                    cardEntityList.add(new CardEntity(now.getBasic().getCid(),now.getBasic().getLocation(),now.getNow().getCond_txt(),now.getNow().getFl(),R.drawable.bg));
+                if (LitePal.where("cityDb_cid = ?", searchCityEntity.getCityCode())
+                        .count(CityDb.class) > 0) {
+                    Toast.makeText(MainActivity.this,"您已添加过该城市",Toast.LENGTH_SHORT).show();
+                }else {
+                    for (Now now : list) {
+                        CityDb cityDb = new CityDb();
+                        cityDb.setCityDb_cid(now.getBasic().getCid());
+                        cityDb.setCityDb_cityName(now.getBasic().getLocation());
+                        cityDb.setCityDb_txt(now.getNow().getCond_txt());
+                        cityDb.setCityDb_temperature(now.getNow().getFl());
+                        cityDb.setCityDb_imageId(R.drawable.bg);
+                        cityDb.save();
+                        cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
+                                now.getNow().getCond_txt(), now.getNow().getFl(), R.drawable.bg));
+                    }
+                    //刷新Card视图
+                    cardAdapter.notifyDataSetChanged();
+                    isCardEmpty();
                 }
-                //刷新Card视图
-                cardAdapter.notifyDataSetChanged();
-                isCardEmpty();
-
 
             }
         });
