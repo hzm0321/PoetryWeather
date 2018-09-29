@@ -1,5 +1,6 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -46,6 +47,7 @@ public class SearchCityActivity extends AppCompatActivity {
         hotCities.add(new HotCity("广州", "广东", "101280101"));
         hotCities.add(new HotCity("深圳", "广东", "101280601"));
         hotCities.add(new HotCity("杭州", "浙江", "101210101"));
+
 
         CityPicker.getInstance()
                 .setFragmentManager(getSupportFragmentManager())

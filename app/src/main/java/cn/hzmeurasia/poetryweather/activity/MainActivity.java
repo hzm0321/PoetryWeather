@@ -16,6 +16,10 @@ import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.amap.api.location.AMapLocation;
+import com.amap.api.location.AMapLocationClient;
+import com.amap.api.location.AMapLocationClientOption;
+import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
 
 import org.greenrobot.eventbus.EventBus;
@@ -31,7 +35,9 @@ import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
+import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
+import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
@@ -40,12 +46,54 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
+    private String privinceName;
+    private String cityName;
+    private String districtName;
+
+
+    /**
+     * 声明AMapLocationClient类对象
+     */
+    public AMapLocationClient mLocationClient = null;
+    /**
+     * 声明定位回调监听器
+     */
+    public AMapLocationListener mLocationListener = new AMapLocationListener() {
+        @Override
+        public void onLocationChanged(AMapLocation aMapLocation) {
+            if (aMapLocation != null) {
+                if (aMapLocation.getErrorCode() == 0) {
+                    //可在其中解析aMapLocation获取相应内容。
+                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getCity());
+                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getDistrict());
+                    privinceName = aMapLocation.getProvince();
+                    cityName = aMapLocation.getCity();
+                    districtName = aMapLocation.getDistrict();
+                    mLocationClient.stopLocation();
+                    //销毁定位客户端，同时销毁本地定位服务。
+                    mLocationClient.onDestroy();
+                }else {
+                    //定位失败时，可通过ErrCode（错误码）信息来确定失败的原因，errInfo是错误信息，详见错误码表。
+                    Log.e("AmapError","location Error, ErrCode:"
+                            + aMapLocation.getErrorCode() + ", errInfo:"
+                            + aMapLocation.getErrorInfo());
+                }
+            }
+        }
+    };
+    /**
+     * 声明AMapLocationClientOption对象,用来设置发起定位的模式和相关参数
+     */
+    public AMapLocationClientOption mLocationOption = null;
+
     private DrawerLayout drawerLayout;
     private Toolbar toolbar;
     private TextView tvTip;
 
     private List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +113,37 @@ public class MainActivity extends AppCompatActivity {
         //注册EventBus事件
         EventBus.getDefault().register(this);
 
+        //注册高德地图定位组件
+        //初始化定位
+        mLocationClient = new AMapLocationClient(getApplicationContext());
+        //设置定位回调监听
+        mLocationClient.setLocationListener(mLocationListener);
+        //初始化AMapLocationClientOption对象
+        mLocationOption = new AMapLocationClientOption();
+        AMapLocationClientOption option = new AMapLocationClientOption();
+        /**
+         * 设置定位场景，目前支持三种场景（签到、出行、运动，默认无场景）
+         */
+        option.setLocationPurpose(AMapLocationClientOption.AMapLocationPurpose.SignIn);
+        if(null != mLocationClient){
+            mLocationClient.setLocationOption(option);
+            //设置场景模式后最好调用一次stop，再调用start以保证场景模式生效
+            mLocationClient.stopLocation();
+            mLocationClient.startLocation();
+        }
+        //给定位客户端对象设置定位参数
+        mLocationClient.setLocationOption(mLocationOption);
+        //该方法默认为false。
+        mLocationOption.setOnceLocation(true);
+
+        //获取最近3s内精度最高的一次定位结果：
+        //设置setOnceLocationLatest(boolean b)接口为true，启动定位时SDK会返回最近3s内精度最高的一次定位结果。如果设置其为true，setOnceLocation(boolean b)接口也会被设置为true，反之不会，默认为false。
+        mLocationOption.setOnceLocationLatest(true);
+        //启动定位
+        mLocationClient.startLocation();
+        //停止定位
+//        mLocationClient.stopLocation();
+
         //载入左滑提示按钮
         drawerLayout = findViewById(R.id.drawerLayout);
         ActionBar actionBar = getSupportActionBar();
@@ -79,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+
                 Intent intent = new Intent(MainActivity.this, SearchCityActivity.class);
                 startActivity(intent);
             }
