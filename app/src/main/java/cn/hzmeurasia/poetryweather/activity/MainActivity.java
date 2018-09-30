@@ -13,6 +13,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +22,13 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItemClickListener;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
+import com.yanzhenjie.recyclerview.swipe.touch.OnItemMoveListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -28,6 +36,7 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
@@ -166,9 +175,52 @@ public class MainActivity extends AppCompatActivity {
 
         //判断是否添加了城市
         isCardEmpty();
-        RecyclerView recyclerView = findViewById(R.id.rv_main);
+        //设置RecyclerView
+        SwipeMenuRecyclerView recyclerView = findViewById(R.id.rv_main);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         recyclerView.setLayoutManager(gridLayoutManager);
+        //设置侧滑菜单
+        recyclerView.setSwipeMenuCreator(new SwipeMenuCreator() {
+            @Override
+            public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int viewType) {
+                SwipeMenuItem deleteItem = new SwipeMenuItem(MainActivity.this)
+                        .setBackgroundColor(getColor(R.color.bluishWhite))
+                        .setText("删除")
+                        .setHeight(ViewGroup.LayoutParams.MATCH_PARENT)
+                        .setWidth(200);
+                swipeRightMenu.addMenuItem(deleteItem);
+            }
+        });
+        //设置侧滑菜单的点击事件
+        recyclerView.setSwipeMenuItemClickListener(new SwipeMenuItemClickListener() {
+            @Override
+            public void onItemClick(SwipeMenuBridge menuBridge) {
+                menuBridge.closeMenu();
+                int menuPositon = menuBridge.getAdapterPosition();
+                cityDbList.remove(menuPositon);
+                cardAdapter.notifyItemRemoved(menuPositon);
+
+            }
+        });
+        //拖拽排序
+        recyclerView.setLongPressDragEnabled(true);
+        //拖拽监听
+        recyclerView.setOnItemMoveListener(new OnItemMoveListener() {
+            @Override
+            public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
+                int fromPosition = srcHolder.getAdapterPosition();
+                int toPosition = targetHolder.getAdapterPosition();
+                //item被拖拽时,交换数据,并更新adapter
+                Collections.swap(cityDbList, fromPosition, toPosition);
+                cardAdapter.notifyItemMoved(fromPosition,toPosition);
+                return true;
+            }
+
+            @Override
+            public void onItemDismiss(RecyclerView.ViewHolder srcHolder) {
+
+            }
+        });
         //查询数据库
         cityDbList = LitePal.findAll(CityDb.class);
         cardAdapter = new CardAdapter(cityDbList);
@@ -241,10 +293,31 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 同步list中数据到本地数据库
+     */
+    private void updateDatabases() {
+        LitePal.deleteAll(CityDb.class);
+        for (CityDb cityDb : cityDbList) {
+            Log.d(TAG, "updateDatabases: "+cityDbList.size());
+            CityDb updateCityDb = new CityDb();
+            updateCityDb.setCityDb_cid(cityDb.getCityDb_cid());
+            updateCityDb.setCityDb_cityName(cityDb.getCityDb_cityName());
+            updateCityDb.setCityDb_txt(cityDb.getCityDb_txt());
+            updateCityDb.setCityDb_temperature(cityDb.getCityDb_temperature());
+            updateCityDb.setCityDb_imageId(cityDb.getCityDb_imageId());
+            updateCityDb.save();
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //更新数据
+        updateDatabases();
         //解除注册EventBus
         EventBus.getDefault().unregister(this);
     }
+
+
 }

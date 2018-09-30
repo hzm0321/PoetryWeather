@@ -12,9 +12,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
+import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 
 import java.util.List;
 
+import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.db.CityDb;
@@ -53,6 +58,8 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
         mCityDbList = cityDbList;
     }
 
+
+
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (mcontext == null) {
@@ -77,6 +84,7 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
         });
         return holder;
     }
+
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {

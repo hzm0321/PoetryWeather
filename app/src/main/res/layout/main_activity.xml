@@ -24,7 +24,7 @@
             android:id="@+id/toolbar"/>
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.RecyclerView
+        <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/rv_main"
