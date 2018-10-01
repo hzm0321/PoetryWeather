@@ -10,31 +10,28 @@
         android:scrollbars="none"
         android:overScrollMode="never">
 
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/rl">
 
-            <include layout="@layout/weather_title"
-                android:id="@+id/in_title"/>
-
-            <include layout="@layout/weather_now"
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/in_now"
-                android:layout_below="@id/in_title"/>
+                android:orientation="vertical">
 
-            <include layout="@layout/weather_poetry"
-                android:id="@+id/in_poetry"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_below="@id/in_now"/>
+                <include layout="@layout/weather_title"/>
 
-            <include layout="@layout/weather_fortune"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_alignParentBottom="true"/>
-        </RelativeLayout>
+                <include layout="@layout/weather_now"/>
+
+                <include layout="@layout/weather_poetry"/>
+
+                <include layout="@layout/weather_fortune"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="150dp"/>
+
+                <include layout="@layout/weather_forecast"/>
+
+
+            </LinearLayout>
+
 
     </ScrollView>
 
