@@ -17,15 +17,34 @@ import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.util.Calendar;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
+import cn.hzmeurasia.poetryweather.Util.CalendarUtil;
+import cn.hzmeurasia.poetryweather.Util.HttpUtil;
+import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
+import cn.hzmeurasia.poetryweather.entity.Data;
+import cn.hzmeurasia.poetryweather.entity.Result;
+import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.HttpUrl;
+import okhttp3.Response;
+import okhttp3.internal.http.HttpHeaders;
+import okhttp3.internal.http.HttpMethod;
 
 /**
  * 类名: WeatherActivity<br>
@@ -45,6 +64,8 @@ public class WeatherActivity extends AppCompatActivity {
     private TextView tvWeather;
     private ImageView imgWeatherIcon;
     private LinearLayout forecastLayout;
+    private TextView tvSuit;
+    private TextView tvAvoid;
 //
 //    private RelativeLayout relativeLayout;
     private Intent intent = null;
@@ -54,6 +75,8 @@ public class WeatherActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_activity);
+        //注册EventBus
+        EventBus.getDefault().register(this);
         //控件初始化
         init();
 //        //获取手机屏幕高度
@@ -82,6 +105,7 @@ public class WeatherActivity extends AppCompatActivity {
         heWeather();
 
 
+
     }
 
     private void init() {
@@ -91,6 +115,8 @@ public class WeatherActivity extends AppCompatActivity {
         tvWeather = findViewById(R.id.tv_weather);
         imgWeatherIcon = findViewById(R.id.iv_weather_icon);
         forecastLayout = findViewById(R.id.ll_forecast);
+        tvSuit = findViewById(R.id.tv_weather_suitable);
+        tvAvoid = findViewById(R.id.tv_weather_avoid);
     }
 
     /**
@@ -148,7 +174,6 @@ public class WeatherActivity extends AppCompatActivity {
                         infoText.setText(forecastBase.getCond_txt_d());
                         StringBuilder stringBuilder = new StringBuilder();
                         stringBuilder.append(forecastBase.getTmp_min())
-                                .append("℃")
                                 .append("-")
                                 .append(forecastBase.getTmp_max())
                                 .append("℃");
@@ -161,9 +186,21 @@ public class WeatherActivity extends AppCompatActivity {
                 }
             }
         });
-
     }
 
+    /**
+     * 获取万年历数据
+     */
+    @Subscribe(threadMode = ThreadMode.MAIN_ORDERED,sticky = true)
+    public void calendarEvent(CalendarEvent calendarEvent) {
+            Log.d(TAG, "reason: "+calendarEvent.getReason());
+            Log.d(TAG, "suit: "+calendarEvent.getSuit());
+            tvSuit.setText(calendarEvent.getSuit());
+            Log.d(TAG, "avoid: "+calendarEvent.getAvoid());
+            tvAvoid.setText(calendarEvent.getAvoid());
+
+
+    }
     /**
      * 载入天气图标
      * @param code
@@ -176,8 +213,12 @@ public class WeatherActivity extends AppCompatActivity {
                 .append(".png");
         Glide.with(MyApplication.getContext()).load(uri.toString()).into(imageView);
     }
+
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        //销毁EventBus
+        EventBus.getDefault().unregister(this);
     }
 }

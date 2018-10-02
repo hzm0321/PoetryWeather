@@ -1,5 +1,6 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +15,7 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -46,6 +48,7 @@ import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.CardEntity;
 import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
+import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
@@ -59,6 +62,7 @@ public class MainActivity extends AppCompatActivity {
     private String cityName;
     private String districtName;
 
+    private ProgressDialog progressDialog;
 
     /**
      * 声明AMapLocationClient类对象
@@ -108,6 +112,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        //开启服务
+        Intent intent = new Intent(this, MyService.class);
+        startService(intent);
+
         //控件初始化
         tvTip = findViewById(R.id.tv_tip);
         //注册和风天气
@@ -121,6 +129,7 @@ public class MainActivity extends AppCompatActivity {
 
         //注册EventBus事件
         EventBus.getDefault().register(this);
+
 
         //注册高德地图定位组件
         //初始化定位
@@ -307,6 +316,27 @@ public class MainActivity extends AppCompatActivity {
             updateCityDb.setCityDb_temperature(cityDb.getCityDb_temperature());
             updateCityDb.setCityDb_imageId(cityDb.getCityDb_imageId());
             updateCityDb.save();
+        }
+    }
+
+    /**
+     * 显示加载中的进度框
+     */
+    private void showProgress() {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(MyApplication.getContext());
+            progressDialog.setMessage("众里寻他千百度");
+            progressDialog.setCanceledOnTouchOutside(false);
+        }
+        progressDialog.show();
+    }
+
+    /**
+     * 取消加载中的进度框
+     */
+    private void closeProgress() {
+        if (progressDialog != null) {
+            progressDialog.dismiss();
         }
     }
 

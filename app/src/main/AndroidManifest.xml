@@ -50,6 +50,11 @@
             android:name=".activity.SearchCityActivity"
             android:theme="@style/DefaultCityPickerTheme" />
 
+        <service
+            android:name=".service.MyService"
+            android:enabled="true"
+            android:exported="true"/>
+
 
     </application>
 
