@@ -15,6 +15,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import cn.hzmeurasia.poetryweather.Util.CalendarUtil;
+import cn.hzmeurasia.poetryweather.Util.DateUtil;
 import cn.hzmeurasia.poetryweather.Util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
 import okhttp3.Call;
@@ -38,22 +39,23 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy-M-d");
-        Date date = new Date(System.currentTimeMillis());
-        Log.d(TAG, "date: "+simpleDateFormat.format(date));
+        String date = DateUtil.getDateString();
+        Log.d(TAG, "date: "+date);
         //读取万年历缓存
         SharedPreferences preferences = getSharedPreferences("date", MODE_PRIVATE);
         String today = preferences.getString("today", null);
         String suit = preferences.getString("suit", null);
         String avoid = preferences.getString("avoid", null);
-        if (simpleDateFormat.format(date).equals(today)) {
+        if (date.equals(today)) {
             Log.d(TAG, "onStartCommand: "+"读取缓存发送");
             EventBus.getDefault().postSticky(new CalendarEvent("Success",suit,avoid));
         } else {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
-            requestCalendar(simpleDateFormat.format(date));
+            requestCalendar(date);
         }
-
+//        for (String s : DateUtil.getWeeks()) {
+//            Log.d(TAG, "今后7天日期 "+ s);
+//        }
         return super.onStartCommand(intent, flags, startId);
 
     }
@@ -65,6 +67,10 @@ public class MyService extends Service {
         }
     }
 
+    /**
+     * 查询万年历显示宜忌
+     * @param date
+     */
     private void requestCalendar(final String date) {
         final CalendarEvent calendarEvent = new CalendarEvent();
         String calendarUri = "http://v.juhe.cn/calendar/day?date=" + date + "&key=3ec186487910553df15ad59c08761c55";
@@ -90,6 +96,7 @@ public class MyService extends Service {
                 editor.putString("today", date);
                 editor.putString("suit", calendar.getResult().getResult_data().getSuit());
                 editor.putString("avoid", calendar.getResult().getResult_data().getAvoid());
+
                 editor.apply();
                 //发送粘性事件
                 EventBus.getDefault().postSticky(calendarEvent);

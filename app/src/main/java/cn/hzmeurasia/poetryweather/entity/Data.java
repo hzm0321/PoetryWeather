@@ -15,6 +15,8 @@ public class Data {
     private String suit;
     @SerializedName("avoid")
     private String avoid;
+    @SerializedName("lunar")
+    private String lunar;
 
     public String getToday() {
         return today;
@@ -38,5 +40,13 @@ public class Data {
 
     public void setAvoid(String avoid) {
         this.avoid = avoid;
+    }
+
+    public String getLunar() {
+        return lunar;
+    }
+
+    public void setLunar(String lunar) {
+        this.lunar = lunar;
     }
 }

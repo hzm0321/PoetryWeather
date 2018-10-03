@@ -49,6 +49,7 @@
         <activity
             android:name=".activity.SearchCityActivity"
             android:theme="@style/DefaultCityPickerTheme" />
+        <activity android:name=".activity.PersonActivity" />
 
         <service
             android:name=".service.MyService"

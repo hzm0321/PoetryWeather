@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
+import cn.hzmeurasia.poetryweather.Util.HeWeatherUtil;
+import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 
 
@@ -34,6 +36,8 @@ import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
  */
 public class SearchCityActivity extends AppCompatActivity {
     private static final String TAG = "SearchCityActivity";
+    private Intent intent = getIntent();
+    private LocationEvent mlocationEvent = new LocationEvent("未获取到定位", "0", "0");
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,23 +52,20 @@ public class SearchCityActivity extends AppCompatActivity {
         hotCities.add(new HotCity("深圳", "广东", "101280601"));
         hotCities.add(new HotCity("杭州", "浙江", "101210101"));
 
-
         CityPicker.getInstance()
                 .setFragmentManager(getSupportFragmentManager())
                 .enableAnimation(false)//是否启用动画效果
 //                .setAnimationStyle(anim)
-                .setLocatedCity(new LocatedCity("西安","陕西","10086"))
+                .setLocatedCity(new LocatedCity("西安","陕西","1001"))
                 .setHotCities(hotCities)
                 .setOnPickListener(new OnPickListener() {
                     @Override
                     public void onPick(int position, City data) {
                         Toast.makeText(MyApplication.getContext(),data.getName(),Toast.LENGTH_SHORT).show();
                         //组合cityCode
-                        StringBuilder stringBuilder = new StringBuilder();
-                        stringBuilder.append("CN").append(data.getCode());
-
+                        String cid = "CN" + data.getCode();
                         //发送EventBus事件
-                        EventBus.getDefault().post(new SearchCityEntity(stringBuilder.toString()));
+                        EventBus.getDefault().post(new SearchCityEntity(cid));
                         finish();
                         Log.d(TAG, "onPick: "+data.getCode());
 
@@ -87,5 +88,8 @@ public class SearchCityActivity extends AppCompatActivity {
 
     }
 
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+    }
 }

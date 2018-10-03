@@ -2,7 +2,11 @@ package cn.hzmeurasia.poetryweather.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -43,9 +47,9 @@ import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
+import cn.hzmeurasia.poetryweather.Util.HeWeatherUtil;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
-import cn.hzmeurasia.poetryweather.entity.CardEntity;
 import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 import cn.hzmeurasia.poetryweather.service.MyService;
@@ -54,12 +58,13 @@ import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
 
+
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
 
-    private String privinceName;
-    private String cityName;
+    private String provinceName;
+    private String cityCode;
     private String districtName;
 
     private ProgressDialog progressDialog;
@@ -77,11 +82,11 @@ public class MainActivity extends AppCompatActivity {
             if (aMapLocation != null) {
                 if (aMapLocation.getErrorCode() == 0) {
                     //可在其中解析aMapLocation获取相应内容。
-                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getCity());
+                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getProvince());
                     Log.d(TAG, "onLocationChanged: "+aMapLocation.getDistrict());
-                    privinceName = aMapLocation.getProvince();
-                    cityName = aMapLocation.getCity();
+                    provinceName = aMapLocation.getProvince();
                     districtName = aMapLocation.getDistrict();
+                    Log.d(TAG, "onLocationChanged: "+districtName);
                     mLocationClient.stopLocation();
                     //销毁定位客户端，同时销毁本地定位服务。
                     mLocationClient.onDestroy();
@@ -105,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
 
     private List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
-
+    private NavigationView navigationView;
 
 
     @Override
@@ -118,6 +123,7 @@ public class MainActivity extends AppCompatActivity {
 
         //控件初始化
         tvTip = findViewById(R.id.tv_tip);
+        navigationView = findViewById(R.id.nv_left);
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
         HeConfig.switchToFreeServerNode();
@@ -176,8 +182,10 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 Intent intent = new Intent(MainActivity.this, SearchCityActivity.class);
+                intent.putExtra("location", districtName);
+                Log.d(TAG, "定位区县"+districtName);
+                intent.putExtra("province", provinceName);
                 startActivity(intent);
             }
         });
@@ -209,6 +217,33 @@ public class MainActivity extends AppCompatActivity {
                 cityDbList.remove(menuPositon);
                 cardAdapter.notifyItemRemoved(menuPositon);
 
+            }
+        });
+        //设置左侧导航及其事件
+        Resources resource = getBaseContext().getResources();
+        ColorStateList csl = resource.getColorStateList(R.color.navigation_menu_item_color);
+        navigationView.setItemTextColor(csl);
+        navigationView.setCheckedItem(R.id.nav_home);
+        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                switch(item.getItemId()) {
+                    case R.id.nav_home:
+                        drawerLayout.closeDrawers();
+                        Intent intentHome = new Intent(MyApplication.getContext(), MainActivity.class);
+                        //栈顶调用
+                        intentHome.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intentHome);
+                        break;
+                    case R.id.nav_personalInformation:
+                        drawerLayout.closeDrawers();
+                        Intent intentPerson = new Intent(MyApplication.getContext(), PersonActivity.class);
+                        intentPerson.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                        startActivity(intentPerson);
+                    default:
+                        break;
+                }
+                return true;
             }
         });
         //拖拽排序
@@ -278,8 +313,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Now> list) {
                 Log.i(TAG, "onSuccess: "+ new Gson().toJson(list));
-                if (LitePal.where("cityDb_cid = ?", searchCityEntity.getCityCode())
-                        .count(CityDb.class) > 0) {
+                if (isRepeatCity(searchCityEntity.getCityCode()
+
+                )){
                     Toast.makeText(MainActivity.this,"您已添加过该城市",Toast.LENGTH_SHORT).show();
                 }else {
                     for (Now now : list) {
@@ -302,6 +338,17 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * 判断主页面添加城市是否重复
+     */
+    private boolean isRepeatCity(String code) {
+        for (CityDb cityDb : cityDbList) {
+            if (cityDb.getCityDb_cid().equals(code)) {
+                return true;
+            }
+        }
+        return false;
+    }
     /**
      * 同步list中数据到本地数据库
      */
