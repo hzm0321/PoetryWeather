@@ -1,6 +1,5 @@
 package cn.hzmeurasia.poetryweather.service;
 
-import android.app.IntentService;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,12 +10,10 @@ import android.util.Log;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
-import cn.hzmeurasia.poetryweather.Util.CalendarUtil;
-import cn.hzmeurasia.poetryweather.Util.DateUtil;
-import cn.hzmeurasia.poetryweather.Util.HttpUtil;
+import cn.hzmeurasia.poetryweather.util.CalendarUtil;
+import cn.hzmeurasia.poetryweather.util.DateUtil;
+import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
 import okhttp3.Call;
 import okhttp3.Callback;

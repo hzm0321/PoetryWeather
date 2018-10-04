@@ -4,14 +4,11 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,30 +18,16 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
-import java.io.IOException;
-import java.net.HttpURLConnection;
-import java.util.Calendar;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
-import cn.hzmeurasia.poetryweather.Util.CalendarUtil;
-import cn.hzmeurasia.poetryweather.Util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
-import cn.hzmeurasia.poetryweather.entity.Data;
-import cn.hzmeurasia.poetryweather.entity.Result;
-import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.HttpUrl;
-import okhttp3.Response;
-import okhttp3.internal.http.HttpHeaders;
-import okhttp3.internal.http.HttpMethod;
 
 /**
  * 类名: WeatherActivity<br>

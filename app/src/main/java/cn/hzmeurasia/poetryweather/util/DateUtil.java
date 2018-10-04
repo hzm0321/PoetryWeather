@@ -1,4 +1,4 @@
-package cn.hzmeurasia.poetryweather.Util;
+package cn.hzmeurasia.poetryweather.util;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

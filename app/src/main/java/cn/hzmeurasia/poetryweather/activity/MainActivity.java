@@ -2,6 +2,7 @@ package cn.hzmeurasia.poetryweather.activity;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.support.annotation.NonNull;
@@ -19,7 +20,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,13 +47,10 @@ import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
-import cn.hzmeurasia.poetryweather.Util.HeWeatherUtil;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
-import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 import cn.hzmeurasia.poetryweather.service.MyService;
-import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
@@ -66,6 +63,10 @@ public class MainActivity extends AppCompatActivity {
     private String provinceName;
     private String cityCode;
     private String districtName;
+    private String personName;
+
+    TextView tvName;
+
 
     private ProgressDialog progressDialog;
 
@@ -105,12 +106,12 @@ public class MainActivity extends AppCompatActivity {
     public AMapLocationClientOption mLocationOption = null;
 
     private DrawerLayout drawerLayout;
-    private Toolbar toolbar;
+    Toolbar toolbar;
     private TextView tvTip;
 
     private List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
-    private NavigationView navigationView;
+    NavigationView navigationView;
 
 
     @Override
@@ -124,11 +125,18 @@ public class MainActivity extends AppCompatActivity {
         //控件初始化
         tvTip = findViewById(R.id.tv_tip);
         navigationView = findViewById(R.id.nv_left);
+        showName();
+        View myView = navigationView.getHeaderView(0);
+        tvName = myView.findViewById(R.id.tv_nav_name);
+        tvName.setText(personName);
+
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
         HeConfig.switchToFreeServerNode();
+
         //主页城市列表本地数据库创建
         LitePal.getDatabase();
+
         //启用toolbar
         toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -179,15 +187,12 @@ public class MainActivity extends AppCompatActivity {
         }
         //悬浮按钮点击事件
         FloatingActionButton fab = findViewById(R.id.fab_add);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent intent = new Intent(MainActivity.this, SearchCityActivity.class);
-                intent.putExtra("location", districtName);
-                Log.d(TAG, "定位区县"+districtName);
-                intent.putExtra("province", provinceName);
-                startActivity(intent);
-            }
+        fab.setOnClickListener(view -> {
+            Intent intent1 = new Intent(MainActivity.this, SearchCityActivity.class);
+            intent1.putExtra("location", districtName);
+            Log.d(TAG, "定位区县"+districtName);
+            intent1.putExtra("province", provinceName);
+            startActivity(intent1);
         });
 
         //判断是否添加了城市
@@ -213,38 +218,43 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(SwipeMenuBridge menuBridge) {
                 menuBridge.closeMenu();
-                int menuPositon = menuBridge.getAdapterPosition();
-                cityDbList.remove(menuPositon);
-                cardAdapter.notifyItemRemoved(menuPositon);
+                int menuPosition = menuBridge.getAdapterPosition();
+                cityDbList.remove(menuPosition);
+                cardAdapter.notifyItemRemoved(menuPosition);
 
             }
         });
         //设置左侧导航及其事件
         Resources resource = getBaseContext().getResources();
+        //设置列表字体颜色
         ColorStateList csl = resource.getColorStateList(R.color.navigation_menu_item_color);
         navigationView.setItemTextColor(csl);
         navigationView.setCheckedItem(R.id.nav_home);
-        navigationView.setNavigationItemSelectedListener(new NavigationView.OnNavigationItemSelectedListener() {
-            @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                switch(item.getItemId()) {
-                    case R.id.nav_home:
-                        drawerLayout.closeDrawers();
-                        Intent intentHome = new Intent(MyApplication.getContext(), MainActivity.class);
-                        //栈顶调用
-                        intentHome.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intentHome);
-                        break;
-                    case R.id.nav_personalInformation:
-                        drawerLayout.closeDrawers();
-                        Intent intentPerson = new Intent(MyApplication.getContext(), PersonActivity.class);
-                        intentPerson.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                        startActivity(intentPerson);
-                    default:
-                        break;
-                }
-                return true;
+        navigationView.setNavigationItemSelectedListener(item -> {
+            switch(item.getItemId()) {
+                case R.id.nav_home:
+                    drawerLayout.closeDrawers();
+                    Intent intentHome = new Intent(MyApplication.getContext(), MainActivity.class);
+                    //栈顶调用
+                    intentHome.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intentHome);
+                    break;
+                case R.id.nav_personalInformation:
+                    drawerLayout.closeDrawers();
+                    Intent intentPerson = new Intent(MyApplication.getContext(), PersonActivity.class);
+                    intentPerson.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intentPerson);
+                    break;
+                case R.id.nav_poetry:
+                    drawerLayout.closeDrawers();
+                    Intent intentPoetry = new Intent(MyApplication.getContext(), PoetryActivity.class);
+                    intentPoetry.addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                    startActivity(intentPoetry);
+                    break;
+                default:
+                    break;
             }
+            return true;
         });
         //拖拽排序
         recyclerView.setLongPressDragEnabled(true);
@@ -387,6 +397,14 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 读取本地缓存name数据
+     */
+    private void showName() {
+        SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
+        personName = sharedPreferences.getString("name", "");
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -396,5 +414,12 @@ public class MainActivity extends AppCompatActivity {
         EventBus.getDefault().unregister(this);
     }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        showName();
+        View myView = navigationView.getHeaderView(0);
+        tvName = myView.findViewById(R.id.tv_nav_name);
+        tvName.setText(personName);
+    }
 }

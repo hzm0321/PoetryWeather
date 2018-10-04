@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/qmui_config_color_background">
+
+        <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/gg">
+
+        </com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView>
+
+    </ScrollView>
+
+</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>

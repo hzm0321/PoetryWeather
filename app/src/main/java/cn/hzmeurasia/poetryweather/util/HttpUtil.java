@@ -1,4 +1,4 @@
-package cn.hzmeurasia.poetryweather.Util;
+package cn.hzmeurasia.poetryweather.util;
 
 import okhttp3.Callback;
 import okhttp3.OkHttpClient;

@@ -3,26 +3,32 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="240dp"
-        android:id="@+id/appBar">
+        android:id="@+id/appBar"
+        android:fitsSystemWindows="true">
 
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:contentScrim="@color/bluishWhite"
+            app:contentScrim="@color/li"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:title="@string/nav_item_personalInformation"
+            android:fitsSystemWindows="true"
             android:id="@+id/collapsing_toolbar">
 
             <ImageView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
+                android:fitsSystemWindows="true"
                 app:layout_collapseMode="parallax"
+                android:src="@drawable/person_bg"
                 android:id="@+id/iv_person_bg"/>
 
             <android.support.v7.widget.Toolbar
@@ -42,14 +48,14 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
 
-        </LinearLayout>
+            <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:id="@+id/qmui_group_list_view"/>
 
     </android.support.v4.widget.NestedScrollView>
+
 
 
 

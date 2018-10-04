@@ -1,12 +1,19 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="AppTheme" parent="QMUI.Compat">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/bluishWhite</item>
         <item name="colorPrimaryDark">@color/teaWhite</item>
         <item name="colorAccent">@color/blueAsh</item>
         <item name="android:textColorPrimary">@color/li</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+
+    </style>
+
+    <style name="PersonActivityTheme" parent="AppTheme" >
+        <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
 </resources>

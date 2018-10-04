@@ -1,15 +1,12 @@
-package cn.hzmeurasia.poetryweather.Util;
+package cn.hzmeurasia.poetryweather.util;
 
 import android.util.Log;
 
 import com.google.gson.Gson;
 
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import cn.hzmeurasia.poetryweather.entity.Calendar;
-import cn.hzmeurasia.poetryweather.entity.Data;
-import cn.hzmeurasia.poetryweather.entity.Result;
 
 /**
  * 类名: CalendarUtil<br>

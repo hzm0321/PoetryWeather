@@ -1,11 +1,9 @@
-package cn.hzmeurasia.poetryweather.Util;
+package cn.hzmeurasia.poetryweather.util;
 
 import android.util.Log;
 import android.widget.Toast;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
-import cn.hzmeurasia.poetryweather.activity.MainActivity;
-import interfaces.heweather.com.interfacesmodule.bean.basic.Basic;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;

@@ -9,14 +9,15 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:background="#FFFFFF"
+        android:src="@drawable/head"
         android:layout_centerInParent="true"/>
 
     <TextView
+        android:layout_marginLeft="10dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_alignParentBottom="true"
-        android:text="姓名字"
-        android:textSize="20sp"/>
+        android:textSize="20sp"
+        android:id="@+id/tv_nav_name"/>
 
 </RelativeLayout>

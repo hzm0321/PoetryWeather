@@ -16,14 +16,11 @@ import com.zaaach.citypicker.model.LocateState;
 import com.zaaach.citypicker.model.LocatedCity;
 
 import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
-import cn.hzmeurasia.poetryweather.Util.HeWeatherUtil;
 import cn.hzmeurasia.poetryweather.entity.LocationEvent;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
 
