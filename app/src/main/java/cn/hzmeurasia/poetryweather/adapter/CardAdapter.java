@@ -19,6 +19,8 @@ import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
@@ -40,17 +42,19 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
 
     static class ViewHolder extends RecyclerView.ViewHolder {
         CardView cardView;
+        @BindView(R.id.iv_bg)
         ImageView bgImage;
+        @BindView(R.id.tv_CityName)
         TextView cityName;
+        @BindView(R.id.tv_weather)
         TextView weatherMessage;
+        @BindView(R.id.tv_temperature)
         TextView temperature;
         public ViewHolder(View view) {
             super(view);
             cardView = (CardView) view;
-            bgImage = view.findViewById(R.id.iv_bg);
-            cityName = view.findViewById(R.id.tv_CityName);
-            weatherMessage = view.findViewById(R.id.tv_weather);
-            temperature = view.findViewById(R.id.tv_temperature);
+            //绑定初始化BufferKnife
+            ButterKnife.bind(this, view);
         }
     }
 

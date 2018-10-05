@@ -45,6 +45,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
@@ -64,7 +66,6 @@ public class MainActivity extends AppCompatActivity {
     private String cityCode;
     private String districtName;
     private String personName;
-
     TextView tvName;
 
 
@@ -105,12 +106,20 @@ public class MainActivity extends AppCompatActivity {
      */
     public AMapLocationClientOption mLocationOption = null;
 
-    private DrawerLayout drawerLayout;
+    @BindView(R.id.drawerLayout)
+    DrawerLayout drawerLayout;
+    @BindView(R.id.toolbar)
     Toolbar toolbar;
-    private TextView tvTip;
+    @BindView(R.id.tv_tip)
+    TextView tvTip;
+    @BindView(R.id.rv_main)
+    SwipeMenuRecyclerView recyclerView;
+    @BindView(R.id.fab_add)
+    FloatingActionButton fab;
 
     private List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
+    @BindView(R.id.nv_left)
     NavigationView navigationView;
 
 
@@ -118,17 +127,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        //绑定初始化ButterKnife
+        ButterKnife.bind(this);
         //开启服务
         Intent intent = new Intent(this, MyService.class);
         startService(intent);
 
-        //控件初始化
-        tvTip = findViewById(R.id.tv_tip);
-        navigationView = findViewById(R.id.nv_left);
+        //刷新左侧导航栏姓名
         showName();
-        View myView = navigationView.getHeaderView(0);
-        tvName = myView.findViewById(R.id.tv_nav_name);
-        tvName.setText(personName);
 
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
@@ -138,12 +144,10 @@ public class MainActivity extends AppCompatActivity {
         LitePal.getDatabase();
 
         //启用toolbar
-        toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         //注册EventBus事件
         EventBus.getDefault().register(this);
-
 
         //注册高德地图定位组件
         //初始化定位
@@ -177,7 +181,6 @@ public class MainActivity extends AppCompatActivity {
 //        mLocationClient.stopLocation();
 
         //载入左滑提示按钮
-        drawerLayout = findViewById(R.id.drawerLayout);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             //显示出按钮
@@ -186,7 +189,6 @@ public class MainActivity extends AppCompatActivity {
             actionBar.setHomeAsUpIndicator(R.drawable.ic_person1);
         }
         //悬浮按钮点击事件
-        FloatingActionButton fab = findViewById(R.id.fab_add);
         fab.setOnClickListener(view -> {
             Intent intent1 = new Intent(MainActivity.this, SearchCityActivity.class);
             intent1.putExtra("location", districtName);
@@ -195,10 +197,7 @@ public class MainActivity extends AppCompatActivity {
             startActivity(intent1);
         });
 
-        //判断是否添加了城市
-        isCardEmpty();
         //设置RecyclerView
-        SwipeMenuRecyclerView recyclerView = findViewById(R.id.rv_main);
         GridLayoutManager gridLayoutManager = new GridLayoutManager(this, 1);
         recyclerView.setLayoutManager(gridLayoutManager);
         //设置侧滑菜单
@@ -221,7 +220,7 @@ public class MainActivity extends AppCompatActivity {
                 int menuPosition = menuBridge.getAdapterPosition();
                 cityDbList.remove(menuPosition);
                 cardAdapter.notifyItemRemoved(menuPosition);
-
+                isCardEmpty();
             }
         });
         //设置左侧导航及其事件
@@ -277,6 +276,8 @@ public class MainActivity extends AppCompatActivity {
         });
         //查询数据库
         cityDbList = LitePal.findAll(CityDb.class);
+        //判断是否添加了城市
+        isCardEmpty();
         cardAdapter = new CardAdapter(cityDbList);
         recyclerView.setAdapter(cardAdapter);
     }
@@ -287,8 +288,8 @@ public class MainActivity extends AppCompatActivity {
      * 判断是否添加了城市
      */
     private void isCardEmpty() {
-        Log.d(TAG, "isCardEmpty: "+LitePal.count(CityDb.class));
-        if (LitePal.count(CityDb.class) == 0) {
+        Log.d(TAG, "isCardEmpty: "+cityDbList.size());
+        if (cityDbList.size() == 0) {
             tvTip.setVisibility(View.VISIBLE);
         } else {
             tvTip.setVisibility(View.GONE);
@@ -403,6 +404,9 @@ public class MainActivity extends AppCompatActivity {
     private void showName() {
         SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
         personName = sharedPreferences.getString("name", "");
+        View myView = navigationView.getHeaderView(0);
+        tvName = myView.findViewById(R.id.tv_nav_name);
+        tvName.setText(personName);
     }
 
     @Override
@@ -418,8 +422,5 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         showName();
-        View myView = navigationView.getHeaderView(0);
-        tvName = myView.findViewById(R.id.tv_nav_name);
-        tvName.setText(personName);
     }
 }

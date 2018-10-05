@@ -13,6 +13,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -20,6 +22,8 @@ import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
@@ -40,28 +44,44 @@ public class WeatherActivity extends AppCompatActivity {
 
 
     private static final String TAG = "WeatherActivity";
-
-    private TextView tvCityName;
-    private TextView tvUpdateTime;
-    private TextView tvTemperature;
-    private TextView tvWeather;
-    private ImageView imgWeatherIcon;
-    private LinearLayout forecastLayout;
-    private TextView tvSuit;
-    private TextView tvAvoid;
+    @BindView(R.id.tv_cityName)
+    TextView tvCityName;
+    @BindView(R.id.tv_updateTime)
+    TextView tvUpdateTime;
+    @BindView(R.id.tv_weather_temperature)
+    TextView tvTemperature;
+    @BindView(R.id.tv_weather)
+    TextView tvWeather;
+    @BindView(R.id.iv_weather_icon)
+    ImageView imgWeatherIcon;
+    @BindView(R.id.ll_forecast)
+    LinearLayout forecastLayout;
+    @BindView(R.id.tv_weather_suitable)
+    TextView tvSuit;
+    @BindView(R.id.tv_weather_avoid)
+    TextView tvAvoid;
 //
 //    private RelativeLayout relativeLayout;
     private Intent intent = null;
     private String cityCode = null;
 
+    QMUITipDialog tipDialog;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_activity);
+
+        //注册和风天气
+        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
+        HeConfig.switchToFreeServerNode();
+
+        //绑定初始化BufferKnife
+        ButterKnife.bind(this);
+
         //注册EventBus
         EventBus.getDefault().register(this);
-        //控件初始化
-        init();
+
 //        //获取手机屏幕高度
 //        DisplayMetrics dm = getResources().getDisplayMetrics();
 //        int height = dm.heightPixels;
@@ -79,9 +99,6 @@ public class WeatherActivity extends AppCompatActivity {
 //        params.height = height-statusBarHeight1;
 //        relativeLayout.setLayoutParams(params);
 
-        //注册和风天气
-        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
-        HeConfig.switchToFreeServerNode();
         //调用天气数据
         intent = getIntent();
         cityCode = intent.getStringExtra("cityCode");
@@ -91,34 +108,22 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
-    private void init() {
-        tvCityName = findViewById(R.id.tv_cityName);
-        tvUpdateTime = findViewById(R.id.tv_updateTime);
-        tvTemperature = findViewById(R.id.tv_weather_temperature);
-        tvWeather = findViewById(R.id.tv_weather);
-        imgWeatherIcon = findViewById(R.id.iv_weather_icon);
-        forecastLayout = findViewById(R.id.ll_forecast);
-        tvSuit = findViewById(R.id.tv_weather_suitable);
-        tvAvoid = findViewById(R.id.tv_weather_avoid);
-    }
-
     /**
      * 载入和风天气数据
      */
     private void heWeather() {
+        showLoading();
         //获取实时天气
         HeWeather.getWeatherNow(this, cityCode, new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
             public void onError(Throwable throwable) {
                 Log.i(TAG, "onError: ", throwable);
                 Toast.makeText(WeatherActivity.this, "天气获取失败", Toast.LENGTH_SHORT).show();
-
             }
 
             @Override
             public void onSuccess(List<Now> list) {
                 StringBuilder temperature = new StringBuilder();
-
                 for (Now now : list) {
                     tvCityName.setText(now.getBasic().getLocation());
                     tvUpdateTime.setText(now.getUpdate().getLoc());
@@ -196,6 +201,28 @@ public class WeatherActivity extends AppCompatActivity {
                 .append(".png");
         Glide.with(MyApplication.getContext()).load(uri.toString()).into(imageView);
     }
+
+    /**
+     * 显示加载进度框
+     */
+    private void showLoading() {
+        tipDialog = new QMUITipDialog.Builder(WeatherActivity.this)
+                .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
+                .setTipWord("正在加载天气数据......")
+                .create();
+        tipDialog.show();
+
+    }
+
+    /**
+     * 关闭加载进度框
+     */
+    private void closeLoading() {
+        if (tipDialog != null) {
+            tipDialog.dismiss();
+        }
+    }
+
 
 
     @Override
