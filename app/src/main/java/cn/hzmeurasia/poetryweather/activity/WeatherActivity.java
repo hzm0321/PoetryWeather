@@ -169,10 +169,12 @@ public class WeatherActivity extends AppCompatActivity {
                         loadWeatherIcon(forecastBase.getCond_code_d(),imageView
                         );
                         forecastLayout.addView(view);
+                        closeLoading();
                     }
 
                 }
             }
+
         });
     }
 
