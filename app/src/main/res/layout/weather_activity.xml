@@ -4,35 +4,50 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <ScrollView
+    <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:id="@+id/iv_weather_bg"
+        android:scaleType="centerCrop"/>
+
+    <!--<ScrollView-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:scrollbars="none"-->
+        <!--android:overScrollMode="never">-->
 
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:orientation="vertical">
+                android:orientation="vertical"
+                android:fitsSystemWindows="true">
 
                 <include layout="@layout/weather_title"/>
 
                 <include layout="@layout/weather_now"/>
 
                 <include layout="@layout/weather_poetry"/>
-
-                <include layout="@layout/weather_fortune"
+                
+                <android.support.v4.view.ViewPager
+                    android:layout_marginTop="150dp"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="150dp"/>
+                    android:layout_height="match_parent"
+                    android:id="@+id/viewPage">
 
-                <include layout="@layout/weather_forecast"/>
+                </android.support.v4.view.ViewPager>
+
+                <!--<include layout="@layout/weather_fortune"-->
+                    <!--android:layout_width="match_parent"-->
+                    <!--android:layout_height="wrap_content"-->
+                    <!--android:layout_marginTop="150dp"/>-->
+
+                <!--<include layout="@layout/weather_forecast"/>-->
 
 
             </LinearLayout>
 
 
-    </ScrollView>
+    <!--</ScrollView>-->
 
 </android.support.design.widget.CoordinatorLayout>

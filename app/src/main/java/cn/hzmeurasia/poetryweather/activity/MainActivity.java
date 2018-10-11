@@ -1,11 +1,9 @@
 package cn.hzmeurasia.poetryweather.activity;
 
-import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
-import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -67,9 +65,6 @@ public class MainActivity extends AppCompatActivity {
     private String districtName;
     private String personName;
     TextView tvName;
-
-
-    private ProgressDialog progressDialog;
 
     /**
      * 声明AMapLocationClient类对象
@@ -275,6 +270,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         //查询数据库
+        cityDbList.clear();
         cityDbList = LitePal.findAll(CityDb.class);
         //判断是否添加了城市
         isCardEmpty();
@@ -377,26 +373,6 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    /**
-     * 显示加载中的进度框
-     */
-    private void showProgress() {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(MyApplication.getContext());
-            progressDialog.setMessage("众里寻他千百度");
-            progressDialog.setCanceledOnTouchOutside(false);
-        }
-        progressDialog.show();
-    }
-
-    /**
-     * 取消加载中的进度框
-     */
-    private void closeProgress() {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
-        }
-    }
 
     /**
      * 读取本地缓存name数据
