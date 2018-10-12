@@ -15,27 +15,38 @@
         android:id="@+id/iv_weather_bg"
         android:scaleType="centerCrop"/>
 
-            <LinearLayout
+            <RelativeLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
                 android:fitsSystemWindows="true">
 
-                <include layout="@layout/weather_title"/>
+                <include layout="@layout/weather_title"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/in_weather_title"/>
 
-                <include layout="@layout/weather_now"/>
+                <include layout="@layout/weather_now"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/in_weather_title"
+                    android:id="@+id/in_weather_now"/>
 
-                <include layout="@layout/weather_poetry"/>
+                <include layout="@layout/weather_poetry"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/in_weather_now"
+                    android:id="@+id/in_weather_poetry"/>
                 
                 <android.support.v4.view.ViewPager
-                    android:layout_marginTop="150dp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent"
+                    android:layout_height="100dp"
+                    android:layout_alignParentBottom="true"
                     android:id="@+id/viewPage">
 
                 </android.support.v4.view.ViewPager>
 
-            </LinearLayout>
+            </RelativeLayout>
     </android.support.design.widget.CoordinatorLayout>
 
 </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>

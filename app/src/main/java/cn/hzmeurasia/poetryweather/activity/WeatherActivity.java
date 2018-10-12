@@ -217,7 +217,7 @@ public class WeatherActivity extends AppCompatActivity {
         @Override
         public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
             Log.e(TAG, "isFromMemoryCache:"+isFromMemoryCache+"  model:"+model+" isFirstResource: "+isFirstResource);
-            Toast.makeText(getApplicationContext(),"图片加载完成",Toast.LENGTH_SHORT).show();
+            Toast.makeText(getApplicationContext(),"背景图片加载完成",Toast.LENGTH_SHORT).show();
             return false;
         }
     };

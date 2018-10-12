@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.widget.Toast;
 
 import com.zaaach.citypicker.CityPicker;
@@ -83,6 +84,15 @@ public class SearchCityActivity extends AppCompatActivity {
                 })
                 .show();
 
+    }
+
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
+            finish();
+            return true;
+        }
+        return false;
     }
 
     @Override
