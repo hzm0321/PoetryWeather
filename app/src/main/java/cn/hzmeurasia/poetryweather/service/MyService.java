@@ -4,6 +4,7 @@ import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -17,6 +18,7 @@ import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
 import okhttp3.Call;
 import okhttp3.Callback;
+import okhttp3.HttpUrl;
 import okhttp3.Response;
 
 /**
@@ -36,6 +38,11 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        new Thread(() -> {
+            updateWeatherBg();
+            stopSelf();
+        }).start();
+
         String date = DateUtil.getDateString();
         Log.d(TAG, "date: "+date);
         //读取万年历缓存
@@ -50,9 +57,6 @@ public class MyService extends Service {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
             requestCalendar(date);
         }
-//        for (String s : DateUtil.getWeeks()) {
-//            Log.d(TAG, "今后7天日期 "+ s);
-//        }
         return super.onStartCommand(intent, flags, startId);
 
     }
@@ -99,6 +103,29 @@ public class MyService extends Service {
                 EventBus.getDefault().postSticky(calendarEvent);
             }
 
+        });
+    }
+
+    /**
+     * 后台更新图片
+     */
+    private void updateWeatherBg() {
+        //向服务器发送请求,是否有新图片
+        //如果有新图片,开始加载
+        String uri = "http://www.hzmeurasia.cn/background/bg.png";
+        HttpUtil.sendOkHttpRequest(uri, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Log.d(TAG, "onFailure: 服务中图片加载失败");
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String bg = response.body().string();
+                SharedPreferences.Editor editor = getSharedPreferences("background", MODE_PRIVATE).edit();
+                editor.putString("Bg", bg);
+                editor.apply();
+            }
         });
     }
 }

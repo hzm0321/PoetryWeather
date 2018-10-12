@@ -1,21 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.design.widget.CoordinatorLayout
+<com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/rf_weather"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+
+    <android.support.design.widget.CoordinatorLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/iv_weather_bg"
         android:scaleType="centerCrop"/>
-
-    <!--<ScrollView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="match_parent"-->
-        <!--android:scrollbars="none"-->
-        <!--android:overScrollMode="never">-->
-
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -37,17 +35,7 @@
 
                 </android.support.v4.view.ViewPager>
 
-                <!--<include layout="@layout/weather_fortune"-->
-                    <!--android:layout_width="match_parent"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginTop="150dp"/>-->
-
-                <!--<include layout="@layout/weather_forecast"/>-->
-
-
             </LinearLayout>
+    </android.support.design.widget.CoordinatorLayout>
 
-
-    <!--</ScrollView>-->
-
-</android.support.design.widget.CoordinatorLayout>
+</com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>

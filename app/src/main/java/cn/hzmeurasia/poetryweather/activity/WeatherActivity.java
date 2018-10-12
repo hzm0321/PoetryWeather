@@ -1,8 +1,10 @@
 package cn.hzmeurasia.poetryweather.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -17,7 +19,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.GlideDrawable;
+import com.bumptech.glide.request.RequestListener;
+import com.bumptech.glide.request.target.Target;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -31,6 +37,7 @@ import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
+import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.hourly.Hourly;
@@ -71,6 +78,8 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView ivBg;
     @BindView(R.id.viewPage)
     ViewPager mViewPager;
+    @BindView(R.id.rf_weather)
+    QMUIPullRefreshLayout mPullRefreshLayout;
     LayoutInflater mInflater;
     View view01,view02,view03;
 //
@@ -125,7 +134,24 @@ public class WeatherActivity extends AppCompatActivity {
         cityCode = intent.getStringExtra("cityCode");
         initViews();
         heWeather();
+        //刷新监听
+        mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
 
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                heWeather();
+                mPullRefreshLayout.finishRefresh();
+            }
+        });
 
 
 
@@ -176,13 +202,41 @@ public class WeatherActivity extends AppCompatActivity {
         }
     }
 
+    private RequestListener<String, GlideDrawable> requestListener = new RequestListener<String, GlideDrawable>() {
+        @Override
+        public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
+            // todo log exception
+            Log.d(TAG,"onException:e="+e.toString()+";target:"+target+";isFirstResource="+isFirstResource);
+            Toast.makeText(getApplicationContext(),"资源加载异常",Toast.LENGTH_SHORT).show();
+
+            // important to return false so the error placeholder can be placed
+            return false;
+        }
+
+
+        @Override
+        public boolean onResourceReady(GlideDrawable resource, String model, Target<GlideDrawable> target, boolean isFromMemoryCache, boolean isFirstResource) {
+            Log.e(TAG, "isFromMemoryCache:"+isFromMemoryCache+"  model:"+model+" isFirstResource: "+isFirstResource);
+            Toast.makeText(getApplicationContext(),"图片加载完成",Toast.LENGTH_SHORT).show();
+            return false;
+        }
+    };
+
+
 
     /**
      * 载入和风天气数据
      */
     private void heWeather() {
         showLoading();
-        Glide.with(this).load("http://www.hzmeurasia.cn/background/bg.png").into(ivBg);
+        //加载背景图片
+        Log.d(TAG, "heWeather: 加载背景");
+        Glide.with(this)
+                .load("http://www.hzmeurasia.cn/background/bg.png")
+                .listener(requestListener)
+                .placeholder(R.drawable.default_bg)
+                .into(ivBg);
+
         //获取实时天气
         HeWeather.getWeatherNow(this, cityCode, new HeWeather.OnResultWeatherNowBeanListener() {
             @Override

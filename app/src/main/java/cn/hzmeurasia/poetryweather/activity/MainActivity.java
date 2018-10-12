@@ -26,6 +26,8 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
+import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
+import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
@@ -49,7 +51,7 @@ import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
-import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
+import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
@@ -64,7 +66,10 @@ public class MainActivity extends AppCompatActivity {
     private String cityCode;
     private String districtName;
     private String personName;
+    private boolean refreshFlag = false;
+    private int iRefresh = 0;
     TextView tvName;
+    QMUITipDialog tipDialog;
 
     /**
      * 声明AMapLocationClient类对象
@@ -116,7 +121,8 @@ public class MainActivity extends AppCompatActivity {
     private CardAdapter cardAdapter;
     @BindView(R.id.nv_left)
     NavigationView navigationView;
-
+    @BindView(R.id.rf_main)
+    QMUIPullRefreshLayout mPullRefreshLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -189,6 +195,7 @@ public class MainActivity extends AppCompatActivity {
             intent1.putExtra("location", districtName);
             Log.d(TAG, "定位区县"+districtName);
             intent1.putExtra("province", provinceName);
+            refreshFlag = false;
             startActivity(intent1);
         });
 
@@ -276,6 +283,33 @@ public class MainActivity extends AppCompatActivity {
         isCardEmpty();
         cardAdapter = new CardAdapter(cityDbList);
         recyclerView.setAdapter(cardAdapter);
+
+        //刷新监听
+        mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
+            @Override
+            public void onMoveTarget(int offset) {
+
+            }
+
+            @Override
+            public void onMoveRefreshView(int offset) {
+
+            }
+
+            @Override
+            public void onRefresh() {
+                refreshFlag = true;
+                iRefresh = -1;
+                Log.d(TAG, "onRefresh: "+refreshFlag);
+                for (CityDb cityDb : cityDbList) {
+                    searchCityEvent(new SearchCityEvent(cityDb.getCityDb_cid()));
+                    Log.d(TAG, "iRefresh: "+iRefresh);
+                }
+                mPullRefreshLayout.finishRefresh();
+                Toast.makeText(MainActivity.this, "数据已刷新", Toast.LENGTH_SHORT).show();
+                Log.d(TAG, "onRefresh: "+refreshFlag);
+            }
+        });
     }
 
 
@@ -308,9 +342,12 @@ public class MainActivity extends AppCompatActivity {
      * EventBus事件处理
      */
     @Subscribe(threadMode = ThreadMode.MAIN)
-    public void searchCityEvent(final SearchCityEntity searchCityEntity) {
-        Log.d(TAG, "Event: "+searchCityEntity.getCityCode());
-        HeWeather.getWeatherNow(this, searchCityEntity.getCityCode(), new HeWeather.OnResultWeatherNowBeanListener() {
+    public void searchCityEvent(final SearchCityEvent searchCityEvent) {
+        Log.d(TAG, "Event: "+ searchCityEvent.getCityCode());
+        if (!refreshFlag) {
+            showLoading();
+        }
+        HeWeather.getWeatherNow(this, searchCityEvent.getCityCode(), new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
             public void onError(Throwable throwable) {
                 Log.i(TAG, "onError: ",throwable);
@@ -320,25 +357,35 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Now> list) {
                 Log.i(TAG, "onSuccess: "+ new Gson().toJson(list));
-                if (isRepeatCity(searchCityEntity.getCityCode()
-
-                )){
-                    Toast.makeText(MainActivity.this,"您已添加过该城市",Toast.LENGTH_SHORT).show();
-                }else {
+                Log.d(TAG, "onSuccess: "+refreshFlag);
+                if (isRepeatCity(searchCityEvent.getCityCode()) && !refreshFlag) {
+                    Toast.makeText(MainActivity.this, "您已添加过该城市", Toast.LENGTH_SHORT).show();
+                    closeLoading();
+                } else {
                     for (Now now : list) {
-                        CityDb cityDb = new CityDb();
-                        cityDb.setCityDb_cid(now.getBasic().getCid());
-                        cityDb.setCityDb_cityName(now.getBasic().getLocation());
-                        cityDb.setCityDb_txt(now.getNow().getCond_txt());
-                        cityDb.setCityDb_temperature(now.getNow().getFl());
-                        cityDb.setCityDb_imageId(R.drawable.bg);
-                        cityDb.save();
-                        cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
-                                now.getNow().getCond_txt(), now.getNow().getFl(), R.drawable.bg));
+                        if (!refreshFlag) {
+                            CityDb cityDb = new CityDb();
+                            cityDb.setCityDb_cid(now.getBasic().getCid());
+                            cityDb.setCityDb_cityName(now.getBasic().getLocation());
+                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
+                            cityDb.setCityDb_temperature(now.getNow().getFl());
+                            cityDb.setCityDb_imageId(R.drawable.bg);
+                            cityDb.save();
+                            cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
+                                    now.getNow().getCond_txt(), now.getNow().getFl(), R.drawable.bg));
+                        } else {
+                            iRefresh++;
+                            CityDb cityDb = cityDbList.get(iRefresh);
+                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
+                            cityDb.setCityDb_temperature(now.getNow().getFl());
+                            Log.d(TAG, "onSuccess: iRefresh"+iRefresh);
+                            Log.d(TAG, "onSuccess: 数据已刷新");
+                        }
                     }
                     //刷新Card视图
                     cardAdapter.notifyDataSetChanged();
                     isCardEmpty();
+                    closeLoading();
                 }
 
             }
@@ -383,6 +430,27 @@ public class MainActivity extends AppCompatActivity {
         View myView = navigationView.getHeaderView(0);
         tvName = myView.findViewById(R.id.tv_nav_name);
         tvName.setText(personName);
+    }
+
+    /**
+     * 显示加载进度框
+     */
+    private void showLoading() {
+        tipDialog = new QMUITipDialog.Builder(MainActivity.this)
+                .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
+                .setTipWord("正在加载城市和天气数据......")
+                .create();
+        tipDialog.show();
+
+    }
+
+    /**
+     * 关闭加载进度框
+     */
+    private void closeLoading() {
+        if (tipDialog != null) {
+            tipDialog.dismiss();
+        }
     }
 
     @Override

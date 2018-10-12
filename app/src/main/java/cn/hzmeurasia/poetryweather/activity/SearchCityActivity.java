@@ -22,7 +22,7 @@ import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.entity.LocationEvent;
-import cn.hzmeurasia.poetryweather.entity.SearchCityEntity;
+import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 
 
 /**
@@ -62,7 +62,7 @@ public class SearchCityActivity extends AppCompatActivity {
                         //组合cityCode
                         String cid = "CN" + data.getCode();
                         //发送EventBus事件
-                        EventBus.getDefault().post(new SearchCityEntity(cid));
+                        EventBus.getDefault().post(new SearchCityEvent(cid));
                         finish();
                         Log.d(TAG, "onPick: "+data.getCode());
 
