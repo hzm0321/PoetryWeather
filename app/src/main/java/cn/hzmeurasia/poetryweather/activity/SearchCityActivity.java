@@ -1,6 +1,7 @@
 package cn.hzmeurasia.poetryweather.activity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -34,12 +35,15 @@ import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
  */
 public class SearchCityActivity extends AppCompatActivity {
     private static final String TAG = "SearchCityActivity";
-    private Intent intent = getIntent();
-    private LocationEvent mlocationEvent = new LocationEvent("未获取到定位", "0", "0");
+    private String provinceName;
+    private String districtName;
+    private String cid;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        //缓存中获取定位
+        initShared();
         /**
          * 添加热门城市
          */
@@ -54,7 +58,7 @@ public class SearchCityActivity extends AppCompatActivity {
                 .setFragmentManager(getSupportFragmentManager())
                 .enableAnimation(false)//是否启用动画效果
 //                .setAnimationStyle(anim)
-                .setLocatedCity(new LocatedCity("西安","陕西","1001"))
+                .setLocatedCity(new LocatedCity(districtName,provinceName,cid))
                 .setHotCities(hotCities)
                 .setOnPickListener(new OnPickListener() {
                     @Override
@@ -86,13 +90,11 @@ public class SearchCityActivity extends AppCompatActivity {
 
     }
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK && event.getRepeatCount() == 0) {
-            finish();
-            return true;
-        }
-        return false;
+    private void initShared() {
+        SharedPreferences preferences = getSharedPreferences("location", MODE_PRIVATE);
+        provinceName = preferences.getString("province", null);
+        districtName = preferences.getString("district", "未获取到定位");
+        cid = preferences.getString("cid", null);
     }
 
     @Override

@@ -49,8 +49,10 @@
         <activity
             android:name=".activity.SearchCityActivity"
             android:theme="@style/DefaultCityPickerTheme" />
+
         <activity android:name=".activity.PersonActivity"
             android:theme="@style/PersonActivityTheme"/>
+
         <activity android:name=".activity.PoetryActivity" />
 
         <service

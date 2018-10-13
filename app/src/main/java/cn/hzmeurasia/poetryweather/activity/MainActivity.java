@@ -4,6 +4,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.os.Handler;
+import android.os.Message;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -26,6 +28,8 @@ import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
 import com.google.gson.Gson;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
+import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
@@ -35,6 +39,7 @@ import com.yanzhenjie.recyclerview.swipe.SwipeMenuItem;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.touch.OnItemMoveListener;
+import com.yanzhenjie.recyclerview.swipe.touch.OnItemStateChangedListener;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -53,9 +58,13 @@ import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 import cn.hzmeurasia.poetryweather.service.MyService;
+import interfaces.heweather.com.interfacesmodule.bean.basic.Basic;
+import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
+
+import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLIFIED;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -68,8 +77,24 @@ public class MainActivity extends AppCompatActivity {
     private String personName;
     private boolean refreshFlag = false;
     private int iRefresh = 0;
+    private boolean isFirst;
     TextView tvName;
     QMUITipDialog tipDialog;
+    public static final int UPDATE_TEXT = 1;
+    private Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message message) {
+            switch(message.what) {
+                case UPDATE_TEXT:
+                    showMessagePositiveDialog();
+                    isFirst();
+                    break;
+                default:
+                    break;
+            }
+        }
+    };
+
 
     /**
      * 声明AMapLocationClient类对象
@@ -83,12 +108,50 @@ public class MainActivity extends AppCompatActivity {
         public void onLocationChanged(AMapLocation aMapLocation) {
             if (aMapLocation != null) {
                 if (aMapLocation.getErrorCode() == 0) {
-                    //可在其中解析aMapLocation获取相应内容。
-                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getProvince());
-                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getDistrict());
-                    provinceName = aMapLocation.getProvince();
-                    districtName = aMapLocation.getDistrict();
-                    Log.d(TAG, "onLocationChanged: "+districtName);
+                    new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            HeWeather.getSearch(MainActivity.this, "雁塔", "cn", 1, CHINESE_SIMPLIFIED, new HeWeather.OnResultSearchBeansListener() {
+                                @Override
+                                public void onError(Throwable throwable) {
+                                    Log.i(TAG, "onError: ",throwable);
+                                    Toast.makeText(MainActivity.this,"城市搜索失败",Toast.LENGTH_SHORT).show();
+
+                                }
+
+                                @Override
+                                public void onSuccess(Search search) {
+                                    //可在其中解析aMapLocation获取相应内容。
+                                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getProvince());
+                                    Log.d(TAG, "onLocationChanged: "+aMapLocation.getDistrict());
+                                    provinceName = aMapLocation.getProvince();
+                                    districtName = aMapLocation.getDistrict();
+                                    Log.d(TAG, "onSuccess: districtName"+districtName.substring(districtName.length()-1));
+                                    if (districtName.substring(districtName.length()-1).equals("区")) {
+                                        districtName = districtName.substring(0, districtName.length() - 1);
+                                        Log.d(TAG, "onSuccess: 修改后区县位置"+districtName);
+                                    }
+                                    Log.d(TAG, "onLocationChanged: "+districtName);
+                                    Log.d(TAG, "onSuccess: searchSize"+search.getBasic().size());
+                                    for (Basic basic : search.getBasic()) {
+                                        String cid = basic.getCid();
+                                        cityCode = cid.substring(2);
+                                        Log.d(TAG, "onSuccess: cityCode"+cityCode);
+                                    }
+                                    SharedPreferences.Editor editor = getSharedPreferences("location", MODE_PRIVATE).edit();
+                                    editor.putString("province", provinceName);
+                                    editor.putString("district", districtName);
+                                    editor.putString("cid", cityCode);
+                                    editor.apply();
+                                    if (!getFirst()) {
+                                        Message message = new Message();
+                                        message.what = UPDATE_TEXT;
+                                        handler.sendMessage(message);
+                                    }
+                                }
+                            });
+                        }
+                    }).start();
                     mLocationClient.stopLocation();
                     //销毁定位客户端，同时销毁本地定位服务。
                     mLocationClient.onDestroy();
@@ -259,10 +322,17 @@ public class MainActivity extends AppCompatActivity {
         });
         //拖拽排序
         recyclerView.setLongPressDragEnabled(true);
+        recyclerView.setOnItemStateChangedListener(new OnItemStateChangedListener() {
+            @Override
+            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+                mPullRefreshLayout.setEnabled(true);
+            }
+        });
         //拖拽监听
         recyclerView.setOnItemMoveListener(new OnItemMoveListener() {
             @Override
             public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
+                mPullRefreshLayout.setEnabled(false);
                 int fromPosition = srcHolder.getAdapterPosition();
                 int toPosition = targetHolder.getAdapterPosition();
                 //item被拖拽时,交换数据,并更新adapter
@@ -451,6 +521,39 @@ public class MainActivity extends AppCompatActivity {
         if (tipDialog != null) {
             tipDialog.dismiss();
         }
+    }
+
+    /**
+     * 是否添加定位城市弹框
+     */
+    private void showMessagePositiveDialog() {
+        new QMUIDialog.MessageDialogBuilder(MainActivity.this)
+                .setTitle("获取到定位")
+                .setMessage("欢迎您~\n" +
+                        "来自"+districtName+"的网友\n" +
+                        "是否添加"+districtName+"到您的天气城市列表")
+                .addAction("取消", (dialog, index) -> dialog.dismiss())
+                .addAction("确定", new QMUIDialogAction.ActionListener() {
+                    @Override
+                    public void onClick(QMUIDialog dialog, int index) {
+                        searchCityEvent(new SearchCityEvent(districtName));
+                        dialog.dismiss();
+                        Toast.makeText(MainActivity.this, "添加定位城市成功", Toast.LENGTH_SHORT).show();
+
+                    }
+                }).create().show();
+    }
+
+    private void isFirst() {
+        SharedPreferences.Editor editor = getSharedPreferences("isFirst", MODE_PRIVATE).edit();
+        editor.putBoolean("first", true);
+        editor.apply();
+    }
+
+    private boolean getFirst() {
+        SharedPreferences preferences = getSharedPreferences("isFirst", MODE_PRIVATE);
+        isFirst = preferences.getBoolean("first", false);
+        return isFirst;
     }
 
     @Override

@@ -5,4 +5,5 @@
     <color name="blueAsh">#A1AFC9</color>
     <color name="li">#76664d</color>
     <color name="gray">#c0c0c0</color>
+    <color name="translucent">#01000000</color>
 </resources>
