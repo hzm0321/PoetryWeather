@@ -29,6 +29,8 @@ import com.amap.api.location.AMapLocation;
 import com.amap.api.location.AMapLocationClient;
 import com.amap.api.location.AMapLocationClientOption;
 import com.amap.api.location.AMapLocationListener;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.Gson;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
@@ -50,6 +52,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -62,6 +65,7 @@ import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 import cn.hzmeurasia.poetryweather.service.MyService;
+import de.hdodenhof.circleimageview.CircleImageView;
 import interfaces.heweather.com.interfacesmodule.bean.basic.Basic;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
@@ -91,6 +95,7 @@ public class MainActivity extends AppCompatActivity {
     private boolean isFirst;
     TextView tvName;
     QMUITipDialog tipDialog;
+    CircleImageView navCircleImageView;
     public static final int UPDATE_TEXT = 1;
     private Handler handler = new Handler(){
         @Override
@@ -302,7 +307,34 @@ public class MainActivity extends AppCompatActivity {
                 isCardEmpty();
             }
         });
-        //设置左侧导航及其事件
+        //拖拽排序
+        recyclerView.setLongPressDragEnabled(true);
+        recyclerView.setOnItemStateChangedListener(new OnItemStateChangedListener() {
+            @Override
+            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+                mPullRefreshLayout.setEnableRefresh(true);
+            }
+        });
+        //拖拽监听
+        recyclerView.setOnItemMoveListener(new OnItemMoveListener() {
+            @Override
+            public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
+                mPullRefreshLayout.setEnableRefresh(false);
+                int fromPosition = srcHolder.getAdapterPosition();
+                int toPosition = targetHolder.getAdapterPosition();
+                //item被拖拽时,交换数据,并更新adapter
+                Collections.swap(cityDbList, fromPosition, toPosition);
+                cardAdapter.notifyItemMoved(fromPosition,toPosition);
+                return true;
+            }
+
+            @Override
+            public void onItemDismiss(RecyclerView.ViewHolder srcHolder) {
+
+            }
+        });
+
+        //---------------------设置左侧导航及其事件----------------------------
         Resources resource = getBaseContext().getResources();
         //设置列表字体颜色
         ColorStateList csl = resource.getColorStateList(R.color.navigation_menu_item_color);
@@ -334,32 +366,7 @@ public class MainActivity extends AppCompatActivity {
             }
             return true;
         });
-        //拖拽排序
-        recyclerView.setLongPressDragEnabled(true);
-        recyclerView.setOnItemStateChangedListener(new OnItemStateChangedListener() {
-            @Override
-            public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-                mPullRefreshLayout.setEnableRefresh(true);
-            }
-        });
-        //拖拽监听
-        recyclerView.setOnItemMoveListener(new OnItemMoveListener() {
-            @Override
-            public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
-                mPullRefreshLayout.setEnableRefresh(false);
-                int fromPosition = srcHolder.getAdapterPosition();
-                int toPosition = targetHolder.getAdapterPosition();
-                //item被拖拽时,交换数据,并更新adapter
-                Collections.swap(cityDbList, fromPosition, toPosition);
-                cardAdapter.notifyItemMoved(fromPosition,toPosition);
-                return true;
-            }
 
-            @Override
-            public void onItemDismiss(RecyclerView.ViewHolder srcHolder) {
-
-            }
-        });
         //查询数据库
         cityDbList.clear();
         cityDbList = LitePal.findAll(CityDb.class);
@@ -495,14 +502,30 @@ public class MainActivity extends AppCompatActivity {
 
 
     /**
-     * 读取本地缓存name数据
+     * nav读取本地缓存name数据
      */
     private void showName() {
         SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
         personName = sharedPreferences.getString("name", "");
         View myView = navigationView.getHeaderView(0);
         tvName = myView.findViewById(R.id.tv_nav_name);
+        navCircleImageView = myView.findViewById(R.id.circle_image_nav_head);
         tvName.setText(personName);
+        String path = "/sdcard/myHead/";
+        File imageHead = new File(path+ "head.jpg");
+        if (imageHead.exists()) {
+            Glide.with(this)
+                    .load(path + "head.jpg")
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(navCircleImageView);
+        } else {
+            Glide.with(this)
+                    .load(R.drawable.head)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .into(navCircleImageView);
+        }
     }
 
     /**

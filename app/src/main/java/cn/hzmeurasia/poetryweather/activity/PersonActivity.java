@@ -4,10 +4,19 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +32,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.util.QMUIKeyboardHelper;
 import com.qmuiteam.qmui.util.QMUIResHelper;
@@ -32,6 +42,10 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +54,7 @@ import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.entity.PersonEntity;
+import cn.hzmeurasia.poetryweather.util.GlideRoundTransform;
 import de.hdodenhof.circleimageview.CircleImageView;
 
 import static cn.hzmeurasia.poetryweather.MyApplication.getContext;
@@ -75,22 +90,175 @@ public class PersonActivity extends AppCompatActivity {
     @BindView(R.id.ib_photo)
     FloatingActionButton ib_photo;
 
+    private Bitmap head;
+    private static String path = "/sdcard/myHead/";
+    private Uri imageUri;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.person_activity);
         //绑定初始化ButterKnife
         ButterKnife.bind(this);
-        Glide.with(this).load(R.drawable.head).into(ib_photo);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        initHead();
         showPerson();
         initGroupListView();
 
+
+
+        //头像点击事件
+        ib_photo.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showHeadDialog();
+            }
+        });
+
     }
+
+    /**
+     * 显示选择头像菜单
+     */
+    private void showHeadDialog() {
+        final String[] items = new String[]{"拍摄头像", "从相册中选取"};
+        new QMUIDialog.MenuDialogBuilder(PersonActivity.this)
+                .addItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Log.d(TAG, "onClick: which "+which);
+                        switch(which) {
+                            case 0:
+                                File outputImage = new File(getExternalCacheDir(),"head.jpg");
+                                try {
+                                    if (outputImage.exists()) {
+                                        outputImage.delete();
+                                    }
+                                    outputImage.createNewFile();
+                                } catch (IOException e) {
+                                    e.printStackTrace();
+                                }
+                                if (Build.VERSION.SDK_INT >= 24) {
+                                    imageUri = FileProvider.getUriForFile(PersonActivity.this, "user", outputImage);
+                                } else {
+                                    imageUri = Uri.fromFile(outputImage);
+                                }
+                                Intent intentCamera = new Intent("android.media.action.IMAGE_CAPTURE");
+                                intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+                                startActivityForResult(intentCamera, 1);
+                                dialog.dismiss();
+                                break;
+                            case 1:
+                                Intent intentPhoto = new Intent(Intent.ACTION_PICK, null);
+                                //打开文件
+                                intentPhoto.setDataAndType(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, "image/*");
+                                startActivityForResult(intentPhoto,2);
+                                dialog.dismiss();
+                            default:
+                                break;
+                        }
+                    }
+                })
+                .create().show();
+    }
+
+    private void initHead() {
+        File imageHead = new File(path+ "head.jpg");
+        Log.d(TAG, "initHead: "+imageHead.exists());
+        if (imageHead.exists()) {
+            Glide.with(this)
+                    .load(path + "head.jpg")
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .transform(new GlideRoundTransform(this,40))
+                    .into(ib_photo);
+        } else {
+            Glide.with(this)
+                    .load(R.drawable.head)
+                    .skipMemoryCache(true)
+                    .diskCacheStrategy(DiskCacheStrategy.NONE)
+                    .transform(new GlideRoundTransform(this,40))
+                    .into(ib_photo);
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch(requestCode) {
+            case 1:
+                if (resultCode == RESULT_OK) {
+                    File temp = new File(getExternalCacheDir() + "/head.jpg");
+                    cropPhoto(Uri.fromFile(temp));
+                }
+                break;
+            case 2:
+                if (resultCode == RESULT_OK) {
+                    cropPhoto(data.getData());
+                }
+                break;
+            case 3:
+                if (data != null) {
+                    Bundle extras = data.getExtras();
+                    head = extras.getParcelable("data");
+                    if (head != null) {
+                        setPicToView(head);
+                        initHead();
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public void cropPhoto(Uri uri) {
+        Intent intent = new Intent("com.android.camera.action.CROP");
+        intent.setDataAndType(uri, "image/*");
+        intent.putExtra("crop", "true");
+        // aspectX aspectY 是宽高的比例
+        intent.putExtra("aspectX", 1);
+        intent.putExtra("aspectY", 1);
+        // outputX outputY 是裁剪图片宽高
+        intent.putExtra("outputX", 250);
+        intent.putExtra("outputY", 250);
+        intent.putExtra("return-data", true);
+        //去除黑边
+        intent.putExtra("scale", true);
+        //去除黑边
+        intent.putExtra("scaleUpIfNeeded", true);
+        startActivityForResult(intent, 3);
+    }
+
+    private void setPicToView(Bitmap mBitmap) {
+        String sdStatus = Environment.getExternalStorageState();
+        if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) { // 检测sd是否可用
+            return;
+        }
+        FileOutputStream b = null;
+        File file = new File(path);
+        file.mkdirs();// 创建文件夹
+        String fileName = path + "head.jpg";// 图片名字
+        try {
+            b = new FileOutputStream(fileName);
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, b);// 把数据写入文件
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                // 关闭流
+                b.flush();
+                b.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
 
     /**
      * 返回按钮

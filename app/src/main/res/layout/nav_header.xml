@@ -9,8 +9,8 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@drawable/referesh_head"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:id="@+id/circle_image_nav_head"/>
 
     <TextView
         android:layout_marginLeft="10dp"
