@@ -1,11 +1,13 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -31,7 +33,9 @@ import com.google.gson.Gson;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
-import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.ClassicsHeader;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
@@ -69,6 +73,13 @@ import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLI
 
 public class MainActivity extends AppCompatActivity {
 
+    static {
+        ClassicsHeader.REFRESH_HEADER_PULLING = "下拉刷新";
+        ClassicsHeader.REFRESH_HEADER_RELEASE = "众里寻她千百度";
+        ClassicsHeader.REFRESH_HEADER_REFRESHING = "蓦然回首";
+        ClassicsHeader.REFRESH_HEADER_FINISH = "那人却在灯火阑珊处";
+    }
+
     private static final String TAG = "MainActivity";
 
     private String provinceName;
@@ -76,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private String districtName;
     private String personName;
     private boolean refreshFlag = false;
-    private int iRefresh = 0;
+    private int iRefresh = -1;
     private boolean isFirst;
     TextView tvName;
     QMUITipDialog tipDialog;
@@ -185,8 +196,11 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.nv_left)
     NavigationView navigationView;
     @BindView(R.id.rf_main)
-    QMUIPullRefreshLayout mPullRefreshLayout;
+    RefreshLayout mPullRefreshLayout;
+    @BindView(R.id.header)
+    ClassicsHeader header;
 
+    @SuppressLint("ResourceAsColor")
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -325,14 +339,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setOnItemStateChangedListener(new OnItemStateChangedListener() {
             @Override
             public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-                mPullRefreshLayout.setEnabled(true);
+                mPullRefreshLayout.setEnableRefresh(true);
             }
         });
         //拖拽监听
         recyclerView.setOnItemMoveListener(new OnItemMoveListener() {
             @Override
             public boolean onItemMove(RecyclerView.ViewHolder srcHolder, RecyclerView.ViewHolder targetHolder) {
-                mPullRefreshLayout.setEnabled(false);
+                mPullRefreshLayout.setEnableRefresh(false);
                 int fromPosition = srcHolder.getAdapterPosition();
                 int toPosition = targetHolder.getAdapterPosition();
                 //item被拖拽时,交换数据,并更新adapter
@@ -355,19 +369,9 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setAdapter(cardAdapter);
 
         //刷新监听
-        mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
+        mPullRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
-            public void onMoveTarget(int offset) {
-
-            }
-
-            @Override
-            public void onMoveRefreshView(int offset) {
-
-            }
-
-            @Override
-            public void onRefresh() {
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
                 refreshFlag = true;
                 iRefresh = -1;
                 Log.d(TAG, "onRefresh: "+refreshFlag);
@@ -376,7 +380,6 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "iRefresh: "+iRefresh);
                 }
                 mPullRefreshLayout.finishRefresh();
-                Toast.makeText(MainActivity.this, "数据已刷新", Toast.LENGTH_SHORT).show();
                 Log.d(TAG, "onRefresh: "+refreshFlag);
             }
         });
@@ -538,8 +541,6 @@ public class MainActivity extends AppCompatActivity {
                     public void onClick(QMUIDialog dialog, int index) {
                         searchCityEvent(new SearchCityEvent(districtName));
                         dialog.dismiss();
-                        Toast.makeText(MainActivity.this, "添加定位城市成功", Toast.LENGTH_SHORT).show();
-
                     }
                 }).create().show();
     }

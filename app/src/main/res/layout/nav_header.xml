@@ -9,7 +9,7 @@
     <de.hdodenhof.circleimageview.CircleImageView
         android:layout_width="80dp"
         android:layout_height="80dp"
-        android:src="@drawable/head"
+        android:src="@drawable/referesh_head"
         android:layout_centerInParent="true"/>
 
     <TextView

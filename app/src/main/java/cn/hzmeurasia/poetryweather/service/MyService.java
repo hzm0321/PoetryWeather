@@ -1,9 +1,12 @@
 package cn.hzmeurasia.poetryweather.service;
 
+import android.app.AlarmManager;
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -11,6 +14,10 @@ import android.util.Log;
 import org.greenrobot.eventbus.EventBus;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import cn.hzmeurasia.poetryweather.util.CalendarUtil;
 import cn.hzmeurasia.poetryweather.util.DateUtil;
@@ -57,6 +64,7 @@ public class MyService extends Service {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
             requestCalendar(date);
         }
+        updateCityWeather();
         return super.onStartCommand(intent, flags, startId);
 
     }
@@ -127,5 +135,27 @@ public class MyService extends Service {
                 editor.apply();
             }
         });
+    }
+
+    /**
+     * 定时任务自动更新城市列表天气
+     */
+    private void updateCityWeather() {
+        SharedPreferences preferences = getSharedPreferences("person", MODE_PRIVATE);
+        int time = preferences.getInt("refreshFlag", 3);
+        List<Integer> timeList = new ArrayList<>();
+        timeList.add(1);
+        timeList.add(2);
+        timeList.add(4);
+        timeList.add(8);
+        AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
+        Log.d(TAG, "updateCityWeather: time"+time);
+        //设定间隔时间
+        int hours = timeList.get(time) * 60 * 60 * 1000;
+        long triggerAtTime = SystemClock.elapsedRealtime() + hours;
+        Intent intent = new Intent(this, MyService.class);
+        PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
+        manager.cancel(pi);
+        manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
     }
 }

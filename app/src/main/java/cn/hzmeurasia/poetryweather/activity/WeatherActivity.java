@@ -252,7 +252,7 @@ public class WeatherActivity extends AppCompatActivity {
                     tvCityName.setText(now.getBasic().getLocation());
                     tvUpdateTime.setText(now.getUpdate().getLoc());
                     temperature.append(now.getNow().getFl())
-                            .append("℃");
+                            .append("°");
                     tvTemperature.setText(temperature.toString());
                     tvWeather.setText(now.getNow().getCond_txt());
                     //载入天气图标
@@ -366,6 +366,7 @@ public class WeatherActivity extends AppCompatActivity {
                 .setTipWord("正在加载天气数据......")
                 .create();
         tipDialog.show();
+
 
     }
 

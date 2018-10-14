@@ -16,7 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
-            app:contentScrim="@color/li"
+            app:contentScrim="@color/bluishWhite"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:title="@string/nav_item_personalInformation"
             android:fitsSystemWindows="true"
@@ -48,15 +48,22 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-
             <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+                android:layout_marginTop="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:id="@+id/qmui_group_list_view"/>
 
     </android.support.v4.widget.NestedScrollView>
 
-
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="80dp"
+        android:layout_height="80dp"
+        android:layout_margin="30dp"
+        app:layout_anchor="@id/appBar"
+        android:id="@+id/ib_photo"
+        android:scaleType="center"
+        app:layout_anchorGravity="bottom|right"/>
 
 
 </android.support.design.widget.CoordinatorLayout>

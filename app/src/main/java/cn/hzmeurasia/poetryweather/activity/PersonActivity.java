@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -15,11 +16,13 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.util.QMUIKeyboardHelper;
 import com.qmuiteam.qmui.util.QMUIResHelper;
@@ -37,6 +40,7 @@ import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.entity.PersonEntity;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 import static cn.hzmeurasia.poetryweather.MyApplication.getContext;
 
@@ -56,17 +60,20 @@ public class PersonActivity extends AppCompatActivity {
     QMUICommonListItemView sexListView;
     QMUICommonListItemView signatureListView;
     QMUICommonListItemView preferenceListView;
-
+    QMUICommonListItemView refreshForWeatherListView;
     private String name;
     private String sex;
     private String signature;
     private String preference;
+    private String refreshForWeather;
 
     private int sexFlag = 2;
+    private int refreshFlag = 3;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
-
+    @BindView(R.id.ib_photo)
+    FloatingActionButton ib_photo;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -74,7 +81,7 @@ public class PersonActivity extends AppCompatActivity {
         setContentView(R.layout.person_activity);
         //绑定初始化ButterKnife
         ButterKnife.bind(this);
-
+        Glide.with(this).load(R.drawable.head).into(ib_photo);
         setSupportActionBar(toolbar);
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -143,16 +150,33 @@ public class PersonActivity extends AppCompatActivity {
         preferenceListView.setTag(R.id.listitem_tag_4);
         preferenceListView.setDetailText(preference);
 
+        refreshForWeatherListView = mGroupListView.createItemView(
+                ContextCompat.getDrawable(PersonActivity.this,R.drawable.test),
+                "自动刷新间隔",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        refreshForWeatherListView.setTag(R.id.listitem_tag_5);
+        refreshForWeatherListView.setDetailText(refreshForWeather);
+
+
+
         QMUIGroupListView.newSection(this)
+                .setTitle("个人信息")
                 .setDescription("诗词示例:\n" +
                         "衣带渐宽终不悔，\n" +
                         "为伊消得人憔悴。")
-
                 .addItemView(nameListView,onClickListener)
                 .addItemView(sexListView,onClickListener)
                 .addItemView(signatureListView,onClickListener)
                 .addItemView(preferenceListView,onClickListener)
                 .addTo(mGroupListView);
+
+        QMUIGroupListView.newSection(this)
+                .setTitle("偏好设置")
+                .addItemView(refreshForWeatherListView, onClickListener)
+                .addTo(mGroupListView);
+
     }
 
     /**
@@ -161,10 +185,12 @@ public class PersonActivity extends AppCompatActivity {
     private void showPerson() {
         SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
         name = sharedPreferences.getString("name", "");
-        sex = sharedPreferences.getString("sex", "");
+        sex = sharedPreferences.getString("sex", "保密");
         sexFlag = sharedPreferences.getInt("sexFlag", 2);
         signature = sharedPreferences.getString("signature", "");
         preference = sharedPreferences.getString("preference", "");
+        refreshFlag = sharedPreferences.getInt("refreshFlag",3);
+        refreshForWeather = sharedPreferences.getString("refreshForWeather","每8小时");
     }
 
     /**
@@ -198,6 +224,8 @@ public class PersonActivity extends AppCompatActivity {
             case R.id.listitem_tag_4:
                 showMultiChoiceDialog();
                 break;
+            case R.id.listitem_tag_5:
+                showRefreshSingleDialog();
             default:
                 break;
         }
@@ -234,7 +262,7 @@ public class PersonActivity extends AppCompatActivity {
      * 单选对话框
      */
     private void showSingleDialog() {
-        final String[] items = new String[]{"男", "女", "无可奉告"};
+        final String[] items = new String[]{"男", "女", "保密"};
         final int checkedIndex = sexFlag;
         new QMUIDialog.CheckableDialogBuilder(PersonActivity.this)
                 .setCheckedIndex(checkedIndex)
@@ -342,6 +370,32 @@ public class PersonActivity extends AppCompatActivity {
             dialog.dismiss();
         });
         builder.create(mCurrentDialogStyle).show();
+    }
+
+    /**
+     * 单选对话框
+     */
+    private void showRefreshSingleDialog() {
+        final String[] items = new String[]{"每1小时", "每2小时", "每4小时","每8小时"};
+        final int checkedIndex = refreshFlag;
+        new QMUIDialog.CheckableDialogBuilder(PersonActivity.this)
+                .setCheckedIndex(checkedIndex)
+                .addItems(items, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        refreshForWeather = items[which];
+                        sharedPreferencesEdit("refreshForWeather",refreshForWeather);
+                        refreshForWeatherListView.setDetailText(refreshForWeather);
+                        refreshFlag = which;
+                        SharedPreferences.Editor editor = getSharedPreferences("person", MODE_PRIVATE).edit();
+                        editor.putInt("refreshFlag", refreshFlag);
+                        editor.apply();
+                        dialog.dismiss();
+                        Toast.makeText(PersonActivity.this,"城市列表天气自动刷新间隔为"+refreshForWeather,Toast.LENGTH_SHORT).show();
+
+                    }
+                })
+                .create().show();
     }
 
 }
