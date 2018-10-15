@@ -90,7 +90,6 @@ public class MainActivity extends AppCompatActivity {
     private String cityCode;
     private String districtName;
     private String personName;
-    private boolean refreshFlag = false;
     private int iRefresh = -1;
     private boolean isFirst;
     TextView tvName;
@@ -277,7 +276,6 @@ public class MainActivity extends AppCompatActivity {
             intent1.putExtra("location", districtName);
             Log.d(TAG, "定位区县"+districtName);
             intent1.putExtra("province", provinceName);
-            refreshFlag = false;
             startActivity(intent1);
         });
 
@@ -375,24 +373,20 @@ public class MainActivity extends AppCompatActivity {
         cardAdapter = new CardAdapter(cityDbList);
         recyclerView.setAdapter(cardAdapter);
 
-        //刷新监听
+        //------------------------刷新监听----------------------------
         mPullRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                refreshFlag = true;
                 iRefresh = -1;
-                Log.d(TAG, "onRefresh: "+refreshFlag);
                 for (CityDb cityDb : cityDbList) {
-                    searchCityEvent(new SearchCityEvent(cityDb.getCityDb_cid()));
+                    Log.d(TAG, "onRefresh: citylist"+cityDb.getCityDb_cityName());
+                    refreshCityLife(cityDb.getCityDb_cid());
                     Log.d(TAG, "iRefresh: "+iRefresh);
                 }
                 mPullRefreshLayout.finishRefresh();
-                Log.d(TAG, "onRefresh: "+refreshFlag);
             }
         });
     }
-
-
 
     /**
      * 判断是否添加了城市
@@ -424,9 +418,8 @@ public class MainActivity extends AppCompatActivity {
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void searchCityEvent(final SearchCityEvent searchCityEvent) {
         Log.d(TAG, "Event: "+ searchCityEvent.getCityCode());
-        if (!refreshFlag) {
-            showLoading();
-        }
+        //显示加载框
+        showLoading();
         HeWeather.getWeatherNow(this, searchCityEvent.getCityCode(), new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
             public void onError(Throwable throwable) {
@@ -437,13 +430,11 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(List<Now> list) {
                 Log.i(TAG, "onSuccess: "+ new Gson().toJson(list));
-                Log.d(TAG, "onSuccess: "+refreshFlag);
-                if (isRepeatCity(searchCityEvent.getCityCode()) && !refreshFlag) {
+                if (isRepeatCity(searchCityEvent.getCityCode())) {
                     Toast.makeText(MainActivity.this, "您已添加过该城市", Toast.LENGTH_SHORT).show();
                     closeLoading();
                 } else {
                     for (Now now : list) {
-                        if (!refreshFlag) {
                             CityDb cityDb = new CityDb();
                             cityDb.setCityDb_cid(now.getBasic().getCid());
                             cityDb.setCityDb_cityName(now.getBasic().getLocation());
@@ -453,14 +444,6 @@ public class MainActivity extends AppCompatActivity {
                             cityDb.save();
                             cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
                                     now.getNow().getCond_txt(), now.getNow().getFl(), R.drawable.bg));
-                        } else {
-                            iRefresh++;
-                            CityDb cityDb = cityDbList.get(iRefresh);
-                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
-                            cityDb.setCityDb_temperature(now.getNow().getFl());
-                            Log.d(TAG, "onSuccess: iRefresh"+iRefresh);
-                            Log.d(TAG, "onSuccess: 数据已刷新");
-                        }
                     }
                     //刷新Card视图
                     cardAdapter.notifyDataSetChanged();
@@ -578,6 +561,29 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("isFirst", MODE_PRIVATE);
         isFirst = preferences.getBoolean("first", false);
         return isFirst;
+    }
+
+    private void refreshCityLife(String cid){
+        HeWeather.getWeatherNow(this, cid, new HeWeather.OnResultWeatherNowBeanListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                Log.i(TAG, "onError: ",throwable);
+                Toast.makeText(MainActivity.this,"天气获取失败",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSuccess(List<Now> list) {
+                for (Now now : list) {
+                    iRefresh++;
+                    CityDb cityDb = cityDbList.get(iRefresh);
+                    cityDb.setCityDb_txt(now.getNow().getCond_txt());
+                    cityDb.setCityDb_temperature(now.getNow().getFl());
+                    Log.d(TAG, "refreshCity: "+cityDb.getCityDb_cityName());
+                    Log.d(TAG, "refreshCityWeather: "+now.getNow().getCond_txt());
+                    Log.d(TAG, "refreshCityList: "+iRefresh);
+                }
+            }
+        });
     }
 
     @Override

@@ -143,7 +143,7 @@ public class PersonActivity extends AppCompatActivity {
                                     e.printStackTrace();
                                 }
                                 if (Build.VERSION.SDK_INT >= 24) {
-                                    imageUri = FileProvider.getUriForFile(PersonActivity.this, "user", outputImage);
+                                    imageUri = FileProvider.getUriForFile(MyApplication.getContext(), "PoetryWeatherHead", outputImage);
                                 } else {
                                     imageUri = Uri.fromFile(outputImage);
                                 }
@@ -191,8 +191,8 @@ public class PersonActivity extends AppCompatActivity {
         switch(requestCode) {
             case 1:
                 if (resultCode == RESULT_OK) {
-                    File temp = new File(getExternalCacheDir() + "/head.jpg");
-                    cropPhoto(Uri.fromFile(temp));
+                    Log.d("Result", "TAKE_PHOTO: "+imageUri.getScheme());
+                    cropPhoto(imageUri);
                 }
                 break;
             case 2:
@@ -236,16 +236,20 @@ public class PersonActivity extends AppCompatActivity {
 
     private void setPicToView(Bitmap mBitmap) {
         String sdStatus = Environment.getExternalStorageState();
-        if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) { // 检测sd是否可用
+        // 检测sd是否可用
+        if (!sdStatus.equals(Environment.MEDIA_MOUNTED)) {
             return;
         }
         FileOutputStream b = null;
         File file = new File(path);
-        file.mkdirs();// 创建文件夹
-        String fileName = path + "head.jpg";// 图片名字
+        // 创建文件夹
+        file.mkdirs();
+        // 图片名字
+        String fileName = path + "head.jpg";
         try {
             b = new FileOutputStream(fileName);
-            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, b);// 把数据写入文件
+            // 把数据写入文件
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, b);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         } finally {
