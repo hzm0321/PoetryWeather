@@ -489,7 +489,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void showName() {
         SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
-        personName = sharedPreferences.getString("name", "");
+        personName = sharedPreferences.getString("name", "诗语天气");
         View myView = navigationView.getHeaderView(0);
         tvName = myView.findViewById(R.id.tv_nav_name);
         navCircleImageView = myView.findViewById(R.id.circle_image_nav_head);

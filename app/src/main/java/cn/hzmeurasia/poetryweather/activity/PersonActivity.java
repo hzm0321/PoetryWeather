@@ -4,6 +4,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
@@ -42,11 +44,16 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import butterknife.BindView;
@@ -84,6 +91,7 @@ public class PersonActivity extends AppCompatActivity {
 
     private int sexFlag = 2;
     private int refreshFlag = 3;
+    private int[] preferenceFlag;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -106,18 +114,10 @@ public class PersonActivity extends AppCompatActivity {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
         initHead();
-        showPerson();
+        initPerson();
         initGroupListView();
-
-
-
         //头像点击事件
-        ib_photo.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showHeadDialog();
-            }
-        });
+        ib_photo.setOnClickListener(v -> showHeadDialog());
 
     }
 
@@ -192,11 +192,13 @@ public class PersonActivity extends AppCompatActivity {
             case 1:
                 if (resultCode == RESULT_OK) {
                     Log.d("Result", "TAKE_PHOTO: "+imageUri.getScheme());
+
                     cropPhoto(imageUri);
                 }
                 break;
             case 2:
                 if (resultCode == RESULT_OK) {
+                    Log.d(TAG, "photo: "+data.getData().getScheme());
                     cropPhoto(data.getData());
                 }
                 break;
@@ -354,13 +356,26 @@ public class PersonActivity extends AppCompatActivity {
     /**
      * 查询person数据本地缓存
      */
-    private void showPerson() {
+    private void initPerson() {
         SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
-        name = sharedPreferences.getString("name", "");
+        name = sharedPreferences.getString("name", "诗语天气");
         sex = sharedPreferences.getString("sex", "保密");
         sexFlag = sharedPreferences.getInt("sexFlag", 2);
         signature = sharedPreferences.getString("signature", "");
         preference = sharedPreferences.getString("preference", "");
+//        preferenceFlag = new int[7];
+//        Arrays.fill(preferenceFlag,0);
+        Log.d(TAG, "initPerson: "+sharedPreferences.getString("preferenceFlag","[]").toString());
+        String p = sharedPreferences.getString("preferenceFlag","[]");
+        p = p.replace("[","");
+        p = p.replace("]","");
+        p = p.replaceAll(",", "");
+        Log.d(TAG, "initPerson: P"+p);
+        preferenceFlag = new int[p.length()];
+        for (int i = 0; i < p.length(); i++) {
+            Log.d(TAG, "initPerson: "+p.substring(i,i+1));
+            preferenceFlag[i] = Integer.valueOf(p.substring(i,i+1));
+        }
         refreshFlag = sharedPreferences.getInt("refreshFlag",3);
         refreshForWeather = sharedPreferences.getString("refreshForWeather","每8小时");
     }
@@ -374,7 +389,6 @@ public class PersonActivity extends AppCompatActivity {
         SharedPreferences.Editor editor = getSharedPreferences("person", MODE_PRIVATE).edit();
         editor.putString(name, data);
         editor.apply();
-
     }
 
     /**
@@ -528,6 +542,8 @@ public class PersonActivity extends AppCompatActivity {
         final String[] items = new String[]{"平实", "含蓄", "清新", "飘逸", "豪放", "沉郁","缠绵"};
         final QMUIDialog.MultiCheckableDialogBuilder builder = new QMUIDialog.MultiCheckableDialogBuilder(PersonActivity.this)
                 .addItems(items, (dialog, which) -> {});
+        Log.d(TAG, "showMultiChoiceDialog: "+preferenceFlag.length);
+        builder.setCheckedItems(preferenceFlag);
         builder.addAction("取消", (dialog, index) -> dialog.dismiss());
         builder.addAction("提交", (dialog, index) -> {
             String result = "您选择了 ";
@@ -536,6 +552,16 @@ public class PersonActivity extends AppCompatActivity {
                 result += "" + items[builder.getCheckedItemIndexes()[i]] + " ";
                 preference += items[builder.getCheckedItemIndexes()[i]] + " ";
             }
+            //sharedPreferences存数组
+            preferenceFlag = builder.getCheckedItemIndexes();
+            Log.d(TAG, "showMultiChoiceDialog: indexes"+builder.getCheckedItemIndexes().length);
+            JSONArray jsonArray = new JSONArray();
+            for (int c : preferenceFlag) {
+                jsonArray.put(c);
+                Log.d(TAG, "showMultiChoiceDialog: c"+c);
+            }
+            Log.d(TAG, "showMultiChoiceDialog: jsonArray"+jsonArray.length());
+            sharedPreferencesEdit("preferenceFlag",jsonArray.toString());
             sharedPreferencesEdit("preference",preference);
             preferenceListView.setDetailText(preference);
             Toast.makeText(PersonActivity.this, result, Toast.LENGTH_SHORT).show();
