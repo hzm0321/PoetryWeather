@@ -1,19 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/rf_weather"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+
     <android.support.design.widget.CoordinatorLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
+
 
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/iv_weather_bg"
         android:scaleType="centerCrop"/>
+
+
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -47,6 +52,10 @@
                 </android.support.v4.view.ViewPager>
 
             </RelativeLayout>
+
+
     </android.support.design.widget.CoordinatorLayout>
+
+
 
 </com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>

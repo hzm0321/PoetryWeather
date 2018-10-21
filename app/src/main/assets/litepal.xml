@@ -3,5 +3,6 @@
     <version value="1"/>
     <list>
         <mapping class="cn.hzmeurasia.poetryweather.db.CityDb"/>
+        <mapping class="cn.hzmeurasia.poetryweather.db.PoetryDb"/>
     </list>
 </litepal>

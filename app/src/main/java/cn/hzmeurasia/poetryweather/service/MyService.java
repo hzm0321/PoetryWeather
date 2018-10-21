@@ -8,10 +8,15 @@ import android.content.SharedPreferences;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
 import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
+import org.litepal.LitePal;
+import org.litepal.crud.LitePalSupport;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -19,10 +24,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import cn.hzmeurasia.poetryweather.db.PoetryDb;
+import cn.hzmeurasia.poetryweather.entity.Poetry;
+import cn.hzmeurasia.poetryweather.entity.PoetryWeather;
+import cn.hzmeurasia.poetryweather.entity.RefreshTimeEvent;
 import cn.hzmeurasia.poetryweather.util.CalendarUtil;
 import cn.hzmeurasia.poetryweather.util.DateUtil;
 import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
+import cn.hzmeurasia.poetryweather.util.PoetryWeatherUtil;
 import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.HttpUrl;
@@ -43,13 +53,21 @@ public class MyService extends Service {
         return null;
     }
 
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+
+        LitePal.getDatabase();
+
+
         new Thread(() -> {
             updateWeatherBg();
+
             stopSelf();
+
         }).start();
 
+        createPoetryDatabase();
         String date = DateUtil.getDateString();
         Log.d(TAG, "date: "+date);
         //读取万年历缓存
@@ -64,17 +82,12 @@ public class MyService extends Service {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
             requestCalendar(date);
         }
+
         updateCityWeather();
         return super.onStartCommand(intent, flags, startId);
 
     }
 
-    class MyServiceThread extends Thread {
-        @Override
-        public void run() {
-
-        }
-    }
 
     /**
      * 查询万年历显示宜忌
@@ -105,7 +118,6 @@ public class MyService extends Service {
                 editor.putString("today", date);
                 editor.putString("suit", calendar.getResult().getResult_data().getSuit());
                 editor.putString("avoid", calendar.getResult().getResult_data().getAvoid());
-
                 editor.apply();
                 //发送粘性事件
                 EventBus.getDefault().postSticky(calendarEvent);
@@ -141,6 +153,7 @@ public class MyService extends Service {
      * 定时任务自动更新城市列表天气
      */
     private void updateCityWeather() {
+        Log.d(TAG, "updateCityWeather: 开始刷新天气");
         SharedPreferences preferences = getSharedPreferences("person", MODE_PRIVATE);
         int time = preferences.getInt("refreshFlag", 3);
         List<Integer> timeList = new ArrayList<>();
@@ -151,11 +164,58 @@ public class MyService extends Service {
         AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
         Log.d(TAG, "updateCityWeather: time"+time);
         //设定间隔时间
+        Log.d(TAG, "updateCityWeather: 刷新间隔时间"+timeList.get(time));
         int hours = timeList.get(time) * 60 * 60 * 1000;
         long triggerAtTime = SystemClock.elapsedRealtime() + hours;
         Intent intent = new Intent(this, MyService.class);
         PendingIntent pi = PendingIntent.getService(this, 0, intent, 0);
+        assert manager != null;
         manager.cancel(pi);
         manager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
+    }
+
+    /**
+     * 获取服务器诗句数据库数据
+     */
+    private void createPoetryDatabase() {
+        String poetryWeatherUrl = "http://hzmeurasia.cn/poetry";
+        HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
+            @Override
+            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+
+            }
+
+            @Override
+            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
+                final String responsText = response.body().string();
+                Log.d(TAG, "onResponse: "+responsText);
+                final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
+                if (poetryWeather.poetryList.size() != LitePal.count(PoetryDb.class)
+                        && poetryWeather.poetryList.size() > 0) {
+                    for (Poetry poetry : poetryWeather.poetryList) {
+                        PoetryDb poetryDb = new PoetryDb();
+                        poetryDb.setPoetryDb_id(poetry.id);
+                        poetryDb.setPoetryDb_poetry(poetry.poetry);
+                        poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
+                        poetryDb.setPoetryDb_weather(poetry.weather);
+                        poetryDb.setPoetryDb_author(poetry.author);
+                        poetryDb.setPoetryDb_author_link(poetry.author_link);
+                        poetryDb.setPoetryDb_annotation(poetry.annotation);
+                        poetryDb.setPoetryDb_qwxl(poetry.qwxl);
+                        poetryDb.setPoetryDb_jygk(poetry.jygk);
+                        poetryDb.setPoetryDb_yyql(poetry.yyql);
+                        poetryDb.save();
+                    }
+                }
+                Log.d(TAG, "诗词数据库字段数 "+LitePal.count(PoetryDb.class));
+//                SharedPreferences.Editor editor = getSharedPreferences("poetry", MODE_PRIVATE).edit();
+
+            }
+        });
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 }

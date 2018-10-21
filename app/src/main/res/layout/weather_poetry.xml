@@ -8,19 +8,28 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ems="1"
-        android:text="随风潜入夜"
         android:textSize="30sp"
+        android:clickable="true"
+        android:focusable="true"
         android:id="@+id/tv_poetry1"/>
 
     <TextView
         android:layout_marginLeft="10dp"
+        android:clickable="true"
+        android:focusable="true"
         android:paddingTop="40dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_toRightOf="@id/tv_poetry1"
-        android:text="润物细无声"
         android:ems="1"
         android:textSize="30sp"
         android:id="@+id/tv_poetry2"/>
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:text="浮层"
+        android:id="@+id/btn_pop"/>
+
 
 </RelativeLayout>

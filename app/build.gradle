@@ -20,6 +20,7 @@ android {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
     }
+
 }
 
 dependencies {
@@ -29,7 +30,7 @@ dependencies {
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.qmuiteam:qmui:1.1.7'
     implementation 'com.yanzhenjie:recyclerview-swipe:1.1.4'
-    implementation 'org.litepal.android:core:2.0.0'
+    implementation 'org.litepal.android:java:3.0.0'
     implementation 'com.squareup.okhttp3:okhttp:3.11.0'
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'org.greenrobot:eventbus:3.1.1'

@@ -3,7 +3,13 @@ package cn.hzmeurasia.poetryweather.util;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import cn.hzmeurasia.poetryweather.MyApplication;
+import cn.hzmeurasia.poetryweather.entity.Weather;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
@@ -39,5 +45,17 @@ public class HeWeatherUtil {
         });
         Log.d(TAG, "searchCity: "+cid[0]);
         return cid[0];
+    }
+
+    public static Weather handleWeatherResponse(String response) {
+        try {
+            JSONObject jsonObject = new JSONObject(response);
+            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather6");
+            String weatherContent = jsonArray.getJSONObject(0).toString();
+            return new Gson().fromJson(weatherContent, Weather.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }

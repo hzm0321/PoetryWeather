@@ -44,6 +44,7 @@ import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
+import org.greenrobot.eventbus.EventBus;
 import org.json.JSONArray;
 import org.json.JSONException;
 
@@ -61,6 +62,7 @@ import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.entity.PersonEntity;
+import cn.hzmeurasia.poetryweather.entity.RefreshTimeEvent;
 import cn.hzmeurasia.poetryweather.util.GlideRoundTransform;
 import de.hdodenhof.circleimageview.CircleImageView;
 
@@ -338,8 +340,9 @@ public class PersonActivity extends AppCompatActivity {
         QMUIGroupListView.newSection(this)
                 .setTitle("个人信息")
                 .setDescription("诗词示例:\n" +
-                        "衣带渐宽终不悔，\n" +
-                        "为伊消得人憔悴。")
+                        "清婉秀丽 寻寻觅觅，冷冷清清，凄凄惨惨戚戚。\n" +
+                        "激越高亢 羽扇纶巾，谈笑间，樯橹灰飞烟灭。\n" +
+                        "语言绮丽 新帖绣罗襦，双双金鹧鸪。")
                 .addItemView(nameListView,onClickListener)
                 .addItemView(sexListView,onClickListener)
                 .addItemView(signatureListView,onClickListener)
@@ -363,8 +366,6 @@ public class PersonActivity extends AppCompatActivity {
         sexFlag = sharedPreferences.getInt("sexFlag", 2);
         signature = sharedPreferences.getString("signature", "");
         preference = sharedPreferences.getString("preference", "");
-//        preferenceFlag = new int[7];
-//        Arrays.fill(preferenceFlag,0);
         Log.d(TAG, "initPerson: "+sharedPreferences.getString("preferenceFlag","[]").toString());
         String p = sharedPreferences.getString("preferenceFlag","[]");
         p = p.replace("[","");
@@ -539,7 +540,7 @@ public class PersonActivity extends AppCompatActivity {
      * 多选框弹窗
      */
     private void showMultiChoiceDialog() {
-        final String[] items = new String[]{"平实", "含蓄", "清新", "飘逸", "豪放", "沉郁","缠绵"};
+        final String[] items = new String[]{"清婉秀丽", "激越高亢", "语言绮丽"};
         final QMUIDialog.MultiCheckableDialogBuilder builder = new QMUIDialog.MultiCheckableDialogBuilder(PersonActivity.this)
                 .addItems(items, (dialog, which) -> {});
         Log.d(TAG, "showMultiChoiceDialog: "+preferenceFlag.length);
@@ -588,6 +589,7 @@ public class PersonActivity extends AppCompatActivity {
                         SharedPreferences.Editor editor = getSharedPreferences("person", MODE_PRIVATE).edit();
                         editor.putInt("refreshFlag", refreshFlag);
                         editor.apply();
+                        EventBus.getDefault().postSticky(new RefreshTimeEvent("sendService"));
                         dialog.dismiss();
                         Toast.makeText(PersonActivity.this,"城市列表天气自动刷新间隔为"+refreshForWeather,Toast.LENGTH_SHORT).show();
 

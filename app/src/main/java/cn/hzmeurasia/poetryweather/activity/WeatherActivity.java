@@ -5,7 +5,9 @@ import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
@@ -13,8 +15,12 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -22,22 +28,28 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
+import com.qmuiteam.qmui.widget.popup.QMUIListPopup;
+import com.qmuiteam.qmui.widget.popup.QMUIPopup;
 import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.litepal.LitePal;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import cn.hzmeurasia.poetryweather.MyApplication;
 import cn.hzmeurasia.poetryweather.R;
+import cn.hzmeurasia.poetryweather.db.PoetryDb;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
-import cn.hzmeurasia.poetryweather.service.MyService;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.hourly.Hourly;
@@ -46,13 +58,16 @@ import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
 
+import static android.support.v7.widget.ListPopupWindow.WRAP_CONTENT;
+import static cn.hzmeurasia.poetryweather.MyApplication.getContext;
+
 /**
  * 类名: WeatherActivity<br>
  * 功能:(天气布局的活动)<br>
  * 作者:黄振敏 <br>
  * 日期:2018/9/22 16:42
  */
-public class WeatherActivity extends AppCompatActivity {
+public class WeatherActivity extends AppCompatActivity implements View.OnClickListener {
 
 
 
@@ -65,14 +80,17 @@ public class WeatherActivity extends AppCompatActivity {
     TextView tvTemperature;
     @BindView(R.id.tv_weather)
     TextView tvWeather;
+    @BindView(R.id.tv_poetry1)
+    TextView tvPoetry01;
+    @BindView(R.id.tv_poetry2)
+    TextView tvPoetry02;
     @BindView(R.id.iv_weather_icon)
     ImageView imgWeatherIcon;
-//    @BindView(R.id.ll_forecast)
+    @BindView(R.id.btn_pop)
+    Button btnPop;
     LinearLayout forecastLayout;
     LinearLayout alternationLayout;
-//    @BindView(R.id.tv_weather_suitable)
     TextView tvSuit;
-//    @BindView(R.id.tv_weather_avoid)
     TextView tvAvoid;
     @BindView(R.id.iv_weather_bg)
     ImageView ivBg;
@@ -82,14 +100,17 @@ public class WeatherActivity extends AppCompatActivity {
     QMUIPullRefreshLayout mPullRefreshLayout;
     LayoutInflater mInflater;
     View view01,view02,view03;
-//
-//    private RelativeLayout relativeLayout;
+
     private Intent intent = null;
     private String cityCode = null;
     private List<View> mListView = new ArrayList<>();
+    private String poetry_link;
+    private String author;
+    private String author_link;
+    private String annotation;
 
     QMUITipDialog tipDialog;
-
+    private QMUIPopup mNormalPopup;
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -152,8 +173,18 @@ public class WeatherActivity extends AppCompatActivity {
                 mPullRefreshLayout.finishRefresh();
             }
         });
-
-
+        //诗句点击监听
+        tvPoetry01.setOnClickListener(this);
+        tvPoetry02.setOnClickListener(this);
+        btnPop.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                initNormalPopupIfNeed();
+                mNormalPopup.setAnimStyle(QMUIPopup.ANIM_GROW_FROM_CENTER);
+                mNormalPopup.setPreferredDirection(QMUIPopup.DIRECTION_TOP);
+                mNormalPopup.show(v);
+            }
+        });
 
     }
 
@@ -178,6 +209,47 @@ public class WeatherActivity extends AppCompatActivity {
         //设置当前page
         mViewPager.setCurrentItem(0);
     }
+
+    /**
+     * 点击监听
+     * @param v
+     */
+    @Override
+    public void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.tv_poetry2:
+                Toast.makeText(WeatherActivity.this,"hhhh",Toast.LENGTH_SHORT).show();
+                initNormalPopupIfNeed();
+                mNormalPopup.setAnimStyle(QMUIPopup.ANIM_GROW_FROM_CENTER);
+                mNormalPopup.setPreferredDirection(QMUIPopup.DIRECTION_TOP);
+                mNormalPopup.show(v);
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * 浮层初始化
+     */
+    private void initNormalPopupIfNeed() {
+        if (mNormalPopup == null) {
+            mNormalPopup = new QMUIPopup(getContext(), QMUIPopup.DIRECTION_NONE);
+            TextView textView = new TextView(getContext());
+            textView.setLayoutParams(mNormalPopup.generateLayoutParam(
+                    QMUIDisplayHelper.dp2px(getContext(), 250),
+                    WRAP_CONTENT
+            ));
+            textView.setLineSpacing(QMUIDisplayHelper.dp2px(getContext(), 4), 1.0f);
+            int padding = QMUIDisplayHelper.dp2px(getContext(), 20);
+            textView.setPadding(padding, padding, padding, padding);
+            textView.setText("Popup 可以设置其位置以及显示和隐藏的动画");
+            textView.setTextColor(ContextCompat.getColor(getContext(), R.color.app_color_description));
+            mNormalPopup.setContentView(textView);
+        }
+    }
+
 
     class MyPagerAdapter extends PagerAdapter {
         @Override
@@ -321,6 +393,11 @@ public class WeatherActivity extends AppCompatActivity {
                         forecastLayout.addView(view);
                     }
                 }
+                getPoetry();
+                Log.d(TAG, "getPoetry: "+tvPoetry01.getText().toString());
+                if (tvPoetry01.getText().length() == 0) {
+                    getPoetry();
+                }
                 closeLoading();
             }
 
@@ -338,7 +415,33 @@ public class WeatherActivity extends AppCompatActivity {
             Log.d(TAG, "avoid: "+calendarEvent.getAvoid());
             tvAvoid.setText(calendarEvent.getAvoid());
 
+    }
 
+    /**
+     * 获取诗句
+     */
+    private void getPoetry() {
+        String poetry = null;
+        Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
+        List<PoetryDb> poetryDbs = LitePal
+                .select("poetryDb_poetry")
+                .where("poetryDb_weather like ?", "%"+tvWeather.getText().toString()+"%")
+                .find(PoetryDb.class);
+        Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
+        if (poetryDbs.size() >= 1) {
+            PoetryDb getPoetryDb = new PoetryDb();
+            getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
+            poetry = getPoetryDb.getPoetryDb_poetry();
+            author = getPoetryDb.getPoetryDb_author();
+            annotation = getPoetryDb.getPoetryDb_annotation();
+        } else {
+            Toast.makeText(WeatherActivity.this,"诗句获取失败",Toast.LENGTH_SHORT).show();
+            return;
+        }
+        Log.d(TAG, "getPoetry: " + poetry);
+        String[] poetrys = poetry.split(",");
+        tvPoetry01.setText(poetrys[0]);
+        tvPoetry02.setText(poetrys[1]);
     }
 
     /**
@@ -354,7 +457,7 @@ public class WeatherActivity extends AppCompatActivity {
                 .append("/")
                 .append(code)
                 .append(".png");
-        Glide.with(MyApplication.getContext()).load(uri.toString()).into(imageView);
+        Glide.with(getContext()).load(uri.toString()).into(imageView);
     }
 
     /**

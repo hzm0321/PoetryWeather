@@ -53,9 +53,11 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,12 +67,18 @@ import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 import cn.hzmeurasia.poetryweather.service.MyService;
+import cn.hzmeurasia.poetryweather.util.HeWeatherUtil;
+import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import de.hdodenhof.circleimageview.CircleImageView;
 import interfaces.heweather.com.interfacesmodule.bean.basic.Basic;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
+import interfaces.heweather.com.interfacesmodule.bean.weather.Weather;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLIFIED;
 
@@ -90,7 +98,6 @@ public class MainActivity extends AppCompatActivity {
     private String cityCode;
     private String districtName;
     private String personName;
-    private int iRefresh = -1;
     private boolean isFirst;
     TextView tvName;
     QMUITipDialog tipDialog;
@@ -195,7 +202,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab_add)
     FloatingActionButton fab;
 
-    private List<CityDb> cityDbList = new ArrayList<>();
+    volatile List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
     @BindView(R.id.nv_left)
     NavigationView navigationView;
@@ -303,6 +310,7 @@ public class MainActivity extends AppCompatActivity {
                 cityDbList.remove(menuPosition);
                 cardAdapter.notifyItemRemoved(menuPosition);
                 isCardEmpty();
+                updateDatabases();
             }
         });
         //拖拽排序
@@ -377,12 +385,7 @@ public class MainActivity extends AppCompatActivity {
         mPullRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-                iRefresh = -1;
-                for (CityDb cityDb : cityDbList) {
-                    Log.d(TAG, "onRefresh: citylist"+cityDb.getCityDb_cityName());
-                    refreshCityLife(cityDb.getCityDb_cid());
-                    Log.d(TAG, "iRefresh: "+iRefresh);
-                }
+
                 mPullRefreshLayout.finishRefresh();
             }
         });
@@ -563,28 +566,6 @@ public class MainActivity extends AppCompatActivity {
         return isFirst;
     }
 
-    private void refreshCityLife(String cid){
-        HeWeather.getWeatherNow(this, cid, new HeWeather.OnResultWeatherNowBeanListener() {
-            @Override
-            public void onError(Throwable throwable) {
-                Log.i(TAG, "onError: ",throwable);
-                Toast.makeText(MainActivity.this,"天气获取失败",Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onSuccess(List<Now> list) {
-                for (Now now : list) {
-                    iRefresh++;
-                    CityDb cityDb = cityDbList.get(iRefresh);
-                    cityDb.setCityDb_txt(now.getNow().getCond_txt());
-                    cityDb.setCityDb_temperature(now.getNow().getFl());
-                    Log.d(TAG, "refreshCity: "+cityDb.getCityDb_cityName());
-                    Log.d(TAG, "refreshCityWeather: "+now.getNow().getCond_txt());
-                    Log.d(TAG, "refreshCityList: "+iRefresh);
-                }
-            }
-        });
-    }
 
     @Override
     protected void onDestroy() {
