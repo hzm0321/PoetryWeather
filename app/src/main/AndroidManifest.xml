@@ -55,6 +55,8 @@
 
         <activity android:name=".activity.PoetryActivity" />
 
+        <activity android:name=".activity.WebViewActivity"/>
+
         <service
             android:name=".service.MyService"
             android:enabled="true"

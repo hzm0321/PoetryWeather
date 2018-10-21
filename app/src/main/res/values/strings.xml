@@ -5,4 +5,6 @@
     <string name="nav_item_care">亲情关怀</string>
     <string name="nav_item_poetry">诗词管理</string>
     <string name="main_tip">您还没有添加任何城市</string>
+    <string name="main_about">关于</string>
+    <string name="webview_poetry">诗词鉴赏</string>
 </resources>

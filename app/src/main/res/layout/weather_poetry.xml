@@ -25,11 +25,7 @@
         android:textSize="30sp"
         android:id="@+id/tv_poetry2"/>
 
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="浮层"
-        android:id="@+id/btn_pop"/>
+
 
 
 </RelativeLayout>

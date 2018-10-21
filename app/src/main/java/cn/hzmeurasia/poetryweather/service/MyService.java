@@ -198,6 +198,7 @@ public class MyService extends Service {
                         poetryDb.setPoetryDb_poetry(poetry.poetry);
                         poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
                         poetryDb.setPoetryDb_weather(poetry.weather);
+                        Log.d(TAG, "onResponse: 作者"+poetry.author);
                         poetryDb.setPoetryDb_author(poetry.author);
                         poetryDb.setPoetryDb_author_link(poetry.author_link);
                         poetryDb.setPoetryDb_annotation(poetry.annotation);

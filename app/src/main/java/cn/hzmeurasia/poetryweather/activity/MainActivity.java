@@ -19,6 +19,7 @@ import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
@@ -271,18 +272,16 @@ public class MainActivity extends AppCompatActivity {
 
         //载入左滑提示按钮
         ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            //显示出按钮
-            actionBar.setDisplayHomeAsUpEnabled(true);
-            //载入按钮图片
-            actionBar.setHomeAsUpIndicator(R.drawable.ic_person1);
-        }
+//        if (actionBar != null) {
+//            //显示出按钮
+//            actionBar.setDisplayHomeAsUpEnabled(true);
+//            //载入按钮图片
+//            actionBar.setHomeAsUpIndicator(R.drawable.ic_person1);
+//        }
         //悬浮按钮点击事件
         fab.setOnClickListener(view -> {
             Intent intent1 = new Intent(MainActivity.this, SearchCityActivity.class);
-            intent1.putExtra("location", districtName);
             Log.d(TAG, "定位区县"+districtName);
-            intent1.putExtra("province", provinceName);
             startActivity(intent1);
         });
 
@@ -566,6 +565,11 @@ public class MainActivity extends AppCompatActivity {
         return isFirst;
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.toolbar,menu);
+        return true;
+    }
 
     @Override
     protected void onDestroy() {

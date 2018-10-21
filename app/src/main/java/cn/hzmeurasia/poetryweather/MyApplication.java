@@ -3,6 +3,7 @@ package cn.hzmeurasia.poetryweather;
 import android.app.Application;
 import android.content.Context;
 
+
 import org.litepal.LitePal;
 
 /**
@@ -12,6 +13,8 @@ import org.litepal.LitePal;
  * 日期:2018/9/22 16:38
  */
 public class MyApplication extends Application {
+
+    private static final String TAG = "MyApplication";
 
     private static Context context;
 
@@ -25,4 +28,6 @@ public class MyApplication extends Application {
     public static Context getContext() {
         return context;
     }
+
+
 }

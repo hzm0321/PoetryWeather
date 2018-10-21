@@ -17,14 +17,11 @@ import cn.hzmeurasia.poetryweather.entity.PoetryWeather;
  */
 public class PoetryWeatherUtil {
 
-    private static final String TAG = "PoetryWeatherUtil";
-
     public static PoetryWeather handlePoetryWeatherResponse(String response) {
         try {
             JSONObject jsonObject = new JSONObject(response);
             JSONArray jsonArray = jsonObject.getJSONArray("PoetryWeather");
             String poetryContent = jsonArray.getJSONObject(0).toString();
-            Log.d(TAG, "handlePoetryWeatherResponse: "+poetryContent);
             return new Gson().fromJson(poetryContent, PoetryWeather.class);
         } catch (Exception e) {
             e.printStackTrace();
