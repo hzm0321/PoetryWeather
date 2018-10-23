@@ -23,19 +23,34 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/webview_poetry"
+            android:text="@string/webView_poetry"
             android:textColor="@color/li"
             android:textSize="24sp"/>
 
     </android.support.v7.widget.Toolbar>
 
-    <WebView
+    <ezy.ui.layout.LoadingLayout
+
         android:layout_marginTop="?attr/actionBarSize"
-        android:id="@+id/web_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/webView_loading">
 
-    </WebView>
+        <com.scwang.smartrefresh.layout.SmartRefreshLayout
+            android:id="@+id/webView_refreshLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:srlHeaderHeight="150dp"
+            app:srlHeaderMaxDragRate="1">
 
+            <WebView
+                android:id="@+id/web_view"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+            </WebView>
+
+        </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+
+    </ezy.ui.layout.LoadingLayout>
 
 </FrameLayout>

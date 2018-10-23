@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import com.xujiaji.happybubble.BubbleDialog;
 
+import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.activity.WebViewActivity;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -32,9 +33,10 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
         calBar(true);
 //        initText();
         setTransParentBackground();
-        setPosition(Position.TOP);
+        setPosition(Position.RIGHT);
+        setOffsetX(100);
         View rootView = LayoutInflater.from(context).inflate(R.layout.weather_pop, null);
-        mViewHolder = new PoetryDialog.ViewHolder(rootView);
+        mViewHolder = new ViewHolder(rootView);
         addContentView(rootView);
         mViewHolder.tv1.setOnClickListener(this);
         mViewHolder.tv2.setOnClickListener(this);

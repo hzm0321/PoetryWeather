@@ -18,8 +18,6 @@
         android:id="@+id/iv_weather_bg"
         android:scaleType="centerCrop"/>
 
-
-
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"

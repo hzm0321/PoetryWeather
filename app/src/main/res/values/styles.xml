@@ -9,11 +9,18 @@
         <item name="android:textColorPrimary">@color/li</item>
         <item name="windowActionBar">false</item>
         <item name="windowNoTitle">true</item>
+        <item name="styleLoadingLayout">@style/LoadingLayoutStyle</item>
 
     </style>
 
     <style name="PersonActivityTheme" parent="AppTheme" >
         <item name="android:statusBarColor">@android:color/transparent</item>
+    </style>
+
+    <style name="LoadingLayoutStyle" parent="LoadingLayout.Style">
+        <item name="llEmptyImage">@drawable/ic_empty</item>
+        <item name="llErrorImage">@drawable/ic_error</item>
+        <item name="llLoadingResId">@layout/common_loading</item>
     </style>
 
 </resources>

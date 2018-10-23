@@ -11,12 +11,10 @@ import com.google.gson.annotations.SerializedName;
 public class Data {
     @SerializedName("date")
     private String today;
-    @SerializedName("suit")
     private String suit;
-    @SerializedName("avoid")
     private String avoid;
-    @SerializedName("lunar")
     private String lunar;
+    private String lunarYear;
 
     public String getToday() {
         return today;
@@ -49,4 +47,13 @@ public class Data {
     public void setLunar(String lunar) {
         this.lunar = lunar;
     }
+
+    public String getLunarYear() {
+        return lunarYear;
+    }
+
+    public void setLunarYear(String lunarYear) {
+        this.lunarYear = lunarYear;
+    }
+
 }

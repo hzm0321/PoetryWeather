@@ -1,4 +1,4 @@
-package com.scwang.refreshlayout.adapter;
+package cn.hzmeurasia.poetryweather.adapter;
 
 import android.content.res.Resources;
 import android.support.annotation.StringRes;

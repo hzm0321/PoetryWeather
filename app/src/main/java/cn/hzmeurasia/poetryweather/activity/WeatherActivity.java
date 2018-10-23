@@ -11,6 +11,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
+import android.text.TextPaint;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -78,8 +79,8 @@ public class WeatherActivity extends AppCompatActivity {
     private static final String TAG = "WeatherActivity";
     @BindView(R.id.tv_cityName)
     TextView tvCityName;
-    @BindView(R.id.tv_updateTime)
-    TextView tvUpdateTime;
+    @BindView(R.id.tv_weather_date)
+    TextView tvDate;
     @BindView(R.id.tv_weather_temperature)
     TextView tvTemperature;
     @BindView(R.id.tv_weather)
@@ -90,6 +91,9 @@ public class WeatherActivity extends AppCompatActivity {
     TextView tvPoetry02;
     @BindView(R.id.iv_weather_icon)
     ImageView imgWeatherIcon;
+    @BindView(R.id.btn_weather_back)
+    Button btnWeatherBack;
+
     LinearLayout forecastLayout;
     LinearLayout alternationLayout;
     TextView tvSuit;
@@ -103,15 +107,17 @@ public class WeatherActivity extends AppCompatActivity {
     LayoutInflater mInflater;
     View view01,view02,view03;
 
-
+    private String lunar;
+    private String date;
     private Intent intent = null;
     private String cityCode = null;
     private List<View> mListView = new ArrayList<>();
+    private int dateOnclickFlag = 0;
 
     QMUITipDialog tipDialog;
     private BubbleDialog.Position mPosition = BubbleDialog.Position.RIGHT;
 
-    @OnClick({R.id.tv_poetry1,R.id.tv_poetry2})
+    @OnClick({R.id.tv_poetry1,R.id.tv_poetry2,R.id.btn_weather_back,R.id.tv_cityName,R.id.tv_weather_date})
     void onClick(View v){
         switch(v.getId()) {
             case R.id.tv_poetry1:
@@ -119,12 +125,22 @@ public class WeatherActivity extends AppCompatActivity {
                 PoetryDialog poetryDialog = new PoetryDialog(this)
                         .setPosition(mPosition)
                         .setClickedView(tvPoetry02);
-                poetryDialog.setClickListener(str ->
-                                intent()
-
-                );
+                poetryDialog.setClickListener(str ->intent());
                 poetryDialog.show();
-
+                break;
+            case R.id.btn_weather_back:
+                finish();
+                break;
+            case R.id.tv_cityName:
+            case R.id.tv_weather_date:
+                Log.d(TAG, "onClick: 城市被点击了");
+                if (dateOnclickFlag % 2 == 0) {
+                    tvDate.setText(lunar);
+                    dateOnclickFlag++;
+                } else {
+                    tvDate.setText(date);
+                    dateOnclickFlag++;
+                }
                 break;
             default:
                 break;
@@ -202,8 +218,6 @@ public class WeatherActivity extends AppCompatActivity {
 
 
     }
-
-
 
     /**
      * viewPager初始化
@@ -301,7 +315,6 @@ public class WeatherActivity extends AppCompatActivity {
                 StringBuilder temperature = new StringBuilder();
                 for (Now now : list) {
                     tvCityName.setText(now.getBasic().getLocation());
-                    tvUpdateTime.setText(now.getUpdate().getLoc());
                     temperature.append(now.getNow().getFl())
                             .append("°");
                     tvTemperature.setText(temperature.toString());
@@ -388,12 +401,16 @@ public class WeatherActivity extends AppCompatActivity {
      */
     @Subscribe(threadMode = ThreadMode.MAIN_ORDERED,sticky = true)
     public void calendarEvent(CalendarEvent calendarEvent) {
-            Log.d(TAG, "reason: "+calendarEvent.getReason());
-            Log.d(TAG, "suit: "+calendarEvent.getSuit());
-            tvSuit.setText(calendarEvent.getSuit());
-            Log.d(TAG, "avoid: "+calendarEvent.getAvoid());
-            tvAvoid.setText(calendarEvent.getAvoid());
-
+        Log.d(TAG, "reason: "+calendarEvent.getReason());
+        Log.d(TAG, "suit: "+calendarEvent.getSuit());
+        tvSuit.setText(calendarEvent.getSuit());
+        Log.d(TAG, "avoid: "+calendarEvent.getAvoid());
+        tvAvoid.setText(calendarEvent.getAvoid());
+        lunar = calendarEvent.getLunarYear() + calendarEvent.getLunar();
+        date = calendarEvent.getDate();
+        TextPaint textPaint = tvDate.getPaint();
+        textPaint.setFakeBoldText(true);
+        tvDate.setText(date);
     }
 
     /**

@@ -1,22 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="wrap_content">
+
+    <Button
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/btn_weather_back"
+        android:gravity="left|center_vertical"
+        android:layout_marginLeft="10dp"
+        android:background="@drawable/ic_weather_back"/>
 
     <TextView
+        android:clickable="true"
+        android:focusable="true"
+        android:layout_marginTop="5dp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:textSize="30sp"
+        android:text="西安"
         android:id="@+id/tv_cityName"/>
 
+    <Button
+        android:layout_marginTop="2dp"
+        android:layout_width="25dp"
+        android:layout_height="25dp"
+        android:id="@+id/btn_weather_share"
+        android:background="@drawable/ic_weather_share"
+        android:layout_alignParentRight="true"
+        android:gravity="center_vertical"
+        android:layout_marginRight="10dp"/>
+
     <TextView
-        android:paddingRight="10dp"
+        android:clickable="true"
+        android:focusable="true"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
-        android:textSize="14sp"
-        android:id="@+id/tv_updateTime"/>
+        android:id="@+id/tv_weather_date"
+        android:text="戊戌年九月十五日"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@id/tv_cityName"/>
 
 </RelativeLayout>

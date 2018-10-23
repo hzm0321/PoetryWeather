@@ -60,12 +60,12 @@ public class MyService extends Service {
         LitePal.getDatabase();
 
 
-        new Thread(() -> {
-            updateWeatherBg();
-
-            stopSelf();
-
-        }).start();
+//        new Thread(() -> {
+//            updateWeatherBg();
+//
+//            stopSelf();
+//
+//        }).start();
 
         createPoetryDatabase();
         String date = DateUtil.getDateString();
@@ -73,11 +73,14 @@ public class MyService extends Service {
         //读取万年历缓存
         SharedPreferences preferences = getSharedPreferences("date", MODE_PRIVATE);
         String today = preferences.getString("today", null);
+        String reason = preferences.getString("reason", null);
         String suit = preferences.getString("suit", null);
         String avoid = preferences.getString("avoid", null);
+        String lunar = preferences.getString("lunar", null);
+        String lunarYear = preferences.getString("lunarYear", null);
         if (date.equals(today)) {
             Log.d(TAG, "onStartCommand: "+"读取缓存发送");
-            EventBus.getDefault().postSticky(new CalendarEvent("Success",suit,avoid));
+            EventBus.getDefault().postSticky(new CalendarEvent(reason,suit,avoid,lunar,lunarYear,today));
         } else {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
             requestCalendar(date);
@@ -107,17 +110,22 @@ public class MyService extends Service {
 
                 final String responsText = response.body().string();
                 final cn.hzmeurasia.poetryweather.entity.Calendar calendar = CalendarUtil.handleCalendarResponse(responsText);
-                Log.d(TAG, "onResponse: "+calendar.getResult().getResult_data().getAvoid());
                 calendarEvent.setReason(calendar.getReason());
                 Log.d(TAG, "onResponse: "+calendar.getReason());
                 Log.d(TAG, "onResponse: "+calendarEvent.getReason());
                 calendarEvent.setSuit(calendar.getResult().getResult_data().getSuit());
                 calendarEvent.setAvoid(calendar.getResult().getResult_data().getAvoid());
+                calendarEvent.setLunar(calendar.getResult().getResult_data().getLunar());
+                calendarEvent.setLunarYear(calendar.getResult().getResult_data().getLunarYear());
+                calendarEvent.setDate(calendar.getResult().getResult_data().getToday());
                 //把万年历数据载入缓存
                 SharedPreferences.Editor editor = getSharedPreferences("date", MODE_PRIVATE).edit();
+                editor.putString("reason", calendar.getReason());
                 editor.putString("today", date);
                 editor.putString("suit", calendar.getResult().getResult_data().getSuit());
                 editor.putString("avoid", calendar.getResult().getResult_data().getAvoid());
+                editor.putString("lunar", calendar.getResult().getResult_data().getLunar());
+                editor.putString("lunarYear", calendar.getResult().getResult_data().getLunarYear());
                 editor.apply();
                 //发送粘性事件
                 EventBus.getDefault().postSticky(calendarEvent);

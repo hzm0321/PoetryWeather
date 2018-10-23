@@ -14,12 +14,13 @@ import android.webkit.WebViewClient;
 import android.widget.Button;
 
 
-import com.itheima.view.BridgeWebView;
+import com.yanzhenjie.loading.LoadingView;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.hzmeurasia.poetryweather.R;
+import ezy.ui.layout.LoadingLayout;
 
 /**
  * 类名: WebViewActivity<br>
@@ -35,7 +36,8 @@ public class WebViewActivity extends AppCompatActivity {
     Button btnBack;
     @BindView(R.id.web_view)
     WebView mWebView;
-//    BridgeWebView mBdWebView;
+    @BindView(R.id.webView_loading)
+    LoadingLayout loading;
 
     private String url=null;
 
@@ -62,14 +64,20 @@ public class WebViewActivity extends AppCompatActivity {
 
     private void init() {
         mWebView.loadUrl(url);
-//        mWebView.setWebChromeClient(new WebChromeClient(){
-//            @Override
-//            public void onProgressChanged(WebView view, int newProgress) {
-//                super.onProgressChanged(view, newProgress);
-//                view.loadUrl("javascript:function setTop(){document.querySelector('#pic_container').style.display='none';}setTop();");
-//
-//            }
-//        });
+        mWebView.setWebChromeClient(new WebChromeClient(){
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                super.onProgressChanged(view, newProgress);
+                view.loadUrl("javascript:function setTop(){document.querySelector('#pic_container').style.display='none';}setTop();");
+                if (newProgress == 100) {
+
+                } else {
+
+                }
+            }
+
+
+        });
         mWebView.setWebViewClient(new WebViewClient(){
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
@@ -80,13 +88,10 @@ public class WebViewActivity extends AppCompatActivity {
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
-                view.postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        view.loadUrl("javascript:function setTop(){document.querySelector('#pic_container').style.display='none';}setTop();");
-                        Log.d(TAG, "run: 执行了过滤的方法");
-                    }
-                },2000);
+                view.loadUrl("javascript:function setTop(){document.querySelector('#pic_container').style.display='none';}setTop();");
+                Log.d(TAG, "run: 执行了过滤的方法");
+
+                loading.showContent();
             }
         });
 

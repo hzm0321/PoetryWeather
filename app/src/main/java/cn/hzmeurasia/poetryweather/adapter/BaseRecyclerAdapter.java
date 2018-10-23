@@ -1,4 +1,4 @@
-package com.scwang.refreshlayout.adapter;
+package cn.hzmeurasia.poetryweather.adapter;
 
 import android.database.DataSetObservable;
 import android.database.DataSetObserver;
