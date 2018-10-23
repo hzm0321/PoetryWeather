@@ -6,6 +6,8 @@ import android.content.Context;
 
 import org.litepal.LitePal;
 
+import interfaces.heweather.com.interfacesmodule.view.HeConfig;
+
 /**
  * 类名: MyApplication<br>
  * 功能:(全局Context)<br>
@@ -23,6 +25,9 @@ public class MyApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         LitePal.initialize(context);
+        //注册和风天气
+        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
+        HeConfig.switchToFreeServerNode();
     }
 
     public static Context getContext() {

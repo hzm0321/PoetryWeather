@@ -9,41 +9,62 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true">
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="80sp"
-        android:id="@+id/tv_weather_temperature"
-        android:text="20°"/>
 
-    <View
-        android:layout_marginLeft="10dp"
-        android:layout_width="2dp"
-        android:layout_height="100dp"
-        android:background="@color/li"
-        android:layout_toEndOf="@id/tv_weather_temperature"
-        android:id="@+id/v_line"/>
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id="@+id/ll">
 
-    <ImageView
+            <TextView
+                android:layout_marginTop="-10dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="80sp"
+                android:id="@+id/tv_weather_temperature"
+                android:layout_gravity="center"
+                android:text="22°"/>
 
-        android:layout_marginLeft="20dp"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_toRightOf="@id/v_line"
-        android:layout_alignTop="@id/v_line"
-        android:id="@+id/iv_weather_icon"/>
+            <TextView
+                android:layout_marginTop="-13dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="空气质量·1024"
+                android:layout_gravity="center"
+                android:id="@+id/tv_weather_aqi"
+                android:textSize="16sp"/>
 
-    <TextView
-        android:layout_marginLeft="10dp"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@id/iv_weather_icon"
-        android:layout_toEndOf="@id/v_line"
-        android:textSize="30sp"
-        android:gravity="center"
-        android:ems="2"
-        android:text="云"
-        android:id="@+id/tv_weather"/>
+        </LinearLayout>
+
+        <View
+            android:layout_marginLeft="10dp"
+            android:layout_width="2dp"
+            android:layout_height="100dp"
+            android:background="@color/li"
+            android:layout_toEndOf="@id/ll"
+            android:id="@+id/v_line"/>
+
+        <ImageView
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="20dp"
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:layout_toRightOf="@id/v_line"
+            android:layout_alignTop="@id/v_line"
+            android:id="@+id/iv_weather_icon"/>
+
+        <TextView
+            android:layout_marginLeft="10dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/iv_weather_icon"
+            android:layout_toEndOf="@id/v_line"
+            android:textSize="30sp"
+            android:gravity="center"
+            android:ems="2"
+            android:text="云"
+            android:id="@+id/tv_weather"/>
+
 
     </RelativeLayout>
 

@@ -1,17 +1,21 @@
 package cn.hzmeurasia.poetryweather.util;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
+import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.gson.Gson;
 
-import org.json.JSONArray;
-import org.json.JSONObject;
+
+import java.util.List;
 
 import cn.hzmeurasia.poetryweather.MyApplication;
+import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.entity.Weather;
+import interfaces.heweather.com.interfacesmodule.bean.air.now.AirNow;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
-import interfaces.heweather.com.interfacesmodule.view.HeConfig;
+import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
 
 import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLIFIED;
@@ -24,38 +28,62 @@ import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLI
  */
 public class HeWeatherUtil {
     private static final String TAG = "HeWeatherUtil";
+    private static String parentCity;
 
-    public static String searchCity(String cityName) {
-        final String[] cid = {null};
-        //注册和风天气
-        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
-        HeConfig.switchToFreeServerNode();
-        HeWeather.getSearch(MyApplication.getContext(), cityName, "cn", 1, CHINESE_SIMPLIFIED, new HeWeather.OnResultSearchBeansListener() {
+    /**
+     * 空气质量
+     * @param cid
+     * @param view
+     */
+    public static void handleAirResponse(String cid, TextView view) {
+        HeWeather.getAirNow(MyApplication.getContext(), cid, new HeWeather.OnResultAirNowBeansListener() {
             @Override
             public void onError(Throwable throwable) {
                 Log.i(TAG, "onError: ",throwable);
-                Toast.makeText(MyApplication.getContext(),"搜索城市失败",Toast.LENGTH_SHORT).show();
+                handleSearchCityResponse(cid,view);
+
+            }
+
+            @Override
+            public void onSuccess(List<AirNow> list) {
+                Log.d(TAG, "onSuccess: 加载到的AQI"+list.get(0).getAir_now_city().getAqi());
+                Log.d(TAG, "onSuccess: 加载AQI方法结束");
+                view.setText("空气质量·"+list.get(0).getAir_now_city().getAqi());
+            }
+        });
+    }
+
+    public static void handleSearchCityResponse(String cid,TextView view) {
+        HeWeather.getSearch(MyApplication.getContext(), cid, "cn", 1, CHINESE_SIMPLIFIED, new HeWeather.OnResultSearchBeansListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                Log.i(TAG, "onError: ", throwable);
+
             }
 
             @Override
             public void onSuccess(Search search) {
-                cid[0] = search.getBasic().get(0).getCid();
-                Log.d(TAG, "onSuccess: "+cid[0]);
+                parentCity = search.getBasic().get(0).getParent_city();
+                handleAirResponse(parentCity,view);
             }
         });
-        Log.d(TAG, "searchCity: "+cid[0]);
-        return cid[0];
     }
 
-    public static Weather handleWeatherResponse(String response) {
-        try {
-            JSONObject jsonObject = new JSONObject(response);
-            JSONArray jsonArray = jsonObject.getJSONArray("HeWeather6");
-            String weatherContent = jsonArray.getJSONObject(0).toString();
-            return new Gson().fromJson(weatherContent, Weather.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return null;
+    public static void handleNowResponse(String cid, TextView cityName,TextView temperature,TextView text) {
+        HeWeather.getWeatherNow(MyApplication.getContext(), cid, new HeWeather.OnResultWeatherNowBeanListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                Log.i(TAG, "onError: ", throwable);
+            }
+
+            @Override
+            public void onSuccess(List<Now> list) {
+
+            }
+        });
     }
+
+
+
+
 }

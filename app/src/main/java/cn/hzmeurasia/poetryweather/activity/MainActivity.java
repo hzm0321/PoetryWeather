@@ -134,7 +134,14 @@ public class MainActivity extends AppCompatActivity {
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
-                            HeWeather.getSearch(MainActivity.this, "雁塔", "cn", 1, CHINESE_SIMPLIFIED, new HeWeather.OnResultSearchBeansListener() {
+                            districtName = aMapLocation.getDistrict();
+                            Log.d(TAG, "onSuccess: districtName"+districtName.substring(districtName.length()-1));
+                            if (districtName.substring(districtName.length()-1).equals("区")) {
+                                districtName = districtName.substring(0, districtName.length() - 1);
+                                Log.d(TAG, "onSuccess: 修改后区县位置"+districtName);
+                            }
+                            Log.d(TAG, "onLocationChanged: "+districtName);
+                            HeWeather.getSearch(MainActivity.this, districtName, "cn", 1, CHINESE_SIMPLIFIED, new HeWeather.OnResultSearchBeansListener() {
                                 @Override
                                 public void onError(Throwable throwable) {
                                     Log.i(TAG, "onError: ",throwable);
@@ -148,14 +155,7 @@ public class MainActivity extends AppCompatActivity {
                                     Log.d(TAG, "onLocationChanged: "+aMapLocation.getProvince());
                                     Log.d(TAG, "onLocationChanged: "+aMapLocation.getDistrict());
                                     provinceName = aMapLocation.getProvince();
-                                    districtName = aMapLocation.getDistrict();
-                                    Log.d(TAG, "onSuccess: districtName"+districtName.substring(districtName.length()-1));
-                                    if (districtName.substring(districtName.length()-1).equals("区")) {
-                                        districtName = districtName.substring(0, districtName.length() - 1);
-                                        Log.d(TAG, "onSuccess: 修改后区县位置"+districtName);
-                                    }
-                                    Log.d(TAG, "onLocationChanged: "+districtName);
-                                    Log.d(TAG, "onSuccess: searchSize"+search.getBasic().size());
+
                                     for (Basic basic : search.getBasic()) {
                                         String cid = basic.getCid();
                                         cityCode = cid.substring(2);
@@ -225,10 +225,6 @@ public class MainActivity extends AppCompatActivity {
 
         //刷新左侧导航栏姓名
         showName();
-
-        //注册和风天气
-        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
-        HeConfig.switchToFreeServerNode();
 
         //主页城市列表本地数据库创建
         LitePal.getDatabase();
@@ -384,8 +380,29 @@ public class MainActivity extends AppCompatActivity {
         mPullRefreshLayout.setOnRefreshListener(new OnRefreshListener() {
             @Override
             public void onRefresh(@NonNull RefreshLayout refreshLayout) {
-
+                for (CityDb cityDb : cityDbList) {
+                    refreshCityList(cityDb);
+                }
+                cardAdapter.notifyDataSetChanged();
+                Log.d(TAG, "onRefresh: 页面已更新");
                 mPullRefreshLayout.finishRefresh();
+            }
+        });
+    }
+
+    private void refreshCityList(CityDb cityDb) {
+        int i = cityDbList.indexOf(cityDb);
+        HeWeather.getWeatherNow(this, cityDb.getCityDb_cid(), new HeWeather.OnResultWeatherNowBeanListener() {
+            @Override
+            public void onError(Throwable throwable) {
+                Log.i(TAG, "onError: ",throwable);
+            }
+
+            @Override
+            public void onSuccess(List<Now> list) {
+                Log.d(TAG, "onSuccess: 刷新成功"+cityDb.getCityDb_cityName()+list.get(0).getNow().getCond_txt());
+                cityDbList.get(i).setCityDb_txt(list.get(0).getNow().getCond_txt());
+                cityDbList.get(i).setCityDb_temperature(list.get(0).getNow().getFl());
             }
         });
     }

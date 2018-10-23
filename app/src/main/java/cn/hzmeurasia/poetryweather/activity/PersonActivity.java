@@ -368,6 +368,7 @@ public class PersonActivity extends AppCompatActivity {
         preference = sharedPreferences.getString("preference", "");
         Log.d(TAG, "initPerson: "+sharedPreferences.getString("preferenceFlag","[]").toString());
         String p = sharedPreferences.getString("preferenceFlag","[]");
+        Log.d(TAG, "initPerson: P"+p);
         p = p.replace("[","");
         p = p.replace("]","");
         p = p.replaceAll(",", "");

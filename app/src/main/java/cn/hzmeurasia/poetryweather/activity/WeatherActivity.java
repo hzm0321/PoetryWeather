@@ -55,6 +55,7 @@ import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
 import cn.hzmeurasia.poetryweather.entity.Weather;
+import cn.hzmeurasia.poetryweather.util.HeWeatherUtil;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.hourly.Hourly;
@@ -93,7 +94,8 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView imgWeatherIcon;
     @BindView(R.id.btn_weather_back)
     Button btnWeatherBack;
-
+    @BindView(R.id.tv_weather_aqi)
+    TextView tvAqi;
     LinearLayout forecastLayout;
     LinearLayout alternationLayout;
     TextView tvSuit;
@@ -107,8 +109,7 @@ public class WeatherActivity extends AppCompatActivity {
     LayoutInflater mInflater;
     View view01,view02,view03;
 
-    private String lunar;
-    private String date;
+    private String lunar,date,aqi;
     private Intent intent = null;
     private String cityCode = null;
     private List<View> mListView = new ArrayList<>();
@@ -197,6 +198,7 @@ public class WeatherActivity extends AppCompatActivity {
         initViews();
         heWeather();
 
+
         //刷新监听
         mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
             @Override
@@ -240,6 +242,8 @@ public class WeatherActivity extends AppCompatActivity {
         //设置当前page
         mViewPager.setCurrentItem(0);
     }
+
+
 
 
 
@@ -294,6 +298,7 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void heWeather() {
         showLoading();
+        HeWeatherUtil.handleAirResponse(cityCode,tvAqi);
         //加载背景图片
         Log.d(TAG, "heWeather: 加载背景");
         Glide.with(this)
@@ -385,8 +390,13 @@ public class WeatherActivity extends AppCompatActivity {
                         forecastLayout.addView(view);
                     }
                 }
-                getPoetry();
-                Log.d(TAG, "getPoetry: "+tvPoetry01.getText().toString());
+//                getPoetry();
+//                Log.d(TAG, "getPoetry: "+tvPoetry01.getText().toString());
+//                if (tvPoetry01.getText().length() == 0) {
+//                    getPoetry();
+//                } else {
+//                    closeLoading();
+//                }
                 if (tvPoetry01.getText().length() == 0) {
                     getPoetry();
                 }
@@ -418,10 +428,21 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void getPoetry() {
         String poetry = null;
+        SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
+        String p = sharedPreferences.getString("preferenceFlag","[]");
+        p = p.replace("[","");
+        p = p.replace("]","");
+        p = p.replaceAll(",", "");
+        String qwxl = "0";
+        String jygk = "0";
+        String yyql = "0";
+        if (p.contains("0")) {  qwxl="1";}
+        if (p.contains("1")) {  jygk="1";}
+        if (p.contains("2")) {  yyql="1";}
         Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
         List<PoetryDb> poetryDbs = LitePal
                 .select("poetryDb_poetry","poetryDb_author","poetryDb_annotation","poetryDb_poetry_link")
-                .where("poetryDb_weather like ?", "%"+tvWeather.getText().toString()+"%")
+                .where("poetryDb_weather like ? and (poetryDb_qwxl=? or poetryDb_jygk=? or poetryDb_yyql=?)", "%"+tvWeather.getText().toString()+"%",qwxl,jygk,yyql)
                 .find(PoetryDb.class);
         Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
         if (poetryDbs.size() >= 1) {
