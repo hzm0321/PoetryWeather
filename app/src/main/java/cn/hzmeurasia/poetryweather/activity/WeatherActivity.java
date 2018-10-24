@@ -46,6 +46,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import butterknife.BindString;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
@@ -98,18 +99,19 @@ public class WeatherActivity extends AppCompatActivity {
     TextView tvAqi;
     LinearLayout forecastLayout;
     LinearLayout alternationLayout;
-    TextView tvSuit;
-    TextView tvAvoid;
     @BindView(R.id.iv_weather_bg)
     ImageView ivBg;
     @BindView(R.id.viewPage)
     ViewPager mViewPager;
     @BindView(R.id.rf_weather)
     QMUIPullRefreshLayout mPullRefreshLayout;
-    LayoutInflater mInflater;
-    View view01,view02,view03;
 
-    private String lunar,date,aqi;
+    LayoutInflater mInflater;
+    View view01,view02,view03,view04,lifeStyleView;
+    TextView tvSuit,tvAvoid,tvComf,tvDrsg,tvFlu,tvUv,tvSport,tvAir,tvLifeStyle;
+
+
+    private String lunar,date,comf,drsg,flu,uv,sport,air;
     private Intent intent = null;
     private String cityCode = null;
     private List<View> mListView = new ArrayList<>();
@@ -197,6 +199,7 @@ public class WeatherActivity extends AppCompatActivity {
         cityCode = intent.getStringExtra("cityCode");
         initViews();
         heWeather();
+        initLifeStyleSharePreference();
 
 
         //刷新监听
@@ -214,10 +217,22 @@ public class WeatherActivity extends AppCompatActivity {
             @Override
             public void onRefresh() {
                 heWeather();
+                initLifeStyleSharePreference();
                 mPullRefreshLayout.finishRefresh();
             }
         });
 
+
+    }
+
+    private void initLifeStyleSharePreference() {
+        SharedPreferences sp = getSharedPreferences("lifeStyle", MODE_PRIVATE);
+        comf = sp.getString("comf","暂未获取到数据,请刷新后重试");
+        drsg = sp.getString("drsg","暂未获取到数据,请刷新后重试");
+        flu = sp.getString("flu","暂未获取到数据,请刷新后重试");
+        uv = sp.getString("uv","暂未获取到数据,请刷新后重试");
+        sport = sp.getString("sport","暂未获取到数据,请刷新后重试");
+        air = sp.getString("air","暂未获取到数据,请刷新后重试");
 
     }
 
@@ -229,20 +244,51 @@ public class WeatherActivity extends AppCompatActivity {
         view01 = mInflater.inflate(R.layout.weather_fortune, null);
         view02 = mInflater.inflate(R.layout.weather_alternation, null);
         view03 = mInflater.inflate(R.layout.weather_forecast, null);
+        view04 = mInflater.inflate(R.layout.weather_lifestyle, null);
+
+
         alternationLayout = view02.findViewById(R.id.ll_alternation_forecast);
         forecastLayout = view03.findViewById(R.id.ll_forecast_forecast);
+
         tvSuit = view01.findViewById(R.id.tv_weather_suitable);
         tvAvoid = view01.findViewById(R.id.tv_weather_avoid);
+
+        tvComf = view04.findViewById(R.id.tv_weather_comf);
+        tvDrsg = view04.findViewById(R.id.tv_weather_drsg);
+        tvFlu = view04.findViewById(R.id.tv_weather_flu);
+        tvUv = view04.findViewById(R.id.tv_weather_uv);
+        tvSport = view04.findViewById(R.id.tv_weather_sport);
+        tvAir = view04.findViewById(R.id.tv_weather_air);
+
+        //文字dialog监听
+        tvComf.setOnClickListener(v -> showLifeStyleDialog(comf,tvComf));
+        tvDrsg.setOnClickListener(v -> showLifeStyleDialog(drsg,tvDrsg));
+        tvFlu.setOnClickListener(v -> showLifeStyleDialog(flu,tvFlu));
+        tvUv.setOnClickListener(v -> showLifeStyleDialog(uv,tvUv));
+        tvSport.setOnClickListener(v -> showLifeStyleDialog(sport,tvSport));
+        tvAir.setOnClickListener(v -> showLifeStyleDialog(air,tvAir));
 
         mListView.add(view01);
         mListView.add(view02);
         mListView.add(view03);
+        mListView.add(view04);
 
         mViewPager.setAdapter(new MyPagerAdapter());
         //设置当前page
         mViewPager.setCurrentItem(0);
     }
 
+    private void showLifeStyleDialog(String text,TextView view) {
+        lifeStyleView = mInflater.inflate(R.layout.weather_lifestyle_dialog, null);
+        tvLifeStyle = lifeStyleView.findViewById(R.id.tv_weather_lifeStyle_dialog);
+        tvLifeStyle.setText(text);
+        new BubbleDialog(WeatherActivity.this)
+                        .addContentView(lifeStyleView)
+                        .setClickedView(view)
+                        .calBar(true)
+                        .show();
+
+    }
 
 
 
@@ -271,6 +317,9 @@ public class WeatherActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * 加载背景监听
+     */
     private RequestListener<String, GlideDrawable> requestListener = new RequestListener<String, GlideDrawable>() {
         @Override
         public boolean onException(Exception e, String model, Target<GlideDrawable> target, boolean isFirstResource) {
@@ -360,6 +409,9 @@ public class WeatherActivity extends AppCompatActivity {
             }
         });
 
+        //获取生活指数
+        HeWeatherUtil.handleWeatherLifeStyleResponse(WeatherActivity.this,cityCode,tvComf,tvDrsg,tvFlu,tvUv,tvSport,tvAir);
+
         //获取未来7天天气
         HeWeather.getWeatherForecast(this, cityCode, new HeWeather.OnResultWeatherForecastBeanListener() {
             @Override
@@ -390,16 +442,8 @@ public class WeatherActivity extends AppCompatActivity {
                         forecastLayout.addView(view);
                     }
                 }
-//                getPoetry();
-//                Log.d(TAG, "getPoetry: "+tvPoetry01.getText().toString());
-//                if (tvPoetry01.getText().length() == 0) {
-//                    getPoetry();
-//                } else {
-//                    closeLoading();
-//                }
-                if (tvPoetry01.getText().length() == 0) {
-                    getPoetry();
-                }
+                getPoetry();
+
                 closeLoading();
             }
 

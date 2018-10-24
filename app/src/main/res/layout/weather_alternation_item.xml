@@ -10,9 +10,8 @@
         android:layout_height="0dp"
         android:layout_gravity="center"
         android:layout_weight="1"
-        android:textSize="16sp"
+        style="@style/WeatherLifeStyleText"
         android:text="9-30"
-        android:textColor="#fff"
         android:id="@+id/tv_date"/>
 
     <ImageView
@@ -24,14 +23,13 @@
 
 
     <TextView
-        android:textSize="16sp"
         android:gravity="center"
         android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:text="20℃"
-        android:textColor="#fff"
+        style="@style/WeatherLifeStyleText"
         android:id="@+id/tv_temperature"/>
 
 </LinearLayout>

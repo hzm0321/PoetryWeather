@@ -23,4 +23,9 @@
         <item name="llLoadingResId">@layout/common_loading</item>
     </style>
 
+    <style name="WeatherLifeStyleText">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/teaWhite</item>
+    </style>
+
 </resources>

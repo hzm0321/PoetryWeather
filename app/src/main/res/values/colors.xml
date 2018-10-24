@@ -7,4 +7,5 @@
     <color name="gray">#c0c0c0</color>
     <color name="translucent">#01000000</color>
     <color name="app_color_description">@color/qmui_config_color_gray_5</color>
+    <color name="weather_bg">#8000</color>
 </resources>

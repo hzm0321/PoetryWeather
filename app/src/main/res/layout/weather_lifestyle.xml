@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="12dp"
+    android:paddingRight="12dp"
+    android:paddingTop="20dp"
+    android:paddingBottom="20dp"
+    android:background="@color/weather_bg">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="舒适度:舒适"
+        style="@style/WeatherLifeStyleText"
+        android:id="@+id/tv_weather_comf"/>
+
+    <TextView
+        style="@style/WeatherLifeStyleText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:text="穿衣建议:舒适"
+        android:id="@+id/tv_weather_drsg"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/WeatherLifeStyleText"
+        android:layout_alignParentRight="true"
+        android:id="@+id/tv_weather_flu"
+        android:text="感冒指数:少发"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        style="@style/WeatherLifeStyleText"
+        android:id="@+id/tv_weather_sport"
+        android:text="运动建议:较适宜"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        style="@style/WeatherLifeStyleText"
+        android:id="@+id/tv_weather_uv"
+        android:text="紫外线:弱"/>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        style="@style/WeatherLifeStyleText"
+        android:id="@+id/tv_weather_air"
+        android:text="空气品质:较差"/>
+
+
+
+    
+    
+</RelativeLayout>
