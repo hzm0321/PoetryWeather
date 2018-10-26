@@ -9,6 +9,8 @@ buildscript {
 
     }
     dependencies {
+        // 注册MobSDK
+        classpath "com.mob.sdk:MobSDK:2018.0319.1724"
         classpath 'com.android.tools.build:gradle:3.2.0'
         classpath 'com.jakewharton:butterknife-gradle-plugin:8.8.1'
 

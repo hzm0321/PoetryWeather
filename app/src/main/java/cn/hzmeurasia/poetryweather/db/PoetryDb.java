@@ -15,7 +15,6 @@ public class PoetryDb extends LitePalSupport {
     private String poetryDb_poetry_link;
     private String poetryDb_weather;
     private String poetryDb_author;
-    private String poetryDb_author_link;
     private String poetryDb_annotation;
     private int poetryDb_qwxl;
     private int poetryDb_jygk;
@@ -64,14 +63,6 @@ public class PoetryDb extends LitePalSupport {
 
     public void setPoetryDb_author(String poetryDb_author) {
         this.poetryDb_author = poetryDb_author;
-    }
-
-    public String getPoetryDb_author_link() {
-        return poetryDb_author_link;
-    }
-
-    public void setPoetryDb_author_link(String poetryDb_author_link) {
-        this.poetryDb_author_link = poetryDb_author_link;
     }
 
     public String getPoetryDb_annotation() {

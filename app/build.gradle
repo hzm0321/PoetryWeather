@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.mob.sdk'
 
 android {
     compileSdkVersion 26
@@ -24,6 +25,59 @@ android {
         targetCompatibility = '1.8'
     }
 
+}
+
+MobSDK {
+    appKey "287133dcd3ab8"
+    appSecret "562d002962bfcd85fdae38b12bcb63c4"
+    ShareSDK {
+        devInfo {
+            SinaWeibo {
+                appKey "568898243"
+                appSecret "38a4f8204cc784f81f9f0daaf31e02e3"
+                callbackUri "http://www.sharesdk.cn"
+                shareByAppClient true
+            }
+            Evernote {
+                hostType "sandbox"
+                appKey "sharesdk-7807"
+                appSecret "d05bf86993836004"
+                shareByAppClient true
+            }
+            Wechat {
+                appId "wx4868b35061f87885"
+                appSecret "64020361b8ec4c99936c0e3999a9f249"
+                userName "gh_afb25ac019c9"
+                path "pages/index/index.html?id=1"
+                withShareTicket true
+                miniprogramType 2
+                bypassApproval false
+            }
+            QQ {
+                appId "1107783930"
+                appKey "2d6whKbMteDyCDiA"
+                shareByAppClient true
+                bypassApproval false
+            }
+        }
+    }
+    MobAPI {}
+    SMSSDK {}
+    MobPush {
+        devInfo {
+            HUAWEI {
+                appId "100215127"
+            }
+            MEIZU {
+                appId "112481"
+                appKey "03dd70b9be434446a7255c8586e1725a"
+            }
+            XIAOMI {
+                appId "5671772162670"
+                appKey "2882303761517721670"
+            }
+        }
+    }
 }
 
 dependencies {

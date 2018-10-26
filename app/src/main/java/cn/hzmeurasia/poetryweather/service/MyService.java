@@ -110,25 +110,28 @@ public class MyService extends Service {
 
                 final String responsText = response.body().string();
                 final cn.hzmeurasia.poetryweather.entity.Calendar calendar = CalendarUtil.handleCalendarResponse(responsText);
-                calendarEvent.setReason(calendar.getReason());
-                Log.d(TAG, "onResponse: "+calendar.getReason());
-                Log.d(TAG, "onResponse: "+calendarEvent.getReason());
-                calendarEvent.setSuit(calendar.getResult().getResult_data().getSuit());
-                calendarEvent.setAvoid(calendar.getResult().getResult_data().getAvoid());
-                calendarEvent.setLunar(calendar.getResult().getResult_data().getLunar());
-                calendarEvent.setLunarYear(calendar.getResult().getResult_data().getLunarYear());
-                calendarEvent.setDate(calendar.getResult().getResult_data().getToday());
-                //把万年历数据载入缓存
-                SharedPreferences.Editor editor = getSharedPreferences("date", MODE_PRIVATE).edit();
-                editor.putString("reason", calendar.getReason());
-                editor.putString("today", date);
-                editor.putString("suit", calendar.getResult().getResult_data().getSuit());
-                editor.putString("avoid", calendar.getResult().getResult_data().getAvoid());
-                editor.putString("lunar", calendar.getResult().getResult_data().getLunar());
-                editor.putString("lunarYear", calendar.getResult().getResult_data().getLunarYear());
-                editor.apply();
-                //发送粘性事件
-                EventBus.getDefault().postSticky(calendarEvent);
+
+                if (calendar != null) {
+                    calendarEvent.setReason(calendar.getReason());
+                    Log.d(TAG, "onResponse: " + calendar.getReason());
+                    Log.d(TAG, "onResponse: " + calendarEvent.getReason());
+                    calendarEvent.setSuit(calendar.getResult().getResult_data().getSuit());
+                    calendarEvent.setAvoid(calendar.getResult().getResult_data().getAvoid());
+                    calendarEvent.setLunar(calendar.getResult().getResult_data().getLunar());
+                    calendarEvent.setLunarYear(calendar.getResult().getResult_data().getLunarYear());
+                    calendarEvent.setDate(calendar.getResult().getResult_data().getToday());
+                    //把万年历数据载入缓存
+                    SharedPreferences.Editor editor = getSharedPreferences("date", MODE_PRIVATE).edit();
+                    editor.putString("reason", calendar.getReason());
+                    editor.putString("today", date);
+                    editor.putString("suit", calendar.getResult().getResult_data().getSuit());
+                    editor.putString("avoid", calendar.getResult().getResult_data().getAvoid());
+                    editor.putString("lunar", calendar.getResult().getResult_data().getLunar());
+                    editor.putString("lunarYear", calendar.getResult().getResult_data().getLunarYear());
+                    editor.apply();
+                    //发送粘性事件
+                    EventBus.getDefault().postSticky(calendarEvent);
+                }
             }
 
         });
@@ -198,22 +201,23 @@ public class MyService extends Service {
                 final String responsText = response.body().string();
                 Log.d(TAG, "onResponse: "+responsText);
                 final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
-                if (poetryWeather.poetryList.size() != LitePal.count(PoetryDb.class)
-                        && poetryWeather.poetryList.size() > 0) {
-                    for (Poetry poetry : poetryWeather.poetryList) {
-                        PoetryDb poetryDb = new PoetryDb();
-                        poetryDb.setPoetryDb_id(poetry.id);
-                        poetryDb.setPoetryDb_poetry(poetry.poetry);
-                        poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
-                        poetryDb.setPoetryDb_weather(poetry.weather);
-                        Log.d(TAG, "onResponse: 作者"+poetry.author);
-                        poetryDb.setPoetryDb_author(poetry.author);
-                        poetryDb.setPoetryDb_author_link(poetry.author_link);
-                        poetryDb.setPoetryDb_annotation(poetry.annotation);
-                        poetryDb.setPoetryDb_qwxl(poetry.qwxl);
-                        poetryDb.setPoetryDb_jygk(poetry.jygk);
-                        poetryDb.setPoetryDb_yyql(poetry.yyql);
-                        poetryDb.save();
+                if (poetryWeather!=null) {
+                    if (poetryWeather.poetryList.size() != LitePal.count(PoetryDb.class)
+                            && poetryWeather.poetryList.size() > 0) {
+                        for (Poetry poetry : poetryWeather.poetryList) {
+                            PoetryDb poetryDb = new PoetryDb();
+                            poetryDb.setPoetryDb_id(poetry.id);
+                            poetryDb.setPoetryDb_poetry(poetry.poetry);
+                            poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
+                            poetryDb.setPoetryDb_weather(poetry.weather);
+                            Log.d(TAG, "onResponse: 作者"+poetry.author);
+                            poetryDb.setPoetryDb_author(poetry.author);
+                            poetryDb.setPoetryDb_annotation(poetry.annotation);
+                            poetryDb.setPoetryDb_qwxl(poetry.qwxl);
+                            poetryDb.setPoetryDb_jygk(poetry.jygk);
+                            poetryDb.setPoetryDb_yyql(poetry.yyql);
+                            poetryDb.save();
+                        }
                     }
                 }
                 Log.d(TAG, "诗词数据库字段数 "+LitePal.count(PoetryDb.class));

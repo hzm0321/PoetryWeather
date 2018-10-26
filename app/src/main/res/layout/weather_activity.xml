@@ -7,9 +7,10 @@
     android:layout_height="match_parent">
 
 
-    <android.support.design.widget.CoordinatorLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:id="@+id/frameLayout">
 
 
     <ImageView
@@ -50,9 +51,21 @@
                 </android.support.v4.view.ViewPager>
 
             </RelativeLayout>
+        <LinearLayout
+            android:layout_marginBottom="-50dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:text="黄振敏"/>
+        </LinearLayout>
 
 
-    </android.support.design.widget.CoordinatorLayout>
+    </FrameLayout>
+
 
 
 

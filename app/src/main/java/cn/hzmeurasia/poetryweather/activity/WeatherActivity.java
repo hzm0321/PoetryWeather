@@ -2,11 +2,16 @@ package cn.hzmeurasia.poetryweather.activity;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.SyncStateContract;
 import android.support.annotation.Nullable;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -19,6 +24,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -57,6 +63,11 @@ import cn.hzmeurasia.poetryweather.db.PoetryDb;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
 import cn.hzmeurasia.poetryweather.entity.Weather;
 import cn.hzmeurasia.poetryweather.util.HeWeatherUtil;
+import cn.hzmeurasia.poetryweather.util.ImageUtil;
+import cn.sharesdk.framework.Platform;
+import cn.sharesdk.onekeyshare.OnekeyShare;
+import cn.sharesdk.onekeyshare.ShareContentCustomizeCallback;
+import cn.sharesdk.tencent.qq.QQ;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.Forecast;
 import interfaces.heweather.com.interfacesmodule.bean.weather.forecast.ForecastBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.hourly.Hourly;
@@ -95,6 +106,8 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView imgWeatherIcon;
     @BindView(R.id.btn_weather_back)
     Button btnWeatherBack;
+    @BindView(R.id.btn_weather_share)
+    Button btnShare;
     @BindView(R.id.tv_weather_aqi)
     TextView tvAqi;
     LinearLayout forecastLayout;
@@ -120,7 +133,7 @@ public class WeatherActivity extends AppCompatActivity {
     QMUITipDialog tipDialog;
     private BubbleDialog.Position mPosition = BubbleDialog.Position.RIGHT;
 
-    @OnClick({R.id.tv_poetry1,R.id.tv_poetry2,R.id.btn_weather_back,R.id.tv_cityName,R.id.tv_weather_date})
+    @OnClick({R.id.tv_poetry1,R.id.tv_poetry2,R.id.btn_weather_back,R.id.tv_cityName,R.id.tv_weather_date,R.id.btn_weather_share})
     void onClick(View v){
         switch(v.getId()) {
             case R.id.tv_poetry1:
@@ -136,7 +149,6 @@ public class WeatherActivity extends AppCompatActivity {
                 break;
             case R.id.tv_cityName:
             case R.id.tv_weather_date:
-                Log.d(TAG, "onClick: 城市被点击了");
                 if (dateOnclickFlag % 2 == 0) {
                     tvDate.setText(lunar);
                     dateOnclickFlag++;
@@ -144,6 +156,15 @@ public class WeatherActivity extends AppCompatActivity {
                     tvDate.setText(date);
                     dateOnclickFlag++;
                 }
+                break;
+            case R.id.btn_weather_share:
+                FrameLayout frameLayout = findViewById(R.id.frameLayout);
+                btnWeatherBack.setVisibility(View.GONE);
+                btnShare.setVisibility(View.GONE);
+                ImageUtil.getBitmapByView(this,frameLayout);
+                btnWeatherBack.setVisibility(View.VISIBLE);
+                btnShare.setVisibility(View.VISIBLE);
+                showShare();
                 break;
             default:
                 break;
@@ -160,13 +181,8 @@ public class WeatherActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.weather_activity);
 
-        //注册和风天气
-        HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
-        HeConfig.switchToFreeServerNode();
-
         //绑定初始化BufferKnife
         ButterKnife.bind(this);
-
 
         //注册EventBus
         EventBus.getDefault().register(this);
@@ -225,6 +241,10 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
+
+    /**
+     * 初始化lifestyle数据
+     */
     private void initLifeStyleSharePreference() {
         SharedPreferences sp = getSharedPreferences("lifeStyle", MODE_PRIVATE);
         comf = sp.getString("comf","暂未获取到数据,请刷新后重试");
@@ -234,6 +254,37 @@ public class WeatherActivity extends AppCompatActivity {
         sport = sp.getString("sport","暂未获取到数据,请刷新后重试");
         air = sp.getString("air","暂未获取到数据,请刷新后重试");
 
+    }
+
+    private void showShare() {
+        OnekeyShare oks = new OnekeyShare();
+        //关闭sso授权
+        oks.disableSSOWhenAuthorize();
+
+        // title标题，微信、QQ和QQ空间等平台使用
+        oks.setTitle(getString(R.string.shareName));
+        // titleUrl QQ和QQ空间跳转链接
+        oks.setTitleUrl("http://hzmeurasia.cn");
+        // text是分享文本，所有平台都需要这个字段
+        oks.setText("我是分享文本");
+        // imagePath是图片的本地路径，Linked-In以外的平台都支持此参数
+        //确保SDcard下面存在此张图片
+        oks.setImagePath(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ScreenPoetryWeather.png");
+        // url在微信、微博，Facebook等平台中使用
+        oks.setShareContentCustomizeCallback(new ShareContentCustomizeCallback() {
+            @Override
+            public void onShare(Platform platform, Platform.ShareParams shareParams) {
+                if (platform.getName().equalsIgnoreCase(QQ.NAME)) {
+                    shareParams.setText(null);
+                    shareParams.setTitle(null);
+                    shareParams.setTitleUrl(null);
+                    shareParams.setImagePath(Environment.getExternalStorageDirectory().getAbsolutePath()+"/ScreenPoetryWeather.png");
+                }
+            }
+        });
+        oks.setUrl("http://hzmeurasia.cn");
+        // 启动分享GUI
+        oks.show(this);
     }
 
     /**
@@ -346,7 +397,7 @@ public class WeatherActivity extends AppCompatActivity {
      * 载入和风天气数据
      */
     private void heWeather() {
-        showLoading();
+        showLoading("正在加载天气数据......");
         HeWeatherUtil.handleAirResponse(cityCode,tvAqi);
         //加载背景图片
         Log.d(TAG, "heWeather: 加载背景");
@@ -483,6 +534,8 @@ public class WeatherActivity extends AppCompatActivity {
         if (p.contains("0")) {  qwxl="1";}
         if (p.contains("1")) {  jygk="1";}
         if (p.contains("2")) {  yyql="1";}
+        Log.d(TAG, "getPoetry: P "+p );
+        Log.d(TAG, "getPoetry: qjy "+ qwxl+jygk+yyql);
         Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
         List<PoetryDb> poetryDbs = LitePal
                 .select("poetryDb_poetry","poetryDb_author","poetryDb_annotation","poetryDb_poetry_link")
@@ -492,7 +545,6 @@ public class WeatherActivity extends AppCompatActivity {
         if (poetryDbs.size() >= 1) {
             PoetryDb getPoetryDb = new PoetryDb();
             getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
-            Log.d(TAG, "getPoetry: 数据库中读取到的字段"+getPoetryDb.getPoetryDb_author_link());
             poetry = getPoetryDb.getPoetryDb_poetry();
             String author = getPoetryDb.getPoetryDb_author();
             String annotation = getPoetryDb.getPoetryDb_annotation();
@@ -533,10 +585,10 @@ public class WeatherActivity extends AppCompatActivity {
     /**
      * 显示加载进度框
      */
-    private void showLoading() {
+    private void showLoading(String text) {
         tipDialog = new QMUITipDialog.Builder(WeatherActivity.this)
                 .setIconType(QMUITipDialog.Builder.ICON_TYPE_LOADING)
-                .setTipWord("正在加载天气数据......")
+                .setTipWord(text)
                 .create();
         tipDialog.show();
 
