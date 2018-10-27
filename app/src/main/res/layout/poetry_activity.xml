@@ -1,20 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.qmuiteam.qmui.widget.QMUIWindowInsetLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:fitsSystemWindows="true">
 
-    <ScrollView
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="240dp"
+        android:id="@+id/appBar"
+        android:fitsSystemWindows="true">
+
+        <android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
+            app:contentScrim="@color/bluishWhite"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed"
+            app:title="@string/nav_item_poetry"
+            android:fitsSystemWindows="true"
+            android:id="@+id/collapsing_toolbar">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:fitsSystemWindows="true"
+                app:layout_collapseMode="parallax"
+                android:src="@drawable/person_bg"
+                android:id="@+id/iv_person_bg"/>
+
+            <android.support.v7.widget.Toolbar
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin"
+                android:id="@+id/toolbar">
+
+            </android.support.v7.widget.Toolbar>
+
+        </android.support.design.widget.CollapsingToolbarLayout>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <android.support.v4.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/qmui_config_color_background">
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+            android:layout_marginTop="20dp"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/gg">
+            android:id="@+id/qmui_group_list_view"/>
 
-        </com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView>
+    </android.support.v4.widget.NestedScrollView>
 
-    </ScrollView>
+    <android.support.design.widget.FloatingActionButton
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_margin="20dp"
+        app:layout_anchor="@id/appBar"
+        android:id="@+id/ib_photo"
+        app:layout_anchorGravity="bottom|right"/>
 
-</com.qmuiteam.qmui.widget.QMUIWindowInsetLayout>
+</android.support.design.widget.CoordinatorLayout>

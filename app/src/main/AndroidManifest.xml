@@ -55,9 +55,12 @@
         <activity android:name=".activity.PersonActivity"
             android:theme="@style/PersonActivityTheme"/>
 
-        <activity android:name=".activity.PoetryActivity" />
+        <activity android:name=".activity.PoetryActivity"
+            android:theme="@style/PersonActivityTheme"/>
 
         <activity android:name=".activity.WebViewActivity"/>
+
+        <activity android:name=".activity.AddPoetryActivity"/>
 
         <service
             android:name=".service.MyService"

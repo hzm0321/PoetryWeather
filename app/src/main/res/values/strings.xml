@@ -8,4 +8,5 @@
     <string name="main_about">关于</string>
     <string name="webView_poetry">诗词鉴赏</string>
     <string name="shareName">诗语天气</string>
+    <string name="addPoetry">添加自定义诗词</string>
 </resources>
