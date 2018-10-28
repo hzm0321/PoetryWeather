@@ -64,6 +64,9 @@ public class PoetryActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    /**
+     * 初始化GroupList
+     */
     private void initGroupListView() {
         officialPoetryNumber = mGroupListView.createItemView(
                 ContextCompat.getDrawable(PoetryActivity.this,R.drawable.test),
