@@ -203,7 +203,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.fab_add)
     FloatingActionButton fab;
 
-    volatile List<CityDb> cityDbList = new ArrayList<>();
+    List<CityDb> cityDbList = new ArrayList<>();
     private CardAdapter cardAdapter;
     @BindView(R.id.nv_left)
     NavigationView navigationView;

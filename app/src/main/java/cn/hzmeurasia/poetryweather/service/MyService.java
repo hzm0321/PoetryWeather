@@ -202,7 +202,7 @@ public class MyService extends Service {
                 Log.d(TAG, "onResponse: "+responsText);
                 final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
                 if (poetryWeather!=null) {
-                    if (poetryWeather.poetryList.size() != LitePal.count(PoetryDb.class)
+                    if (poetryWeather.poetryList.size() > LitePal.count(PoetryDb.class)
                             && poetryWeather.poetryList.size() > 0) {
                         for (Poetry poetry : poetryWeather.poetryList) {
                             PoetryDb poetryDb = new PoetryDb();
@@ -221,7 +221,6 @@ public class MyService extends Service {
                     }
                 }
                 Log.d(TAG, "诗词数据库字段数 "+LitePal.count(PoetryDb.class));
-//                SharedPreferences.Editor editor = getSharedPreferences("poetry", MODE_PRIVATE).edit();
 
             }
         });

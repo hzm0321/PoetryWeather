@@ -62,8 +62,6 @@ public class CardAdapter extends RecyclerView.Adapter<CardAdapter.ViewHolder>{
         mCityDbList = cityDbList;
     }
 
-
-
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         if (mcontext == null) {

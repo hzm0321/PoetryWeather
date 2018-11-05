@@ -19,10 +19,15 @@ import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import org.litepal.LitePal;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 import cn.hzmeurasia.poetryweather.R;
+import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
 
 /**
@@ -166,6 +171,11 @@ public class AddPoetryActivity extends AppCompatActivity {
                 .addAction("确定", (dialog, index) -> {
                     CharSequence firstPoetry = builder.getEditText().getText();
                     if (firstPoetry != null && firstPoetry.length() > 0 && firstPoetry.length() <= 10) {
+                        String str = stringFilter(firstPoetry.toString());
+                        if (!firstPoetry.toString().equals(str)) {
+                            Toast.makeText(AddPoetryActivity.this,"请输入纯汉字",Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         dialog.dismiss();
                         sFirstPoetry = firstPoetry.toString();
                         firstPoetryListView.setDetailText(sFirstPoetry);
@@ -180,7 +190,7 @@ public class AddPoetryActivity extends AppCompatActivity {
     }
 
     /**
-     * 诗词上句可输入对话框
+     * 诗词下句可输入对话框
      */
     private void showSecondPoetryEditTextDialog() {
         QMUIDialog.EditTextDialogBuilder builder = new QMUIDialog.EditTextDialogBuilder(AddPoetryActivity.this);
@@ -191,6 +201,11 @@ public class AddPoetryActivity extends AppCompatActivity {
                 .addAction("确定", (dialog, index) -> {
                     CharSequence secondPoetry = builder.getEditText().getText();
                     if (secondPoetry != null && secondPoetry.length() > 0 && secondPoetry.length() <= 10) {
+                        String str = stringFilter(secondPoetry.toString());
+                        if (!secondPoetry.toString().equals(str)) {
+                            Toast.makeText(AddPoetryActivity.this,"请输入纯汉字",Toast.LENGTH_SHORT).show();
+                            return;
+                        }
                         dialog.dismiss();
                         sSecondPotry = secondPoetry.toString();
                         secondPoetryListView.setDetailText(sSecondPotry);
@@ -345,6 +360,14 @@ public class AddPoetryActivity extends AppCompatActivity {
                     .setTipWord("添加成功")
                     .create();
             tipDialog.show();
+            PoetryDb poetryDb = new PoetryDb();
+            poetryDb.setPoetryDb_id(id);
+            poetryDb.setPoetryDb_poetry(sFirstPoetry + "," + sSecondPotry);
+            poetryDb.setPoetryDb_weather(sWeatherPoetry);
+            poetryDb.setPoetryDb_qwxl(qwxl);
+            poetryDb.setPoetryDb_jygk(jygk);
+            poetryDb.setPoetryDb_yyql(yyql);
+            poetryDb.save();
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
                 @Override
@@ -357,4 +380,13 @@ public class AddPoetryActivity extends AppCompatActivity {
             Toast.makeText(AddPoetryActivity.this,"提交失败,请检查每项是否已填写",Toast.LENGTH_SHORT).show();
         }
     }
+
+    public static String stringFilter(String str)throws PatternSyntaxException {
+        // 只允许字母、数字和汉字      
+        String regEx = "[^a-zA-Z0-9\u4E00-\u9FA5]";
+        Pattern p = Pattern.compile(regEx);
+        Matcher m = p.matcher(str);
+    return m.replaceAll("").trim();
+    }
+
 }

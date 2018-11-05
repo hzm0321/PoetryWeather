@@ -119,6 +119,7 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.rf_weather)
     QMUIPullRefreshLayout mPullRefreshLayout;
 
+    PoetryDb getPoetryDb;
     LayoutInflater mInflater;
     View view01,view02,view03,view04,lifeStyleView;
     TextView tvSuit,tvAvoid,tvComf,tvDrsg,tvFlu,tvUv,tvSport,tvAir,tvLifeStyle;
@@ -138,11 +139,13 @@ public class WeatherActivity extends AppCompatActivity {
         switch(v.getId()) {
             case R.id.tv_poetry1:
             case R.id.tv_poetry2:
-                PoetryDialog poetryDialog = new PoetryDialog(this)
-                        .setPosition(mPosition)
-                        .setClickedView(tvPoetry02);
-                poetryDialog.setClickListener(str ->intent());
-                poetryDialog.show();
+                if (getPoetryDb.getPoetryDb_annotation() != null) {
+                    PoetryDialog poetryDialog = new PoetryDialog(this)
+                            .setPosition(mPosition)
+                            .setClickedView(tvPoetry02);
+                    poetryDialog.setClickListener(str ->intent());
+                    poetryDialog.show();
+                }
                 break;
             case R.id.btn_weather_back:
                 finish();
@@ -543,7 +546,6 @@ public class WeatherActivity extends AppCompatActivity {
                 .find(PoetryDb.class);
         Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
         if (poetryDbs.size() >= 1) {
-            PoetryDb getPoetryDb = new PoetryDb();
             getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
             poetry = getPoetryDb.getPoetryDb_poetry();
             String author = getPoetryDb.getPoetryDb_author();

@@ -48,11 +48,25 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
-            android:layout_marginTop="20dp"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/qmui_group_list_view"/>
+            android:orientation="vertical">
+
+            <com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView
+                android:layout_marginTop="20dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/qmui_group_list_view"/>
+
+            <com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView
+                android:paddingLeft="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/rv_ownPoetry"
+                android:background="#FFF"/>
+
+        </LinearLayout>
 
     </android.support.v4.widget.NestedScrollView>
 
