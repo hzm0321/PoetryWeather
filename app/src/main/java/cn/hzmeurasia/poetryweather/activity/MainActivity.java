@@ -10,6 +10,7 @@ import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
+import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -47,6 +48,11 @@ import com.yanzhenjie.recyclerview.swipe.SwipeMenuItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuRecyclerView;
 import com.yanzhenjie.recyclerview.swipe.touch.OnItemMoveListener;
 import com.yanzhenjie.recyclerview.swipe.touch.OnItemStateChangedListener;
+import com.zaaach.citypicker.CityPicker;
+import com.zaaach.citypicker.adapter.OnPickListener;
+import com.zaaach.citypicker.model.City;
+import com.zaaach.citypicker.model.HotCity;
+import com.zaaach.citypicker.model.LocatedCity;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -135,7 +141,6 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void run() {
                             districtName = aMapLocation.getDistrict();
-                            Log.d(TAG, "onSuccess: districtName"+districtName.substring(districtName.length()-1));
                             if (districtName.substring(districtName.length()-1).equals("区")) {
                                 districtName = districtName.substring(0, districtName.length() - 1);
                                 Log.d(TAG, "onSuccess: 修改后区县位置"+districtName);
@@ -161,11 +166,6 @@ public class MainActivity extends AppCompatActivity {
                                         cityCode = cid.substring(2);
                                         Log.d(TAG, "onSuccess: cityCode"+cityCode);
                                     }
-                                    SharedPreferences.Editor editor = getSharedPreferences("location", MODE_PRIVATE).edit();
-                                    editor.putString("province", provinceName);
-                                    editor.putString("district", districtName);
-                                    editor.putString("cid", cityCode);
-                                    editor.apply();
                                     if (!getFirst()) {
                                         Message message = new Message();
                                         message.what = UPDATE_TEXT;
@@ -276,9 +276,10 @@ public class MainActivity extends AppCompatActivity {
 //        }
         //悬浮按钮点击事件
         fab.setOnClickListener(view -> {
-            Intent intent1 = new Intent(MainActivity.this, SearchCityActivity.class);
-            Log.d(TAG, "定位区县"+districtName);
-            startActivity(intent1);
+//            Intent intent1 = new Intent(MainActivity.this, SearchCityActivity.class);
+//            Log.d(TAG, "定位区县"+districtName);
+//            startActivity(intent1);
+            showSearchCity();
         });
 
         //设置RecyclerView
@@ -289,7 +290,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int viewType) {
                 SwipeMenuItem deleteItem = new SwipeMenuItem(MainActivity.this)
-                        .setBackgroundColor(getColor(R.color.bluishWhite))
+                        .setBackgroundColor(getResources().getColor(R.color.bluishWhite))
                         .setText("删除")
                         .setHeight(ViewGroup.LayoutParams.MATCH_PARENT)
                         .setWidth(200);
@@ -300,12 +301,30 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setSwipeMenuItemClickListener(new SwipeMenuItemClickListener() {
             @Override
             public void onItemClick(SwipeMenuBridge menuBridge) {
+                final boolean[] isCancle = {false};
                 menuBridge.closeMenu();
-                int menuPosition = menuBridge.getAdapterPosition();
-                cityDbList.remove(menuPosition);
-                cardAdapter.notifyItemRemoved(menuPosition);
-                isCardEmpty();
-                updateDatabases();
+                Handler handler = new Handler();
+                Snackbar.make(recyclerView,"正在删除本地该城市天气数据",Snackbar.LENGTH_SHORT)
+                        .setAction("取消", new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                isCancle[0] = true;
+                                Toast.makeText(MainActivity.this,"已取消删除",Toast.LENGTH_SHORT).show();
+                            }
+                        }).show();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (!isCancle[0]) {
+                            int menuPosition = menuBridge.getAdapterPosition();
+                            cityDbList.remove(menuPosition);
+                            cardAdapter.notifyItemRemoved(menuPosition);
+                            isCardEmpty();
+                            updateDatabases();
+                        }
+                    }
+                },1800);
+
             }
         });
         //拖拽排序
@@ -580,6 +599,43 @@ public class MainActivity extends AppCompatActivity {
         SharedPreferences preferences = getSharedPreferences("isFirst", MODE_PRIVATE);
         isFirst = preferences.getBoolean("first", false);
         return isFirst;
+    }
+
+    /**
+     * 显示搜索城市界面
+     */
+    private void showSearchCity() {
+        /**
+         * 添加热门城市
+         */
+        List<HotCity> hotCities = new ArrayList<>();
+        hotCities.add(new HotCity("北京", "北京", "101010100"));
+        hotCities.add(new HotCity("上海", "上海", "101020100"));
+        hotCities.add(new HotCity("广州", "广东", "101280101"));
+        hotCities.add(new HotCity("深圳", "广东", "101280601"));
+        hotCities.add(new HotCity("杭州", "浙江", "101210101"));
+        hotCities.add(new HotCity("西安", "陕西", "101050311"));
+        CityPicker.getInstance()
+                .setFragmentManager(getSupportFragmentManager())
+                .enableAnimation(true)
+                .setAnimationStyle(R.style.DefaultCityPickerAnimation)
+                .setLocatedCity(new LocatedCity(districtName,provinceName,cityCode))
+                .setHotCities(hotCities)
+                .setOnPickListener(new OnPickListener() {
+                    @Override
+                    public void onPick(int position, City data) {
+                        Toast.makeText(MyApplication.getContext(),data.getName(),Toast.LENGTH_SHORT).show();
+                        //组合cityCode
+                        String cid = "CN" + data.getCode();
+                        //发送EventBus事件
+                        EventBus.getDefault().post(new SearchCityEvent(cid));
+                    }
+
+                    @Override
+                    public void onLocate() {
+
+                    }
+                }).show();
     }
 
     @Override

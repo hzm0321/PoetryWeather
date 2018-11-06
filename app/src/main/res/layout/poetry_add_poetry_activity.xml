@@ -26,8 +26,8 @@
             android:layout_gravity="center"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/addPoetry"
             android:textColor="@color/li"
+            android:id="@+id/tv_title"
             android:textSize="20sp"/>
 
     </android.support.v7.widget.Toolbar>
@@ -37,12 +37,15 @@
         android:layout_height="wrap_content"
         android:id="@+id/qmui_group_list_view"/>
 
-    <Button
-        android:id="@+id/btn_finish"
-        android:layout_gravity="center"
-        android:layout_width="match_parent"
+
+    <ImageButton
+        android:layout_marginTop="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="完成"/>
+        android:id="@+id/btn_finish"
+        android:background="@color/translucent"
+        android:src="@drawable/button_apply"/>
 
 
 

@@ -1,8 +1,12 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.animation.Animator;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.Snackbar;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
@@ -10,18 +14,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
-import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
-import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
-import com.yanzhenjie.recyclerview.swipe.SwipeItemClickListener;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuBridge;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenuCreator;
@@ -37,7 +38,7 @@ import java.util.List;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import cn.hzmeurasia.poetryweather.MyApplication;
+import butterknife.OnClick;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.OwnPoetryAdapter;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
@@ -56,12 +57,44 @@ public class PoetryActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.rv_ownPoetry)
     SwipeMenuRecyclerView recyclerView;
+    @BindView(R.id.ib_photo)
+    FloatingActionButton ibPhoto;
     private List<PoetryDb> poetryDbList = new ArrayList<>();
     private OwnPoetryAdapter ownPoetryAdapter;
 
     QMUICommonListItemView officialPoetryNumber;
     QMUICommonListItemView ownPoetryNumber;
     QMUICommonListItemView addOwnPoetry;
+    Animation rotate;
+    @OnClick({R.id.ib_photo})
+    void onClick(View v) {
+        switch(v.getId()) {
+            case R.id.ib_photo:
+                poetryDbList.clear();
+                List<PoetryDb> poetryDbList1 = LitePal.where("poetryDb_id >= ?", "200").find(PoetryDb.class);
+                for (PoetryDb poetryDb : poetryDbList1) {
+                    poetryDbList.add(poetryDb);
+                }
+                ownPoetryAdapter.notifyDataSetChanged();
+                rotate = AnimationUtils.loadAnimation(PoetryActivity.this,R.anim.widget_rotate);
+                rotate.setFillAfter(true);
+                ibPhoto.startAnimation(rotate);
+                int officialNumbers = LitePal.where("poetryDb_id<?","200").count(PoetryDb.class);
+                int ownNumbers = LitePal.where("poetryDb_id >= ?", "200").count(PoetryDb.class);
+                officialPoetryNumber.setDetailText(String.valueOf(officialNumbers));
+                ownPoetryNumber.setDetailText(String.valueOf(ownNumbers));
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        Toast.makeText(PoetryActivity.this,"已同步数据库数据",Toast.LENGTH_SHORT).show();
+                    }
+                },2000);
+                 break;
+            default:
+                break;
+        }
+    }
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -76,6 +109,7 @@ public class PoetryActivity extends AppCompatActivity {
         initGroupListView();
         showSwipeRecycleView();
     }
+
 
     /**
      * swipeRecycleView处理
@@ -122,15 +156,37 @@ public class PoetryActivity extends AppCompatActivity {
                 // RecyclerView的Item的position。
                 int adapterPosition = menuBridge.getAdapterPosition();
                 // 菜单在RecyclerView的Item中的Position。
-                int menuPosition = menuBridge.getAdapterPosition();
-                Log.d(TAG, "onItemClick: 位置"+menuPosition);
+                int menuPosition = menuBridge.getPosition();
+                Log.d(TAG, "onItemClick: 位置"+adapterPosition);
                 if (direction == SwipeMenuRecyclerView.LEFT_DIRECTION) {
-
+                    Intent intent = new Intent(PoetryActivity.this, AddAndEditPoetryActivity.class);
+                    intent.putExtra("addOrEdit","edit");
+                    int editId = poetryDbList.get(adapterPosition).getPoetryDb_id();
+                    intent.putExtra("editId",editId+"");
+                    startActivity(intent);
                 } else if (direction == SwipeMenuRecyclerView.RIGHT_DIRECTION) {
-                    int deleteId = poetryDbList.get(menuPosition).getPoetryDb_id();
-                    LitePal.deleteAll(PoetryDb.class, "poetryDb_id = ?", String.valueOf(deleteId));
-                    poetryDbList.remove(menuPosition);
-                    ownPoetryAdapter.notifyItemRemoved(menuPosition);
+                    final boolean[] isCancle = {false};
+                    Handler handler = new Handler();
+                    Snackbar.make(recyclerView,"正在删除该条诗词数据",Snackbar.LENGTH_SHORT)
+                            .setAction("取消", new View.OnClickListener() {
+                                @Override
+                                public void onClick(View v) {
+                                    isCancle[0] = true;
+                                    Toast.makeText(PoetryActivity.this,"已取消删除",Toast.LENGTH_SHORT).show();
+                                }
+                            }).show();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            if (!isCancle[0]) {
+                                int deleteId = poetryDbList.get(adapterPosition).getPoetryDb_id();
+                                LitePal.deleteAll(PoetryDb.class, "poetryDb_id = ?", String.valueOf(deleteId));
+                                poetryDbList.remove(adapterPosition);
+                                ownPoetryAdapter.notifyItemRemoved(adapterPosition);
+                            }
+                        }
+                    },1800);
+
                 }
 
             }
@@ -162,24 +218,26 @@ public class PoetryActivity extends AppCompatActivity {
      * 初始化GroupList
      */
     private void initGroupListView() {
+        int officialNumbers = LitePal.where("poetryDb_id<?","200").count(PoetryDb.class);
+        int ownNumbers = LitePal.where("poetryDb_id >= ?", "200").count(PoetryDb.class);
         officialPoetryNumber = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.test),
+                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon05),
                 "官方诗词数",
-                null,
+                String.valueOf(officialNumbers),
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
         officialPoetryNumber.setTag(R.id.listitem_tag_1);
 
         ownPoetryNumber = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.test),
+                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon06),
                 "自定义诗词数",
-                null,
+                String.valueOf(ownNumbers),
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
         ownPoetryNumber.setTag(R.id.listitem_tag_2);
 
         addOwnPoetry = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.test),
+                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon07),
                 "添加自定义诗词",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -206,7 +264,8 @@ public class PoetryActivity extends AppCompatActivity {
         int tag = (int) listItemView.getTag();
         switch(tag) {
             case R.id.listitem_tag_3:
-                Intent intent = new Intent(PoetryActivity.this, AddPoetryActivity.class);
+                Intent intent = new Intent(PoetryActivity.this, AddAndEditPoetryActivity.class);
+                intent.putExtra("addOrEdit","add");
                 startActivity(intent);
                 break;
             default:

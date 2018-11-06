@@ -135,23 +135,24 @@ public class PersonActivity extends AppCompatActivity {
                         Log.d(TAG, "onClick: which "+which);
                         switch(which) {
                             case 0:
-                                File outputImage = new File(getExternalCacheDir(),"head.jpg");
-                                try {
-                                    if (outputImage.exists()) {
-                                        outputImage.delete();
-                                    }
-                                    outputImage.createNewFile();
-                                } catch (IOException e) {
-                                    e.printStackTrace();
-                                }
-                                if (Build.VERSION.SDK_INT >= 24) {
-                                    imageUri = FileProvider.getUriForFile(MyApplication.getContext(), "PoetryWeatherHead", outputImage);
-                                } else {
-                                    imageUri = Uri.fromFile(outputImage);
-                                }
-                                Intent intentCamera = new Intent("android.media.action.IMAGE_CAPTURE");
-                                intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
-                                startActivityForResult(intentCamera, 1);
+                                Toast.makeText(PersonActivity.this,"此功能还在调试中,敬请期待",Toast.LENGTH_SHORT).show();
+//                                File outputImage = new File(getExternalCacheDir(),"head.jpg");
+//                                try {
+//                                    if (outputImage.exists()) {
+//                                        outputImage.delete();
+//                                    }
+//                                    outputImage.createNewFile();
+//                                } catch (IOException e) {
+//                                    e.printStackTrace();
+//                                }
+//                                if (Build.VERSION.SDK_INT >= 24) {
+//                                    imageUri = FileProvider.getUriForFile(PersonActivity.this, "PoetryWeatherHead", outputImage);
+//                                } else {
+//                                    imageUri = Uri.fromFile(outputImage);
+//                                }
+//                                Intent intentCamera = new Intent("android.media.action.IMAGE_CAPTURE");
+//                                intentCamera.putExtra(MediaStore.EXTRA_OUTPUT, imageUri);
+//                                startActivityForResult(intentCamera, 1);
                                 dialog.dismiss();
                                 break;
                             case 1:
@@ -291,7 +292,7 @@ public class PersonActivity extends AppCompatActivity {
      */
     private void initGroupListView() {
         nameListView = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PersonActivity.this,R.drawable.test),
+                ContextCompat.getDrawable(PersonActivity.this,R.drawable.item_icon00),
                 "姓名",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -300,7 +301,7 @@ public class PersonActivity extends AppCompatActivity {
         nameListView.setDetailText(name);
 
         sexListView = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PersonActivity.this, R.drawable.test),
+                ContextCompat.getDrawable(PersonActivity.this, R.drawable.item_icon01),
                 "性别",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -309,7 +310,7 @@ public class PersonActivity extends AppCompatActivity {
         sexListView.setDetailText(sex);
 
         signatureListView = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PersonActivity.this, R.drawable.test),
+                ContextCompat.getDrawable(PersonActivity.this, R.drawable.item_icon02),
                 "个性签名",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -318,7 +319,7 @@ public class PersonActivity extends AppCompatActivity {
         signatureListView.setDetailText(signature);
 
         preferenceListView = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PersonActivity.this, R.drawable.test),
+                ContextCompat.getDrawable(PersonActivity.this, R.drawable.item_icon03),
                 "诗词偏爱",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -327,7 +328,7 @@ public class PersonActivity extends AppCompatActivity {
         preferenceListView.setDetailText(preference);
 
         refreshForWeatherListView = mGroupListView.createItemView(
-                ContextCompat.getDrawable(PersonActivity.this,R.drawable.test),
+                ContextCompat.getDrawable(PersonActivity.this,R.drawable.item_icon04),
                 "自动刷新间隔",
                 null,
                 QMUICommonListItemView.HORIZONTAL,
@@ -340,9 +341,9 @@ public class PersonActivity extends AppCompatActivity {
         QMUIGroupListView.newSection(this)
                 .setTitle("个人信息")
                 .setDescription("诗词示例:\n" +
-                        "清婉秀丽 寻寻觅觅，冷冷清清，凄凄惨惨戚戚。\n" +
-                        "激越高亢 羽扇纶巾，谈笑间，樯橹灰飞烟灭。\n" +
-                        "语言绮丽 新帖绣罗襦，双双金鹧鸪。")
+                        "清婉秀丽: 寻寻觅觅，冷冷清清，凄凄惨惨戚戚。\n" +
+                        "激越高亢: 羽扇纶巾，谈笑间，樯橹灰飞烟灭。\n" +
+                        "语言绮丽: 新帖绣罗襦，双双金鹧鸪。")
                 .addItemView(nameListView,onClickListener)
                 .addItemView(sexListView,onClickListener)
                 .addItemView(signatureListView,onClickListener)

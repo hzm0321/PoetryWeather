@@ -5,7 +5,7 @@ android {
     compileSdkVersion 26
     defaultConfig {
         applicationId "cn.hzmeurasia.poetryweather"
-        minSdkVersion 25
+        minSdkVersion 21
         targetSdkVersion 26
         versionCode 1
         versionName "1.0"
@@ -86,6 +86,7 @@ dependencies {
     implementation 'com.github.czy1121:loadinglayout:1.0.1'
     implementation 'com.github.xujiaji:happy-bubble:1.1.6'
     implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-14'
+    compile 'com.scwang.smartrefresh:SmartRefreshHeader:1.1.0-alpha-14'
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.qmuiteam:qmui:1.1.7'
