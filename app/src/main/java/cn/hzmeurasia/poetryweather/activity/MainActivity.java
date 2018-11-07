@@ -1,16 +1,21 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.net.Uri;
 import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBar;
@@ -240,6 +245,9 @@ public class MainActivity extends AppCompatActivity {
         mLocationClient = new AMapLocationClient(getApplicationContext());
         //设置定位回调监听
         mLocationClient.setLocationListener(mLocationListener);
+
+        checkLocationPower();
+
         //初始化AMapLocationClientOption对象
         mLocationOption = new AMapLocationClientOption();
         AMapLocationClientOption option = new AMapLocationClientOption();
@@ -289,11 +297,14 @@ public class MainActivity extends AppCompatActivity {
         recyclerView.setSwipeMenuCreator(new SwipeMenuCreator() {
             @Override
             public void onCreateMenu(SwipeMenu swipeLeftMenu, SwipeMenu swipeRightMenu, int viewType) {
+                int height = ViewGroup.LayoutParams.MATCH_PARENT;
                 SwipeMenuItem deleteItem = new SwipeMenuItem(MainActivity.this)
-                        .setBackgroundColor(getResources().getColor(R.color.bluishWhite))
+                        .setBackgroundColor(getResources().getColor(R.color.qmui_config_color_red))
                         .setText("删除")
-                        .setHeight(ViewGroup.LayoutParams.MATCH_PARENT)
-                        .setWidth(200);
+                        .setTextColorResource(R.color.qmui_config_color_white)
+                        .setTextSize(18)
+                        .setHeight(height)
+                        .setWidth(220);
                 swipeRightMenu.addMenuItem(deleteItem);
             }
         });
@@ -359,6 +370,7 @@ public class MainActivity extends AppCompatActivity {
         //设置列表字体颜色
         ColorStateList csl = resource.getColorStateList(R.color.navigation_menu_item_color);
         navigationView.setItemTextColor(csl);
+        navigationView.setItemIconTintList(null);
         navigationView.setCheckedItem(R.id.nav_home);
         navigationView.setNavigationItemSelectedListener(item -> {
             switch(item.getItemId()) {
@@ -443,6 +455,18 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 drawerLayout.openDrawer(GravityCompat.START);
+                break;
+            case R.id.github:
+                Uri uri = Uri.parse("https://github.com/hzm0321/PoetryWeather");
+                Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+                startActivity(intent);
+                break;
+            case R.id.update:
+                Toast.makeText(MainActivity.this,"已是最新版",Toast.LENGTH_SHORT).show();
+                break;
+            case R.id.about:
+                Intent intent1 = new Intent(this, AboutActivity.class);
+                startActivity(intent1);
                 break;
             default:
                 break;
@@ -638,11 +662,55 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
 
+    private void checkLocationPower() {
+        List<String> permissionList = new ArrayList<>();
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.READ_PHONE_STATE);
+        }
+        if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissionList.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        }
+        if (!permissionList.isEmpty()) {
+            String[] permissions = permissionList.toArray(new String[permissionList.size()]);
+            ActivityCompat.requestPermissions(MainActivity.this, permissions, 1);
+        } else {
+            mLocationClient.startLocation();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        switch(requestCode) {
+            case 1:
+                if (grantResults.length > 0) {
+                    for (int result : grantResults) {
+                        if (result != PackageManager.PERMISSION_GRANTED) {
+                            Toast.makeText(this, "必须同意所请求的权限才能使用本程序", Toast.LENGTH_SHORT).show();
+                            finish();
+                            return;
+                        }
+                    }
+                    mLocationClient.startLocation();
+                } else {
+                    Toast.makeText(this,"发生未知错误",Toast.LENGTH_SHORT).show();
+                    finish();
+                }
+                break;
+            default:
+                break;
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.toolbar,menu);
         return true;
     }
+
+
 
     @Override
     protected void onDestroy() {

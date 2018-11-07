@@ -6,7 +6,11 @@
     <string name="nav_item_poetry">诗词管理</string>
     <string name="main_tip">您还没有添加任何城市</string>
     <string name="main_about">关于</string>
+    <string name="github">项目GitHub地址</string>
+    <string name="update">检查更新</string>
+    <string name="about_copyright">© 2018-%1$s PoetryWeather All rights reserved.</string>
     <string name="webView_poetry">诗词鉴赏</string>
     <string name="shareName">诗语天气</string>
     <string name="addPoetry">添加自定义诗词</string>
+    <string name="about_description">将中国传统文化、诗词等与天气应用相结合的一款基于安卓端的开源APP</string>
 </resources>

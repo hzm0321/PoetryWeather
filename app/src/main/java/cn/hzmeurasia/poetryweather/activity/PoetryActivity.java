@@ -65,6 +65,7 @@ public class PoetryActivity extends AppCompatActivity {
     QMUICommonListItemView officialPoetryNumber;
     QMUICommonListItemView ownPoetryNumber;
     QMUICommonListItemView addOwnPoetry;
+    QMUICommonListItemView buyOwnPoetry;
     Animation rotate;
     @OnClick({R.id.ib_photo})
     void onClick(View v) {
@@ -244,6 +245,14 @@ public class PoetryActivity extends AppCompatActivity {
                 QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
         addOwnPoetry.setTag(R.id.listitem_tag_3);
 
+        buyOwnPoetry = mGroupListView.createItemView(
+                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon00),
+                "购买自定义诗词包",
+                null,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        buyOwnPoetry.setTag(R.id.listitem_tag_4);
+
         QMUIGroupListView.newSection(this)
                 .setTitle("本地诗词数据库")
                 .addItemView(officialPoetryNumber,null)
@@ -252,6 +261,7 @@ public class PoetryActivity extends AppCompatActivity {
         QMUIGroupListView.newSection(this)
                 .setTitle("自定义诗词数据库")
                 .addItemView(addOwnPoetry,onClickListener)
+                .addItemView(buyOwnPoetry,onClickListener)
                 .addTo(mGroupListView);
 
     }
@@ -268,6 +278,8 @@ public class PoetryActivity extends AppCompatActivity {
                 intent.putExtra("addOrEdit","add");
                 startActivity(intent);
                 break;
+            case R.id.listitem_tag_4:
+                Toast.makeText(PoetryActivity.this, "此功能正在建设中,敬请期待", Toast.LENGTH_SHORT).show();
             default:
                 break;
         }

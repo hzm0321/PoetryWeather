@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.Map;
 
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
+import cn.hzmeurasia.poetryweather.entity.Control;
 import cn.hzmeurasia.poetryweather.entity.Poetry;
 import cn.hzmeurasia.poetryweather.entity.PoetryWeather;
 import cn.hzmeurasia.poetryweather.entity.RefreshTimeEvent;
 import cn.hzmeurasia.poetryweather.util.CalendarUtil;
+import cn.hzmeurasia.poetryweather.util.ControlUtil;
 import cn.hzmeurasia.poetryweather.util.DateUtil;
 import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
@@ -57,17 +59,32 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        final int[] dataBases = new int[1];
+        dataBases[0] = 0;
         LitePal.getDatabase();
+        //读取control
+        String controlUri = "http://hzmeurasia.cn/control";
+        HttpUtil.sendOkHttpRequest(controlUri, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
 
+            }
 
-//        new Thread(() -> {
-//            updateWeatherBg();
-//
-//            stopSelf();
-//
-//        }).start();
-
-        createPoetryDatabase();
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String responsText = response.body().string();
+                Control control = ControlUtil.handleControlResponse(responsText);
+                if (control != null) {
+                    SharedPreferences.Editor editor = getSharedPreferences("control", MODE_PRIVATE).edit();
+                    editor.putInt("dataBaseNumber",control.getDataBaseNumber());
+                    editor.putInt("weather_bg_cloud", control.getWeather_bg_cloud());
+                    editor.putInt("weather_bg_rain", control.getWeather_bg_rain());
+                    editor.apply();
+                    dataBases[0] = control.getDataBaseNumber();
+                    createPoetryDatabase(dataBases[0]);
+                }
+            }
+        });
         String date = DateUtil.getDateString();
         Log.d(TAG, "date: "+date);
         //读取万年历缓存
@@ -85,6 +102,8 @@ public class MyService extends Service {
             Log.d(TAG, "onStartCommand: "+"查询网络数据后发送");
             requestCalendar(date);
         }
+
+
 
         updateCityWeather();
         return super.onStartCommand(intent, flags, startId);
@@ -188,42 +207,37 @@ public class MyService extends Service {
     /**
      * 获取服务器诗句数据库数据
      */
-    private void createPoetryDatabase() {
-        String poetryWeatherUrl = "http://hzmeurasia.cn/poetry";
-        HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
-            @Override
-            public void onFailure(@NonNull Call call, @NonNull IOException e) {
+    private void createPoetryDatabase(int dataBases) {
+        int locationOfficialPoetryDatabases = LitePal.where("poetryDb_id < ?", "200").count(PoetryDb.class);
+        if (dataBases > locationOfficialPoetryDatabases) {
+            String poetryWeatherUrl = "http://hzmeurasia.cn/poetry";
+            HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
 
-            }
+                }
 
-            @Override
-            public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
-                final String responsText = response.body().string();
-                Log.d(TAG, "onResponse: "+responsText);
-                final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
-                if (poetryWeather!=null) {
-                    if (poetryWeather.poetryList.size() > LitePal.count(PoetryDb.class)
-                            && poetryWeather.poetryList.size() > 0) {
-                        for (Poetry poetry : poetryWeather.poetryList) {
-                            PoetryDb poetryDb = new PoetryDb();
-                            poetryDb.setPoetryDb_id(poetry.id);
-                            poetryDb.setPoetryDb_poetry(poetry.poetry);
-                            poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
-                            poetryDb.setPoetryDb_weather(poetry.weather);
-                            Log.d(TAG, "onResponse: 作者"+poetry.author);
-                            poetryDb.setPoetryDb_author(poetry.author);
-                            poetryDb.setPoetryDb_annotation(poetry.annotation);
-                            poetryDb.setPoetryDb_qwxl(poetry.qwxl);
-                            poetryDb.setPoetryDb_jygk(poetry.jygk);
-                            poetryDb.setPoetryDb_yyql(poetry.yyql);
-                            poetryDb.save();
-                        }
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    final String responsText = response.body().string();
+                    final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
+                    for (Poetry poetry : poetryWeather.poetryList) {
+                        PoetryDb poetryDb = new PoetryDb();
+                        poetryDb.setPoetryDb_id(poetry.id);
+                        poetryDb.setPoetryDb_poetry(poetry.poetry);
+                        poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
+                        poetryDb.setPoetryDb_weather(poetry.weather);
+                        Log.d(TAG, "onResponse: 作者"+poetry.author);
+                        poetryDb.setPoetryDb_author(poetry.author);
+                        poetryDb.setPoetryDb_annotation(poetry.annotation);
+                        poetryDb.setPoetryDb_qwxl(poetry.qwxl);
+                        poetryDb.setPoetryDb_jygk(poetry.jygk);
+                        poetryDb.setPoetryDb_yyql(poetry.yyql);
+                        poetryDb.save();
                     }
                 }
-                Log.d(TAG, "诗词数据库字段数 "+LitePal.count(PoetryDb.class));
-
-            }
-        });
+            });
+        }
     }
 
     @Override

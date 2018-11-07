@@ -1,5 +1,6 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.annotation.SuppressLint;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
@@ -21,6 +22,8 @@ import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 
 import org.litepal.LitePal;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,6 +61,11 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
     int jygk=-1 ;
     int yyql=-1 ;
     String checkIntent,tipText;
+    String[] items = new String[]{
+            "晴","多云","少云","晴间多云","阴","阵雨","强阵雨",
+            "雷阵雨","小雨","中雨","大雨","暴雨","大暴雨","特大暴雨",
+            "冻雨","小到中雨","中到大雨","大到暴雨","雨","小雪","中雪",
+            "大雪","暴雪","雨夹雪","阵雪","雪","薄雾","雾","沙尘暴","大雾"};
 
     @OnClick({R.id.btn_back,R.id.btn_finish})
     void onClick(View v){
@@ -103,6 +111,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("LongLogTag")
     private boolean isEdit() {
         Intent intent = getIntent();
         checkIntent = intent.getStringExtra("addOrEdit");
@@ -119,6 +128,14 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
             sFirstPoetry = sPoetry[0];
             sSecondPotry = sPoetry[1];
             sWeatherPoetry = poetryDb.getPoetryDb_weather();
+//            String[] strings = sWeatherPoetry.split(" ");
+//            Log.d(TAG, "isEdit: string长度 "+strings.length);
+//            weatherItems = new int[strings.length];
+//            for (int i = 0; i < strings.length; i++) {
+//                weatherItems[i] =
+//                Log.d(TAG, "isEdit: strings "+strings[i]);
+//                Log.d(TAG, "isEdit: 返回的索引位置"+ Arrays.binarySearch(items,strings[i]));
+//            }
             qwxl = poetryDb.getPoetryDb_qwxl();
             jygk = poetryDb.getPoetryDb_jygk();
             yyql = poetryDb.getPoetryDb_yyql();
@@ -142,6 +159,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
     /**
      * 初始化列表
      */
+    @SuppressLint("LongLogTag")
     private void initGroupListView() {
         idPoetryListView = mGroupListView.createItemView(
                 ContextCompat.getDrawable(AddAndEditPoetryActivity.this,R.drawable.item_icon00),
@@ -274,12 +292,8 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
     /**
      * 匹配天气多选输入框
      */
+    @SuppressLint("LongLogTag")
     private void showWeatherPoetryMultiChoiceDialog(){
-        final String[] items = new String[]{
-                "晴","多云","少云","晴间多云","阴","阵雨","强阵雨",
-                "雷阵雨","小雨","中雨","大雨","暴雨","大暴雨","特大暴雨",
-                "冻雨","小到中雨","中到大雨","大到暴雨","雨","小雪","中雪",
-                "大雪","暴雪","雨夹雪","阵雪","雪","薄雾","雾","沙尘暴","大雾"};
         final QMUIDialog.MultiCheckableDialogBuilder builder = new QMUIDialog.MultiCheckableDialogBuilder(AddAndEditPoetryActivity.this)
                 .setCheckedItems(weatherItems)
                 .addItems(items, (dialog, which) -> {
@@ -292,7 +306,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
             weatherItems = builder.getCheckedItemIndexes();
             for (int i = 0; i < weatherItems.length; i++) {
                 text += items[builder.getCheckedItemIndexes()[i]]+" ";
-                sWeatherPoetry += items[builder.getCheckedItemIndexes()[i]];
+                sWeatherPoetry += items[builder.getCheckedItemIndexes()[i]] + " ";
             }
             Log.d(TAG, "sWeatherPoetry: "+sWeatherPoetry);
             weatherPoetryListView.setDetailText(text);
@@ -392,6 +406,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
 
 
+    @SuppressLint("LongLogTag")
     private void checkPoetry() {
         if (id >= 0 && !sFirstPoetry.isEmpty() && !sSecondPotry.isEmpty() && !sWeatherPoetry.isEmpty() &&
                 qwxl >= 0 && jygk >= 0 && yyql >= 0) {

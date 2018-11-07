@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.provider.SyncStateContract;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.v4.content.ContextCompat;
@@ -21,6 +22,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
@@ -40,6 +43,11 @@ import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 import com.qmuiteam.qmui.widget.popup.QMUIListPopup;
 import com.qmuiteam.qmui.widget.popup.QMUIPopup;
 import com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout;
+import com.scwang.smartrefresh.layout.api.OnTwoLevelListener;
+import com.scwang.smartrefresh.layout.api.RefreshHeader;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.header.TwoLevelHeader;
+import com.scwang.smartrefresh.layout.listener.SimpleMultiPurposeListener;
 import com.xujiaji.happybubble.BubbleDialog;
 
 import org.greenrobot.eventbus.EventBus;
@@ -116,8 +124,15 @@ public class WeatherActivity extends AppCompatActivity {
     ImageView ivBg;
     @BindView(R.id.viewPage)
     ViewPager mViewPager;
-    @BindView(R.id.rf_weather)
-    QMUIPullRefreshLayout mPullRefreshLayout;
+
+    @BindView(R.id.secondfloor)
+    View floor;
+    @BindView(R.id.header)
+    TwoLevelHeader header;
+    @BindView(R.id.refreshLayout)
+    RefreshLayout refreshLayout;
+    @BindView(R.id.secondfloor_content)
+    ImageView rfSecondFloorContent;
 
     PoetryDb getPoetryDb;
     LayoutInflater mInflater;
@@ -190,6 +205,12 @@ public class WeatherActivity extends AppCompatActivity {
         //注册EventBus
         EventBus.getDefault().register(this);
 
+        //加载背景图片
+        Glide.with(this)
+                .load(R.drawable.default_bg)
+                .into(ivBg);
+//        showRefresh();
+
 //        //获取手机屏幕高度
 //        DisplayMetrics dm = getResources().getDisplayMetrics();
 //        int height = dm.heightPixels;
@@ -219,29 +240,46 @@ public class WeatherActivity extends AppCompatActivity {
         initViews();
         heWeather();
         initLifeStyleSharePreference();
+        showRefresh();
 
+    }
 
-        //刷新监听
-        mPullRefreshLayout.setOnPullListener(new QMUIPullRefreshLayout.OnPullListener() {
+    private void showRefresh() {
+        refreshLayout.setOnMultiPurposeListener(new SimpleMultiPurposeListener(){
             @Override
-            public void onMoveTarget(int offset) {
+            public void onHeaderMoving(RefreshHeader header, boolean isDragging, float percent, int offset, int headerHeight, int maxDragHeight) {
+                floor.setTranslationY(Math.min(offset - floor.getHeight(), refreshLayout.getLayout().getHeight() - floor.getHeight()));
 
             }
 
             @Override
-            public void onMoveRefreshView(int offset) {
-
-            }
-
-            @Override
-            public void onRefresh() {
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
                 heWeather();
                 initLifeStyleSharePreference();
-                mPullRefreshLayout.finishRefresh();
+                refreshLayout.finishRefresh();
+            }
+
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                refreshLayout.finishLoadMore(2000);
             }
         });
 
-
+        header.setOnTwoLevelListener(new OnTwoLevelListener() {
+            @Override
+            public boolean onTwoLevel(@NonNull RefreshLayout refreshLayout) {
+                Toast.makeText(MyApplication.getContext(),"触发二楼",Toast.LENGTH_SHORT).show();
+                rfSecondFloorContent.animate().alpha(1).setDuration(2000);
+                refreshLayout.getLayout().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        header.finishTwoLevel();
+                        rfSecondFloorContent.animate().alpha(0).setDuration(1000);
+                    }
+                },5000);
+                return true;
+            }
+        });
     }
 
 
@@ -394,6 +432,45 @@ public class WeatherActivity extends AppCompatActivity {
         }
     };
 
+    private void loadingBg(String weather) {
+        SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
+        int weather_bg_cloud = preferences.getInt("weather_bg_cloud", 0);
+        Log.d(TAG, "loadingBg: could "+weather_bg_cloud);
+        int weather_bg_rain = preferences.getInt("weather_bg_rain", 0);
+                switch(weather) {
+                    case "阴":
+                    case "多云":
+                        int rNumberCould = new Random().nextInt(weather_bg_cloud);
+                        Log.d(TAG, "loadingBg: 获取到的随机数"+rNumberCould);
+                        StringBuilder stringBuilderCould = new StringBuilder();
+                        stringBuilderCould.append("http://www.hzmeurasia.cn/background/could")
+                                .append(rNumberCould)
+                                .append(".jpg");
+                        Log.d(TAG, "loadingBg: "+stringBuilderCould.toString());
+                        Glide.with(this)
+                                .load(stringBuilderCould.toString())
+                                .into(ivBg);
+                        break;
+                    case "雨":
+                        int rNumberRain = new Random().nextInt(weather_bg_rain);
+                        Log.d(TAG, "loadingBg: 获取到的随机数"+rNumberRain);
+                        StringBuilder stringBuilderRain = new StringBuilder();
+                        stringBuilderRain.append("http://www.hzmeurasia.cn/background/could")
+                                .append(rNumberRain)
+                                .append(".jpg");
+                        Glide.with(this)
+                                .load(stringBuilderRain.toString())
+                                .into(ivBg);
+                        break;
+                    default:
+                        //加载背景图片
+                        Glide.with(this)
+                                .load(R.drawable.default_bg)
+                                .into(ivBg);
+                        break;
+                }
+    }
+
 
 
     /**
@@ -401,15 +478,8 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void heWeather() {
         showLoading("正在加载天气数据......");
-        HeWeatherUtil.handleAirResponse(cityCode,tvAqi);
-        //加载背景图片
-        Log.d(TAG, "heWeather: 加载背景");
-        Glide.with(this)
-                .load("http://www.hzmeurasia.cn/background/bg.png")
-                .listener(requestListener)
-                .placeholder(R.drawable.default_bg)
-                .into(ivBg);
 
+        HeWeatherUtil.handleAirResponse(cityCode,tvAqi);
         //获取实时天气
         HeWeather.getWeatherNow(this, cityCode, new HeWeather.OnResultWeatherNowBeanListener() {
             @Override
@@ -422,11 +492,15 @@ public class WeatherActivity extends AppCompatActivity {
             public void onSuccess(List<Now> list) {
                 StringBuilder temperature = new StringBuilder();
                 for (Now now : list) {
+                    //加载背景
+                    loadingBg(now.getNow().getCond_txt());
+                    Log.d(TAG, "onSuccess: 加载天气背景");
                     tvCityName.setText(now.getBasic().getLocation());
                     temperature.append(now.getNow().getFl())
                             .append("°");
                     tvTemperature.setText(temperature.toString());
                     tvWeather.setText(now.getNow().getCond_txt());
+
                     //载入天气图标
                     loadWeatherIcon("weather_icon",now.getNow().getCond_code(),imgWeatherIcon);
                 }
@@ -564,8 +638,11 @@ public class WeatherActivity extends AppCompatActivity {
         }
         Log.d(TAG, "getPoetry: " + poetry);
         String[] poetrys = poetry.split(",");
+        Animation animation = AnimationUtils.loadAnimation(this, R.anim.text_alpha);
         tvPoetry01.setText(poetrys[0]);
+        tvPoetry01.startAnimation(animation);
         tvPoetry02.setText(poetrys[1]);
+        tvPoetry02.startAnimation(animation);
     }
 
     /**

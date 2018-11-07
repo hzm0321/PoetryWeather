@@ -1,23 +1,53 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/rf_weather"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-
-    <FrameLayout
+    <com.scwang.smartrefresh.layout.SmartRefreshLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/refreshLayout"
+        android:clipChildren="false"
+        app:srlAccentColor="@color/qmui_config_color_black"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/frameLayout">
+        android:layout_height="match_parent">
+        <com.scwang.smartrefresh.layout.header.TwoLevelHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/header">
 
+            <ImageView
+                android:id="@+id/secondfloor"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/app_name"
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_secondfloor"/>
+            <ImageView
+                android:id="@+id/secondfloor_content"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@string/app_name"
+                android:scaleType="centerCrop"
+                android:src="@drawable/image_secondfloor_content"
+                android:alpha="0"/>
+            <com.scwang.smartrefresh.layout.header.ClassicsHeader
+                android:id="@+id/classics"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+        </com.scwang.smartrefresh.layout.header.TwoLevelHeader>
+        <FrameLayout
+            android:id="@+id/frameLayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
 
-    <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:id="@+id/iv_weather_bg"
-        android:scaleType="centerCrop"/>
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:id="@+id/iv_weather_bg"
+                android:scaleType="centerCrop"/>
 
             <RelativeLayout
                 android:layout_width="match_parent"
@@ -41,7 +71,7 @@
                     android:layout_height="wrap_content"
                     android:layout_below="@id/in_weather_now"
                     android:id="@+id/in_weather_poetry"/>
-                
+
                 <android.support.v4.view.ViewPager
                     android:layout_width="match_parent"
                     android:layout_height="100dp"
@@ -51,22 +81,11 @@
                 </android.support.v4.view.ViewPager>
 
             </RelativeLayout>
-        <LinearLayout
-            android:layout_marginBottom="-50dp"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_gravity="bottom">
+        </FrameLayout>
 
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:text="黄振敏"/>
-        </LinearLayout>
-
-
-    </FrameLayout>
+    </com.scwang.smartrefresh.layout.SmartRefreshLayout>
+</FrameLayout>
 
 
 
 
-</com.qmuiteam.qmui.widget.pullRefreshLayout.QMUIPullRefreshLayout>
