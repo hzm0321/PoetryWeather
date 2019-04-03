@@ -38,6 +38,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
+import com.jinrishici.sdk.android.JinrishiciClient;
+import com.jinrishici.sdk.android.listener.JinrishiciCallback;
+import com.jinrishici.sdk.android.model.JinrishiciRuntimeException;
+import com.jinrishici.sdk.android.model.PoetySentence;
 import com.qmuiteam.qmui.util.QMUIDisplayHelper;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
 import com.qmuiteam.qmui.widget.popup.QMUIListPopup;
@@ -55,6 +59,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -69,9 +74,14 @@ import cn.hzmeurasia.poetryweather.PoetryDialog;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
+import cn.hzmeurasia.poetryweather.entity.PoetryDetail;
+import cn.hzmeurasia.poetryweather.entity.SelectPoetry;
 import cn.hzmeurasia.poetryweather.entity.Weather;
 import cn.hzmeurasia.poetryweather.util.HeWeatherUtil;
+import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import cn.hzmeurasia.poetryweather.util.ImageUtil;
+import cn.hzmeurasia.poetryweather.util.PrefUtils;
+import cn.hzmeurasia.poetryweather.util.SelectPoetryUtil;
 import cn.sharesdk.framework.Platform;
 import cn.sharesdk.onekeyshare.OnekeyShare;
 import cn.sharesdk.onekeyshare.ShareContentCustomizeCallback;
@@ -83,6 +93,9 @@ import interfaces.heweather.com.interfacesmodule.bean.weather.hourly.HourlyBase;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
 import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.Response;
 
 import static android.support.v7.widget.ListPopupWindow.WRAP_CONTENT;
 import static cn.hzmeurasia.poetryweather.MyApplication.getContext;
@@ -134,7 +147,6 @@ public class WeatherActivity extends AppCompatActivity {
     @BindView(R.id.secondfloor_content)
     ImageView rfSecondFloorContent;
 
-    PoetryDb getPoetryDb;
     LayoutInflater mInflater;
     View view01,view02,view03,view04,lifeStyleView;
     TextView tvSuit,tvAvoid,tvComf,tvDrsg,tvFlu,tvUv,tvSport,tvAir,tvLifeStyle;
@@ -145,6 +157,11 @@ public class WeatherActivity extends AppCompatActivity {
     private String cityCode = null;
     private List<View> mListView = new ArrayList<>();
     private int dateOnclickFlag = 0;
+    private boolean checkPoetry = false;
+    private String nowWeather;//当前天气
+    String findPoetry = "";//发现诗句
+    PoetryDetail poetryDetail;//详细诗句
+    List<String> keyWord = new ArrayList<>();
 
     QMUITipDialog tipDialog;
     private BubbleDialog.Position mPosition = BubbleDialog.Position.RIGHT;
@@ -154,13 +171,18 @@ public class WeatherActivity extends AppCompatActivity {
         switch(v.getId()) {
             case R.id.tv_poetry1:
             case R.id.tv_poetry2:
-                if (getPoetryDb.getPoetryDb_annotation() != null) {
-                    PoetryDialog poetryDialog = new PoetryDialog(this)
+                poetryDetail = PrefUtils.getPoetryDetail(WeatherActivity.this);
+                if (poetryDetail != null && poetryDetail.content.length() > 0) {
+                    PoetryDialog poetryDialog = new PoetryDialog(this, poetryDetail, keyWord)
                             .setPosition(mPosition)
                             .setClickedView(tvPoetry02);
-                    poetryDialog.setClickListener(str ->intent());
+                    poetryDialog.setClickListener(str -> intent());
                     poetryDialog.show();
+                } else {
+                    Toast.makeText(WeatherActivity.this, "该诗句诗词库中暂未收录", Toast.LENGTH_SHORT).show();
                 }
+
+
                 break;
             case R.id.btn_weather_back:
                 finish();
@@ -382,10 +404,6 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
-
-
-
-
     class MyPagerAdapter extends PagerAdapter {
         @Override
         public int getCount() {
@@ -432,6 +450,10 @@ public class WeatherActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * 加载背景
+     * @param weather
+     */
     private void loadingBg(String weather) {
         SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
         int weather_bg_cloud = preferences.getInt("weather_bg_cloud", 0);
@@ -471,8 +493,6 @@ public class WeatherActivity extends AppCompatActivity {
                 }
     }
 
-
-
     /**
      * 载入和风天气数据
      */
@@ -493,7 +513,8 @@ public class WeatherActivity extends AppCompatActivity {
                 StringBuilder temperature = new StringBuilder();
                 for (Now now : list) {
                     //加载背景
-                    loadingBg(now.getNow().getCond_txt());
+                    nowWeather = now.getNow().getCond_txt();
+                    loadingBg(nowWeather);
                     Log.d(TAG, "onSuccess: 加载天气背景");
                     tvCityName.setText(now.getBasic().getLocation());
                     temperature.append(now.getNow().getFl())
@@ -571,7 +592,6 @@ public class WeatherActivity extends AppCompatActivity {
                     }
                 }
                 getPoetry();
-
                 closeLoading();
             }
 
@@ -598,51 +618,206 @@ public class WeatherActivity extends AppCompatActivity {
     /**
      * 获取诗句
      */
-    private void getPoetry() {
-        String poetry = null;
-        SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
-        String p = sharedPreferences.getString("preferenceFlag","[]");
-        p = p.replace("[","");
-        p = p.replace("]","");
-        p = p.replaceAll(",", "");
-        String qwxl = "0";
-        String jygk = "0";
-        String yyql = "0";
-        if (p.contains("0")) {  qwxl="1";}
-        if (p.contains("1")) {  jygk="1";}
-        if (p.contains("2")) {  yyql="1";}
-        Log.d(TAG, "getPoetry: P "+p );
-        Log.d(TAG, "getPoetry: qjy "+ qwxl+jygk+yyql);
-        Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
-        List<PoetryDb> poetryDbs = LitePal
-                .select("poetryDb_poetry","poetryDb_author","poetryDb_annotation","poetryDb_poetry_link")
-                .where("poetryDb_weather like ? and (poetryDb_qwxl=? or poetryDb_jygk=? or poetryDb_yyql=?)", "%"+tvWeather.getText().toString()+"%",qwxl,jygk,yyql)
-                .find(PoetryDb.class);
-        Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
-        if (poetryDbs.size() >= 1) {
-            getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
-            poetry = getPoetryDb.getPoetryDb_poetry();
-            String author = getPoetryDb.getPoetryDb_author();
-            String annotation = getPoetryDb.getPoetryDb_annotation();
-            String poetry_link = getPoetryDb.getPoetryDb_poetry_link();
-            Log.d(TAG, "getPoetry: "+author);
-            //添加缓存
-            SharedPreferences.Editor editor = getSharedPreferences("poetry_detail", MODE_PRIVATE).edit();
-            editor.putString("poetry_link", poetry_link);
-            editor.putString("author", author);
-            editor.putString("annotation", annotation);
-            editor.apply();
-        } else {
-            Toast.makeText(WeatherActivity.this,"诗句获取失败",Toast.LENGTH_SHORT).show();
-            return;
+//    private void getPoetry() {
+//        String poetry = null;
+//        SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
+//        String p = sharedPreferences.getString("preferenceFlag","[]");
+//        p = p.replace("[","");
+//        p = p.replace("]","");
+//        p = p.replaceAll(",", "");
+//        String qwxl = "0";
+//        String jygk = "0";
+//        String yyql = "0";
+//        if (p.contains("0")) {  qwxl="1";}
+//        if (p.contains("1")) {  jygk="1";}
+//        if (p.contains("2")) {  yyql="1";}
+//        Log.d(TAG, "getPoetry: P "+p );
+//        Log.d(TAG, "getPoetry: qjy "+ qwxl+jygk+yyql);
+//        Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
+//        List<PoetryDb> poetryDbs = LitePal
+//                .select("poetryDb_poetry","poetryDb_author","poetryDb_annotation","poetryDb_poetry_link")
+//                .where("poetryDb_weather like ? and (poetryDb_qwxl=? or poetryDb_jygk=? or poetryDb_yyql=?)", "%"+tvWeather.getText().toString()+"%",qwxl,jygk,yyql)
+//                .find(PoetryDb.class);
+//        Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
+//        if (poetryDbs.size() >= 1) {
+//            getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
+//            poetry = getPoetryDb.getPoetryDb_poetry();
+//            String author = getPoetryDb.getPoetryDb_author();
+//            String annotation = getPoetryDb.getPoetryDb_annotation();
+//            String poetry_link = getPoetryDb.getPoetryDb_poetry_link();
+//            Log.d(TAG, "getPoetry: "+author);
+//            //添加缓存
+//            SharedPreferences.Editor editor = getSharedPreferences("poetry_detail", MODE_PRIVATE).edit();
+//            editor.putString("poetry_link", poetry_link);
+//            editor.putString("author", author);
+//            editor.putString("annotation", annotation);
+//            editor.apply();
+//        } else {
+//            Toast.makeText(WeatherActivity.this,"诗句获取失败",Toast.LENGTH_SHORT).show();
+//            return;
+//        }
+//        Log.d(TAG, "getPoetry: " + poetry);
+//        String[] poetrys = poetry.split(",");
+//        Animation animation = AnimationUtils.loadAnimation(this, R.anim.text_alpha);
+//        tvPoetry01.setText(poetrys[0]);
+//        tvPoetry01.startAnimation(animation);
+//        tvPoetry02.setText(poetrys[1]);
+//        tvPoetry02.startAnimation(animation);
+//    }
+    private void getPoetry(){
+        if (!checkPoetry){
+            getSmartPoetry();
+        }else {
+            getWeatherPoetry();
         }
-        Log.d(TAG, "getPoetry: " + poetry);
-        String[] poetrys = poetry.split(",");
-        Animation animation = AnimationUtils.loadAnimation(this, R.anim.text_alpha);
-        tvPoetry01.setText(poetrys[0]);
-        tvPoetry01.startAnimation(animation);
-        tvPoetry02.setText(poetrys[1]);
-        tvPoetry02.startAnimation(animation);
+    }
+
+    private void pushPoetry(){
+        if (findPoetry.length()>0){
+            String addressFindPoetry = "https://www.caoxingyu.club/guwen/selectbykeyword?page=1&keyword=" + findPoetry;
+            Log.d(TAG, "getPoetry: 查询诗句的地址" + addressFindPoetry);
+            SelectPoetryUtil.getPoetry(addressFindPoetry,WeatherActivity.this);
+        }
+    }
+
+    /**
+     * 获取智能推荐的诗句
+     */
+    private void getSmartPoetry(){
+        JinrishiciClient client = JinrishiciClient.getInstance();
+        client.getOneSentenceBackground(new JinrishiciCallback() {
+            @Override
+            public void done(PoetySentence poetySentence) {
+                String poetry = poetySentence.getData().getContent();
+                Log.d(TAG, "done: 获取到的诗句"+poetry);
+                poetry = poetry.substring(0,poetry.length()-1);
+                Log.d(TAG, "done: 获取到的Id"+poetySentence.getData().getMatchTags());
+                //关键词,复制引用
+                keyWord.addAll(poetySentence.getData().getMatchTags());
+                String[] poetrys = poetry.split("，");
+                if (poetrys.length < 2){
+                    getSmartPoetry();
+                    return;
+                }
+                Animation animation = AnimationUtils.loadAnimation(MyApplication.getContext(),R.anim.text_alpha);
+                tvPoetry01.setText(poetrys[0]);
+                tvPoetry01.startAnimation(animation);
+                tvPoetry02.setText(poetrys[1]);
+                tvPoetry02.startAnimation(animation);
+                findPoetry = poetrys[0];
+                checkPoetry = true;
+                pushPoetry();
+
+            }
+
+            @Override
+            public void error(JinrishiciRuntimeException e) {
+
+            }
+        });
+    }
+
+    /**
+     * 获取根据天气推荐的诗句
+     */
+    private void getWeatherPoetry(){
+        //拿到当前天气
+        switch (nowWeather){
+            case "晴":
+            case "晴间多云":
+                String address0 = "https://api.gushi.ci/tianqi/taiyang.txt";//写太阳
+                okHttpPoetry(address0);
+                break;
+            case "阴":
+            case "多云":
+                String address1 = "https://api.gushi.ci/tianqi/xieyun.txt";//写云
+                okHttpPoetry(address1);
+                break;
+            case "有风":
+            case "微风":
+            case "和风":
+            case "清风":
+            case "大风":
+            case "风暴":
+                String address2 = "https://api.gushi.ci/tianqi/xiefeng.txt";//写风
+                okHttpPoetry(address2);
+                break;
+            case "阵雨":
+            case "强阵雨":
+            case "雷阵雨":
+            case "强雷阵雨":
+            case "小雨":
+            case "中雨":
+            case "大雨":
+            case "细雨":
+            case "暴雨":
+            case "大暴雨":
+            case "雨":
+            case "小到中雨":
+            case "中到大雨":
+            case "大到暴雨":
+            case "暴雨到大暴雨":
+                String address3 = "https://api.gushi.ci/tianqi/xieyu.txt";//写雨
+                okHttpPoetry(address3);
+                break;
+            case "小雪":
+            case "中雪":
+            case "大雪":
+            case "暴雪":
+            case "雨夹雪":
+            case "雨雪天气":
+            case "阵雨夹雪":
+            case "阵雪":
+            case "小到中雪":
+            case "中到大雪":
+            case "大到暴雪":
+            case "雪":
+                String address4 = "https://api.gushi.ci/tianqi/xieyu.txt";//写雪
+                okHttpPoetry(address4);
+                break;
+            default:
+                String address5 = "https://api.gushi.ci/all.txt";//全部
+                okHttpPoetry(address5);
+                break;
+        }
+        List<String> newWeather = new ArrayList<>();
+        newWeather.add(nowWeather);
+        keyWord = newWeather;
+    }
+
+    private void okHttpPoetry(String address) {
+        HttpUtil.sendOkHttpRequest(address, new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                Toast.makeText(MyApplication.getContext(),"诗词获取失败",Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                String respondsTest = response.body().string();
+                respondsTest = respondsTest.substring(0,respondsTest.length()-1);
+                Log.d(TAG, "onResponse: 根据天气获取到的诗句"+respondsTest);
+                String[] poetry = respondsTest.split("，");
+                if (poetry.length < 2) {
+                    getWeatherPoetry();
+                    return;
+                }
+                findPoetry = poetry[0];
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        Animation animation = AnimationUtils.loadAnimation(MyApplication.getContext(),R.anim.text_alpha);
+                        tvPoetry01.setText(poetry[0]);
+                        tvPoetry01.startAnimation(animation);
+                        tvPoetry02.setText(poetry[1]);
+                        tvPoetry02.startAnimation(animation);
+                        checkPoetry = false;
+                        pushPoetry();
+                    }
+                });
+
+            }
+        });
     }
 
     /**
@@ -670,8 +845,6 @@ public class WeatherActivity extends AppCompatActivity {
                 .setTipWord(text)
                 .create();
         tipDialog.show();
-
-
     }
 
     /**
