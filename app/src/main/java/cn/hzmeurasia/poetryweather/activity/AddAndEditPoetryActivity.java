@@ -408,7 +408,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
     @SuppressLint("LongLogTag")
     private void checkPoetry() {
-        if (id >= 0 && !sFirstPoetry.isEmpty() && !sSecondPotry.isEmpty() && !sWeatherPoetry.isEmpty() &&
+        if (id >= 0 && !sFirstPoetry.isEmpty() && !sSecondPotry.trim().isEmpty() && !sWeatherPoetry.trim().isEmpty() &&
                 qwxl >= 0 && jygk >= 0 && yyql >= 0) {
             tipDialog = new QMUITipDialog.Builder(AddAndEditPoetryActivity.this)
                     .setIconType(QMUITipDialog.Builder.ICON_TYPE_SUCCESS)
@@ -418,7 +418,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
                 PoetryDb poetryDb = new PoetryDb();
                 poetryDb.setPoetryDb_id(id);
-                poetryDb.setPoetryDb_poetry(sFirstPoetry + "," + sSecondPotry);
+                poetryDb.setPoetryDb_poetry(sFirstPoetry.trim() + "," + sSecondPotry.trim());
                 poetryDb.setPoetryDb_weather(sWeatherPoetry);
                 poetryDb.setPoetryDb_qwxl(qwxl);
                 poetryDb.setPoetryDb_jygk(jygk);
@@ -447,7 +447,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
     public static String stringFilter(String str)throws PatternSyntaxException {
         // 只允许字母、数字和汉字      
-        String regEx = "[^a-zA-Z0-9\u4E00-\u9FA5]";
+        String regEx = "[^\u4E00-\u9FA5]";
         Pattern p = Pattern.compile(regEx);
         Matcher m = p.matcher(str);
     return m.replaceAll("").trim();

@@ -5,6 +5,8 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -63,7 +65,7 @@ public class MyService extends Service {
         dataBases[0] = 0;
         LitePal.getDatabase();
         //读取control
-        String controlUri = "http://hzmeurasia.cn/control";
+        String controlUri = "http://hzmeurasia.cn/poetry_weather/control";
         HttpUtil.sendOkHttpRequest(controlUri, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
@@ -81,6 +83,17 @@ public class MyService extends Service {
                     editor.putInt("weather_bg_rain", control.getWeather_bg_rain());
                     editor.apply();
                     dataBases[0] = control.getDataBaseNumber();
+                    try {
+                        Log.d(TAG, "onResponse: 服务器版本号"+control.getVersionCode());
+                        if (control.getVersionCode() > getVersionCode()) {
+                            Log.d(TAG, "onResponse: 执行了更新");
+                            SharedPreferences.Editor editor1 = getSharedPreferences("control", MODE_PRIVATE).edit();
+                            editor1.putBoolean("isUpdate", true);
+                            editor1.apply();
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                     createPoetryDatabase(dataBases[0]);
                 }
             }
@@ -210,7 +223,7 @@ public class MyService extends Service {
     private void createPoetryDatabase(int dataBases) {
         int locationOfficialPoetryDatabases = LitePal.where("poetryDb_id < ?", "200").count(PoetryDb.class);
         if (dataBases > locationOfficialPoetryDatabases) {
-            String poetryWeatherUrl = "http://hzmeurasia.cn/poetry";
+            String poetryWeatherUrl = "http://hzmeurasia.cn/poetry_weather/poetry";
             HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
@@ -219,6 +232,7 @@ public class MyService extends Service {
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
+                    LitePal.deleteAll(PoetryDb.class);
                     final String responsText = response.body().string();
                     final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
                     for (Poetry poetry : poetryWeather.poetryList) {
@@ -238,6 +252,32 @@ public class MyService extends Service {
                 }
             });
         }
+    }
+
+    /**
+     * 获取当前程序的版本名
+     */
+    private String getVersionName() throws Exception{
+        //获取packagemanager的实例
+        PackageManager packageManager = getPackageManager();
+        //getPackageName()是你当前类的包名，0代表是获取版本信息
+        PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(), 0);
+        Log.e("TAG","版本号"+packInfo.versionCode);
+        Log.e("TAG","版本名"+packInfo.versionName);
+        return packInfo.versionName;
+    }
+
+    /**
+     * 获取当前程序的版本号
+     */
+    private int getVersionCode() throws Exception{
+        //获取packagemanager的实例
+        PackageManager packageManager = getPackageManager();
+        //getPackageName()是你当前类的包名，0代表是获取版本信息
+        PackageInfo packInfo = packageManager.getPackageInfo(getPackageName(), 0);
+        Log.e("TAG","版本号"+packInfo.versionCode);
+        Log.e("TAG","版本名"+packInfo.versionName);
+        return packInfo.versionCode;
     }
 
     @Override

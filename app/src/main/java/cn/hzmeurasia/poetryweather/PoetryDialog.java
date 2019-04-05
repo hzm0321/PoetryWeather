@@ -9,8 +9,12 @@ import android.widget.TextView;
 
 import com.xujiaji.happybubble.BubbleDialog;
 
+import java.time.Instant;
+import java.util.List;
+
 import cn.hzmeurasia.poetryweather.activity.WeatherActivity;
 import cn.hzmeurasia.poetryweather.activity.WebViewActivity;
+import cn.hzmeurasia.poetryweather.entity.PoetryDetail;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -24,14 +28,23 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
     private ViewHolder mViewHolder;
     private OnClickCustomButtonListener mListener;
 
+    static PoetryDetail poetryDetail;
+    static String keyWord;
+
     private String poetry_link;
 
     private String author_link;
 
-    public PoetryDialog(Context context) {
+    public PoetryDialog(Context context, PoetryDetail p, List<String> list) {
         super(context);
         calBar(true);
-//        initText();
+        poetryDetail = p;
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int i = 0; i < list.size(); i++) {
+            stringBuilder.append(list.get(i));
+            stringBuilder.append("、");
+        }
+        keyWord = stringBuilder.toString().substring(0,stringBuilder.length()-1);
         setTransParentBackground();
         setPosition(Position.RIGHT);
         setOffsetX(100);
@@ -47,7 +60,7 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
         if (mListener != null)
         {
             mListener.onClick(
-                    poetry_link
+                   poetry_link
             );
         }
     }
@@ -55,17 +68,24 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
     private class ViewHolder {
         private String author;
         private String annotation;
-        TextView tv1, tv2;
+        TextView tv1, tv2, tv3, tv4;
 
         public ViewHolder(View rootView) {
             tv1 = rootView.findViewById(R.id.tv1);
             tv2 = rootView.findViewById(R.id.tv2);
-            SharedPreferences preferences = getContext().getSharedPreferences("poetry_detail", MODE_PRIVATE);
-            author = preferences.getString("author", "暂未获取到作者数据,请刷新网络后重试");
-            annotation = preferences.getString("annotation", "暂未获取到注释数据,请刷新网络后重试");
-            poetry_link = preferences.getString("poetry_link", null);
-            tv1.setText("作者:"+author);
-            tv2.setText("注释:"+annotation);
+            tv3 = rootView.findViewById(R.id.tv3);
+            tv4 = rootView.findViewById(R.id.tv4);
+            tv1.setText(poetryDetail.title);
+            tv2.setText("["+poetryDetail.dynasty+"]"+" "+poetryDetail.writer);
+            tv3.setText(poetryDetail.content);
+            tv4.setText("关键词:"+keyWord);
+
+//            SharedPreferences preferences = getContext().getSharedPreferences("poetry_detail", MODE_PRIVATE);
+//            author = preferences.getString("author", "暂未获取到作者数据,请刷新网络后重试");
+//            annotation = preferences.getString("annotation", "暂未获取到注释数据,请刷新网络后重试");
+//            poetry_link = preferences.getString("poetry_link", null);
+//            tv1.setText("作者:"+author);
+//            tv2.setText("注释:"+annotation);
         }
     }
 
@@ -80,10 +100,6 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
         void onClick(String string);
     }
 
-//    private void initText() {
-//        SharedPreferences preferences = getContext().getSharedPreferences("poetry_detail", MODE_PRIVATE);
-//        author = preferences.getString("author", "暂未获取到作者数据,请刷新网络后重试");
-//        annotation = preferences.getString("annotation", "暂未获取到注释数据,请刷新网络后重试");
-//
-//    }
+
+
 }

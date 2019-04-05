@@ -6,8 +6,12 @@
     android:id="@+id/drawerLayout">
 
         <android.support.design.widget.CoordinatorLayout
+            android:fitsSystemWindows="true"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="@drawable/main_bg">
+
+
 
             <android.support.design.widget.AppBarLayout
                 android:layout_width="match_parent"

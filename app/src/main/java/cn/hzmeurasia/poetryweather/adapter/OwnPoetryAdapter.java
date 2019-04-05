@@ -53,8 +53,7 @@ public class OwnPoetryAdapter extends RecyclerView.Adapter<OwnPoetryAdapter.View
             mContext = parent.getContext();
         }
         View view = LayoutInflater.from(MyApplication.getContext()).inflate(R.layout.poetry_item, parent, false);
-        ViewHolder holder = new ViewHolder(view);
-        return holder;
+        return new ViewHolder(view);
     }
 
     @Override

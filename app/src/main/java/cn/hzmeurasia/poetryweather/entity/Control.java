@@ -7,9 +7,27 @@ package cn.hzmeurasia.poetryweather.entity;
  * 日期:2018/11/7 17:34
  */
 public class Control {
+    private int versionCode;
+    private String versionName;
     private int dataBaseNumber;
     private int weather_bg_cloud;
     private int weather_bg_rain;
+
+    public int getVersionCode() {
+        return versionCode;
+    }
+
+    public void setVersionCode(int versionCode) {
+        this.versionCode = versionCode;
+    }
+
+    public String getVersionName() {
+        return versionName;
+    }
+
+    public void setVersionName(String versionName) {
+        this.versionName = versionName;
+    }
 
     public int getDataBaseNumber() {
         return dataBaseNumber;

@@ -197,7 +197,6 @@ public class PoetryActivity extends AppCompatActivity {
         recyclerView.setAdapter(ownPoetryAdapter);
     }
 
-
     /**
      * 返回按钮
      * @param item

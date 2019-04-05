@@ -212,7 +212,7 @@ public class WeatherActivity extends AppCompatActivity {
     }
 
     private void intent() {
-        Intent intent = new Intent(WeatherActivity.this, WebViewActivity.class);
+        Intent intent = new Intent(WeatherActivity.this, PoetryDetailActivity.class);
         startActivity(intent);
     }
 

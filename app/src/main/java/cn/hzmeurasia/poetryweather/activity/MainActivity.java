@@ -39,6 +39,7 @@ import com.amap.api.location.AMapLocationListener;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.google.gson.Gson;
+import com.qmuiteam.qmui.util.QMUIStatusBarHelper;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.dialog.QMUIDialogAction;
 import com.qmuiteam.qmui.widget.dialog.QMUITipDialog;
@@ -65,11 +66,10 @@ import org.greenrobot.eventbus.ThreadMode;
 import org.litepal.LitePal;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.CountDownLatch;
+import java.util.Random;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -79,18 +79,11 @@ import cn.hzmeurasia.poetryweather.adapter.CardAdapter;
 import cn.hzmeurasia.poetryweather.db.CityDb;
 import cn.hzmeurasia.poetryweather.entity.SearchCityEvent;
 import cn.hzmeurasia.poetryweather.service.MyService;
-import cn.hzmeurasia.poetryweather.util.HeWeatherUtil;
-import cn.hzmeurasia.poetryweather.util.HttpUtil;
 import de.hdodenhof.circleimageview.CircleImageView;
 import interfaces.heweather.com.interfacesmodule.bean.basic.Basic;
 import interfaces.heweather.com.interfacesmodule.bean.search.Search;
-import interfaces.heweather.com.interfacesmodule.bean.weather.Weather;
 import interfaces.heweather.com.interfacesmodule.bean.weather.now.Now;
-import interfaces.heweather.com.interfacesmodule.view.HeConfig;
 import interfaces.heweather.com.interfacesmodule.view.HeWeather;
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.Response;
 
 import static interfaces.heweather.com.interfacesmodule.bean.Lang.CHINESE_SIMPLIFIED;
 
@@ -222,6 +215,8 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        //沉浸式状态栏
+        QMUIStatusBarHelper.translucent(MainActivity.this);
         //绑定初始化ButterKnife
         ButterKnife.bind(this);
         //开启服务
@@ -462,7 +457,12 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
                 break;
             case R.id.update:
-                Toast.makeText(MainActivity.this,"已是最新版",Toast.LENGTH_SHORT).show();
+                SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
+                if (preferences.getBoolean("isUpdate", false)) {
+                    Toast.makeText(MainActivity.this, "此软件已发布更新,请到GitHub本项目地址下载最新版", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainActivity.this,"已是最新版",Toast.LENGTH_SHORT).show();
+                }
                 break;
             case R.id.about:
                 Intent intent1 = new Intent(this, AboutActivity.class);
@@ -496,17 +496,34 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "您已添加过该城市", Toast.LENGTH_SHORT).show();
                     closeLoading();
                 } else {
-                    for (Now now : list) {
-                            CityDb cityDb = new CityDb();
-                            cityDb.setCityDb_cid(now.getBasic().getCid());
-                            cityDb.setCityDb_cityName(now.getBasic().getLocation());
-                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
-                            cityDb.setCityDb_temperature(now.getNow().getFl());
-                            cityDb.setCityDb_imageId(R.drawable.bg);
+                    Random random = new Random();
+                    List<Integer> bgList = new ArrayList<>();
+                    bgList.add(R.drawable.main_city_bg0);
+                    bgList.add(R.drawable.main_city_bg1);
+                    bgList.add(R.drawable.main_city_bg2);
+                    int bg = bgList.get(random.nextInt(bgList.size()));
+                    CityDb cityDb = new CityDb();
+                    cityDb.setCityDb_cid(list.get(0).getBasic().getCid());
+                            cityDb.setCityDb_cityName(list.get(0).getBasic().getLocation());
+                            cityDb.setCityDb_txt(list.get(0).getNow().getCond_txt());
+                            cityDb.setCityDb_temperature(list.get(0).getNow().getFl()+"°");
+                            cityDb.setCityDb_imageId(bg);
                             cityDb.save();
-                            cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
-                                    now.getNow().getCond_txt(), now.getNow().getFl(), R.drawable.bg));
-                    }
+                    cityDbList.add(new CityDb(list.get(0).getBasic().getCid(), list.get(0).getBasic().getLocation(),
+                            list.get(0).getNow().getCond_txt(), list.get(0).getNow().getFl(), bg));
+
+//                    for (Now now : list) {
+//                            int bg = bgList.get(random.nextInt(bgList.size()));
+//                            CityDb cityDb = new CityDb();
+//                            cityDb.setCityDb_cid(now.getBasic().getCid());
+//                            cityDb.setCityDb_cityName(now.getBasic().getLocation());
+//                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
+//                            cityDb.setCityDb_temperature(now.getNow().getFl()+"°");
+//                            cityDb.setCityDb_imageId(bg);
+//                            cityDb.save();
+//                            cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
+//                                    now.getNow().getCond_txt(), now.getNow().getFl(), bg));
+//                    }
                     //刷新Card视图
                     cardAdapter.notifyDataSetChanged();
                     isCardEmpty();
@@ -629,9 +646,7 @@ public class MainActivity extends AppCompatActivity {
      * 显示搜索城市界面
      */
     private void showSearchCity() {
-        /**
-         * 添加热门城市
-         */
+        //添加热门城市
         List<HotCity> hotCities = new ArrayList<>();
         hotCities.add(new HotCity("北京", "北京", "101010100"));
         hotCities.add(new HotCity("上海", "上海", "101020100"));
@@ -639,10 +654,28 @@ public class MainActivity extends AppCompatActivity {
         hotCities.add(new HotCity("深圳", "广东", "101280601"));
         hotCities.add(new HotCity("杭州", "浙江", "101210101"));
         hotCities.add(new HotCity("西安", "陕西", "101050311"));
-        CityPicker.getInstance()
-                .setFragmentManager(getSupportFragmentManager())
+//        CityPicker.getInstance()
+//                .setFragmentManager(getSupportFragmentManager())
+//                .enableAnimation(true)
+//                .setAnimationStyle(R.style.DefaultCityPickerAnimation)
+//                .setLocatedCity(new LocatedCity(districtName,provinceName,cityCode))
+//                .setHotCities(hotCities)
+//                .setOnPickListener(new OnPickListener() {
+//                    @Override
+//                    public void onPick(int position, City data) {
+//                        Toast.makeText(MyApplication.getContext(),data.getName(),Toast.LENGTH_SHORT).show();
+//                        //组合cityCode
+//                        String cid = "CN" + data.getCode();
+//                        //发送EventBus事件
+//                        EventBus.getDefault().post(new SearchCityEvent(cid));
+//                    }
+//                    @Override
+//                    public void onLocate() {
+//
+//                    }
+//                }).show();
+        CityPicker.from(MainActivity.this)
                 .enableAnimation(true)
-                .setAnimationStyle(R.style.DefaultCityPickerAnimation)
                 .setLocatedCity(new LocatedCity(districtName,provinceName,cityCode))
                 .setHotCities(hotCities)
                 .setOnPickListener(new OnPickListener() {
@@ -657,6 +690,11 @@ public class MainActivity extends AppCompatActivity {
 
                     @Override
                     public void onLocate() {
+
+                    }
+
+                    @Override
+                    public void onCancel() {
 
                     }
                 }).show();
@@ -688,8 +726,6 @@ public class MainActivity extends AppCompatActivity {
                 if (grantResults.length > 0) {
                     for (int result : grantResults) {
                         if (result != PackageManager.PERMISSION_GRANTED) {
-                            Toast.makeText(this, "必须同意所请求的权限才能使用本程序", Toast.LENGTH_SHORT).show();
-                            finish();
                             return;
                         }
                     }

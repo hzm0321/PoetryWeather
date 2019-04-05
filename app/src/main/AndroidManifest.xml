@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:versionCode="1"
+    android:versionName="1.0.1"
     package="cn.hzmeurasia.poetryweather">
 
     <!-- 用于进行网络定位 -->
@@ -37,7 +39,12 @@
         <meta-data
             android:name="com.amap.api.v2.apikey"
             android:value="7a1645f258f510ea59866cfa6884be17" />
-
+        <meta-data
+            android:name="design_width_in_dp"
+            android:value="360"/>
+        <meta-data
+            android:name="design_height_in_dp"
+            android:value="640"/>
         <activity
             android:name=".activity.MainActivity"
             android:theme="@style/DefaultCityPickerTheme"
@@ -56,7 +63,7 @@
         <activity android:name=".activity.PoetryActivity"
             android:theme="@style/PersonActivityTheme"/>
 
-        <activity android:name=".activity.WebViewActivity"/>
+        <activity android:name=".activity.PoetryDetailActivity"/>
 
         <activity android:name=".activity.AddAndEditPoetryActivity"/>
 

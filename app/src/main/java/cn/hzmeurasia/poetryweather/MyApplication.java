@@ -4,7 +4,10 @@ import android.app.Application;
 import android.content.Context;
 
 
+import com.jinrishici.sdk.android.JinrishiciClient;
+import com.jinrishici.sdk.android.factory.JinrishiciFactory;
 import com.mob.MobSDK;
+import com.qmuiteam.qmui.arch.QMUISwipeBackActivityManager;
 
 import org.litepal.LitePal;
 
@@ -27,11 +30,16 @@ public class MyApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         LitePal.initialize(context);
+        //初始化随机获取诗词
+        JinrishiciClient.getInstance().init(this);
+        QMUISwipeBackActivityManager.init(this);
         //注册Mob
         MobSDK.init(this);
         //注册和风天气
         HeConfig.init("HE1808181021011344","c6a58c3230694b64b78facdebd7720fb");
         HeConfig.switchToFreeServerNode();
+        QMUISwipeBackActivityManager.init(this);
+
     }
 
     public static Context getContext() {

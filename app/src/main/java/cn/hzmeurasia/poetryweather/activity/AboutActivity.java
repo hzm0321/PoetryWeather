@@ -5,8 +5,10 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -41,6 +43,7 @@ public class AboutActivity extends AppCompatActivity {
     QMUIGroupListView mAboutGroupListView;
     @BindView(R.id.copyright)
     TextView mCopyrightTextView;
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,6 +59,7 @@ public class AboutActivity extends AppCompatActivity {
     }
 
     //初始化状态栏
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void initTopBar() {
         mTopBar.addLeftBackImageButton().setOnClickListener(new View.OnClickListener() {
             @Override

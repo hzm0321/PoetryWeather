@@ -7,25 +7,57 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:alpha="0.6"
-        android:src="@drawable/bg"/>
-
-    <LinearLayout
-        android:padding="5dp"
+        android:alpha="0.5"
+        android:src="@drawable/weather_poetry_bg"/>
+    <ScrollView
+        android:scrollbars="none"
         android:layout_width="match_parent"
-        android:orientation="vertical"
-        android:layout_height="wrap_content">
+        android:layout_height="match_parent">
 
-        <TextView
-            android:textSize="15sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv1"/>
-        <TextView
-            android:textSize="15sp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:id="@+id/tv2"/>
-    </LinearLayout>
+        <LinearLayout
+            android:padding="5dp"
+            android:layout_width="match_parent"
+            android:orientation="vertical"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:text="夜雨寄北"
+                android:layout_gravity="center"
+                android:textSize="18sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv1"/>
+            <TextView
+                android:textColor="#787878"
+                android:layout_marginTop="8dp"
+                android:layout_gravity="center"
+                android:text="[唐代] 李商隐"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv2"/>
+            <TextView
+                android:layout_marginTop="5dp"
+                android:layout_gravity="center"
+                android:text="君问归期未有期，巴山夜雨涨秋池。 \n何当共剪西窗烛，却话巴山夜雨时。"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv3"/>
+            <TextView
+                android:layout_marginTop="10dp"
+                android:layout_marginLeft="10dp"
+                android:layout_gravity="left"
+                android:text="关键词：长安、夜雨"
+                android:textSize="15sp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/tv4"/>
+
+
+        </LinearLayout>
+    </ScrollView>
+
+
 
 </FrameLayout>
