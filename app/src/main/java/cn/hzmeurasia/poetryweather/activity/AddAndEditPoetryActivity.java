@@ -136,9 +136,9 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 //                Log.d(TAG, "isEdit: strings "+strings[i]);
 //                Log.d(TAG, "isEdit: 返回的索引位置"+ Arrays.binarySearch(items,strings[i]));
 //            }
-            qwxl = poetryDb.getPoetryDb_qwxl();
-            jygk = poetryDb.getPoetryDb_jygk();
-            yyql = poetryDb.getPoetryDb_yyql();
+//            qwxl = poetryDb.getPoetryDb_qwxl();
+//            jygk = poetryDb.getPoetryDb_jygk();
+//            yyql = poetryDb.getPoetryDb_yyql();
             return true;
         }
         return false;
@@ -149,8 +149,8 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
      */
     private void checkId() {
         PoetryDb poetryDb = LitePal.findLast(PoetryDb.class);
-        if (poetryDb.getPoetryDb_id() < 200) {
-            id = 200;
+        if (poetryDb == null) {
+            id = 1;
         } else {
             id = poetryDb.getPoetryDb_id() + 1;
         }
@@ -223,9 +223,9 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
                 .addItemView(firstPoetryListView,onClickListener)
                 .addItemView(secondPoetryListView,onClickListener)
                 .addItemView(weatherPoetryListView,onClickListener)
-                .addItemView(isqwxlPoetryListView,onClickListener)
-                .addItemView(isjygkPoetryListView,onClickListener)
-                .addItemView(isyyqlPoetryListView,onClickListener)
+//                .addItemView(isqwxlPoetryListView,onClickListener)
+//                .addItemView(isjygkPoetryListView,onClickListener)
+//                .addItemView(isyyqlPoetryListView,onClickListener)
                 .addTo(mGroupListView);
     }
 
@@ -390,15 +390,15 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
             case R.id.listitem_tag_4:
                 showWeatherPoetryMultiChoiceDialog();
                 break;
-            case R.id.listitem_tag_5:
-                showQWXLSingleChoiceDialog();
-                break;
-            case R.id.listitem_tag_6:
-                showJYGKSingleChoiceDialog();
-                break;
-            case R.id.listitem_tag_7:
-                showYYQLSingleChoiceDialog();
-                break;
+//            case R.id.listitem_tag_5:
+//                showQWXLSingleChoiceDialog();
+//                break;
+//            case R.id.listitem_tag_6:
+//                showJYGKSingleChoiceDialog();
+//                break;
+//            case R.id.listitem_tag_7:
+//                showYYQLSingleChoiceDialog();
+//                break;
             default:
                 break;
         }
@@ -408,8 +408,7 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
 
     @SuppressLint("LongLogTag")
     private void checkPoetry() {
-        if (id >= 0 && !sFirstPoetry.isEmpty() && !sSecondPotry.trim().isEmpty() && !sWeatherPoetry.trim().isEmpty() &&
-                qwxl >= 0 && jygk >= 0 && yyql >= 0) {
+        if (id >= 0 && !sFirstPoetry.isEmpty() && !sSecondPotry.trim().isEmpty() && !sWeatherPoetry.trim().isEmpty() ) {
             tipDialog = new QMUITipDialog.Builder(AddAndEditPoetryActivity.this)
                     .setIconType(QMUITipDialog.Builder.ICON_TYPE_SUCCESS)
                     .setTipWord(tipText)
@@ -420,11 +419,9 @@ public class AddAndEditPoetryActivity extends AppCompatActivity {
                 poetryDb.setPoetryDb_id(id);
                 poetryDb.setPoetryDb_poetry(sFirstPoetry.trim() + "," + sSecondPotry.trim());
                 poetryDb.setPoetryDb_weather(sWeatherPoetry);
-                poetryDb.setPoetryDb_qwxl(qwxl);
-                poetryDb.setPoetryDb_jygk(jygk);
-                poetryDb.setPoetryDb_yyql(yyql)
-
-                ;
+//                poetryDb.setPoetryDb_qwxl(qwxl);
+//                poetryDb.setPoetryDb_jygk(jygk);
+//                poetryDb.setPoetryDb_yyql(yyql);
 
             Log.d(TAG, "checkPoetry: 清婉秀丽"+qwxl);
             if ("edit".equals(checkIntent)) {

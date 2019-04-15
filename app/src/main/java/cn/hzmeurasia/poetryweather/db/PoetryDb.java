@@ -16,9 +16,9 @@ public class PoetryDb extends LitePalSupport {
     private String poetryDb_weather;
     private String poetryDb_author;
     private String poetryDb_annotation;
-    private int poetryDb_qwxl;
-    private int poetryDb_jygk;
-    private int poetryDb_yyql;
+//    private int poetryDb_qwxl;
+//    private int poetryDb_jygk;
+//    private int poetryDb_yyql;
 
     public PoetryDb() {
 
@@ -73,27 +73,27 @@ public class PoetryDb extends LitePalSupport {
         this.poetryDb_annotation = poetryDb_annotation;
     }
 
-    public int getPoetryDb_qwxl() {
-        return poetryDb_qwxl;
-    }
-
-    public void setPoetryDb_qwxl(int poetryDb_qwxl) {
-        this.poetryDb_qwxl = poetryDb_qwxl;
-    }
-
-    public int getPoetryDb_jygk() {
-        return poetryDb_jygk;
-    }
-
-    public void setPoetryDb_jygk(int poetryDb_jygk) {
-        this.poetryDb_jygk = poetryDb_jygk;
-    }
-
-    public int getPoetryDb_yyql() {
-        return poetryDb_yyql;
-    }
-
-    public void setPoetryDb_yyql(int poetryDb_yyql) {
-        this.poetryDb_yyql = poetryDb_yyql;
-    }
+//    public int getPoetryDb_qwxl() {
+//        return poetryDb_qwxl;
+//    }
+//
+//    public void setPoetryDb_qwxl(int poetryDb_qwxl) {
+//        this.poetryDb_qwxl = poetryDb_qwxl;
+//    }
+//
+//    public int getPoetryDb_jygk() {
+//        return poetryDb_jygk;
+//    }
+//
+//    public void setPoetryDb_jygk(int poetryDb_jygk) {
+//        this.poetryDb_jygk = poetryDb_jygk;
+//    }
+//
+//    public int getPoetryDb_yyql() {
+//        return poetryDb_yyql;
+//    }
+//
+//    public void setPoetryDb_yyql(int poetryDb_yyql) {
+//        this.poetryDb_yyql = poetryDb_yyql;
+//    }
 }

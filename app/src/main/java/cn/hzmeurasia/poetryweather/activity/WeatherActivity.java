@@ -74,6 +74,7 @@ import cn.hzmeurasia.poetryweather.PoetryDialog;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
 import cn.hzmeurasia.poetryweather.entity.CalendarEvent;
+import cn.hzmeurasia.poetryweather.entity.Poetry;
 import cn.hzmeurasia.poetryweather.entity.PoetryDetail;
 import cn.hzmeurasia.poetryweather.entity.SelectPoetry;
 import cn.hzmeurasia.poetryweather.entity.Weather;
@@ -179,7 +180,7 @@ public class WeatherActivity extends AppCompatActivity {
                     poetryDialog.setClickListener(str -> intent());
                     poetryDialog.show();
                 } else {
-                    Toast.makeText(WeatherActivity.this, "该诗句诗词库中暂未收录", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(WeatherActivity.this, "抱歉,该诗句诗词库中暂未收录", Toast.LENGTH_SHORT).show();
                 }
 
 
@@ -592,6 +593,7 @@ public class WeatherActivity extends AppCompatActivity {
                     }
                 }
                 getPoetry();
+
                 closeLoading();
             }
 
@@ -665,10 +667,20 @@ public class WeatherActivity extends AppCompatActivity {
 //        tvPoetry02.startAnimation(animation);
 //    }
     private void getPoetry(){
-        if (!checkPoetry){
+        //随机生成一个数
+        Random random = new Random();
+        int getOwnNum = PrefUtils.getInt("priorPoetry",WeatherActivity.this);
+        int num = random.nextInt(4+getOwnNum);
+        Log.d(TAG, "getPoetry: 随机到的数字"+num);
+        //判断num所处的范围
+        if (num < 2) {
             getSmartPoetry();
-        }else {
+        } else if (num < 4) {
             getWeatherPoetry();
+        } else {
+            //获取自定义诗词
+            Log.d(TAG, "getPoetry:数字获取自定义诗词");
+            getOwnPoetry();
         }
     }
 
@@ -783,6 +795,36 @@ public class WeatherActivity extends AppCompatActivity {
         List<String> newWeather = new ArrayList<>();
         newWeather.add(nowWeather);
         keyWord = newWeather;
+    }
+
+    /**
+     * 获取自定义诗词
+     */
+    private void getOwnPoetry() {
+        List<PoetryDb> poetryDbs = LitePal
+                .select("poetryDb_poetry")
+                .where("poetryDb_weather like ?", "%" + nowWeather + "%")
+                .find(PoetryDb.class);
+        Log.d(TAG, "getOwnPoetry: 拿到的自定义诗词数" + poetryDbs.size());
+        if (poetryDbs.size() > 0) {
+            String poetryContext = poetryDbs.get(new Random().nextInt(poetryDbs.size())).getPoetryDb_poetry();
+            String[] poetry = poetryContext.split(",");
+            findPoetry = poetry[0];
+            Animation animation = AnimationUtils.loadAnimation(MyApplication.getContext(), R.anim.text_alpha);
+            tvPoetry01.setText(poetry[0]);
+            tvPoetry01.startAnimation(animation);
+            tvPoetry02.setText(poetry[1]);
+            tvPoetry02.startAnimation(animation);
+            pushPoetry();
+        } else {
+            Random random = new Random();
+            int check = random.nextInt(2);
+            if (check == 0) {
+                getSmartPoetry();
+            } else {
+                getWeatherPoetry();
+            }
+        }
     }
 
     private void okHttpPoetry(String address) {

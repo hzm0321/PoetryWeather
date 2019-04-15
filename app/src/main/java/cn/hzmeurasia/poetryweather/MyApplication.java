@@ -30,6 +30,7 @@ public class MyApplication extends Application {
         super.onCreate();
         context = getApplicationContext();
         LitePal.initialize(context);
+        LitePal.getDatabase();
         //初始化随机获取诗词
         JinrishiciClient.getInstance().init(this);
         QMUISwipeBackActivityManager.init(this);

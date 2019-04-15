@@ -67,4 +67,14 @@ public class PrefUtils {
             return "";
         }
     }
+
+    public static void putInt(String key, int value, Context context) {
+        SharedPreferences sp = context.getSharedPreferences("ownPoetry", Context.MODE_PRIVATE);
+        sp.edit().putInt(key,value).apply();
+    }
+
+    public static int getInt(String key, Context context) {
+        SharedPreferences sp = context.getSharedPreferences("ownPoetry", Context.MODE_PRIVATE);
+        return sp.getInt(key, 2);
+    }
 }

@@ -1,6 +1,7 @@
 package cn.hzmeurasia.poetryweather.activity;
 
 import android.animation.Animator;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
@@ -21,6 +22,7 @@ import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
+import com.qmuiteam.qmui.widget.dialog.QMUIDialog;
 import com.qmuiteam.qmui.widget.grouplist.QMUICommonListItemView;
 import com.qmuiteam.qmui.widget.grouplist.QMUIGroupListView;
 import com.yanzhenjie.recyclerview.swipe.SwipeMenu;
@@ -42,6 +44,7 @@ import butterknife.OnClick;
 import cn.hzmeurasia.poetryweather.R;
 import cn.hzmeurasia.poetryweather.adapter.OwnPoetryAdapter;
 import cn.hzmeurasia.poetryweather.db.PoetryDb;
+import cn.hzmeurasia.poetryweather.util.PrefUtils;
 
 /**
  * 类名: PoetryActivity<br>
@@ -66,13 +69,14 @@ public class PoetryActivity extends AppCompatActivity {
     QMUICommonListItemView ownPoetryNumber;
     QMUICommonListItemView addOwnPoetry;
     QMUICommonListItemView buyOwnPoetry;
+    QMUICommonListItemView priorOwnPoetry;
     Animation rotate;
     @OnClick({R.id.ib_photo})
     void onClick(View v) {
         switch(v.getId()) {
             case R.id.ib_photo:
                 poetryDbList.clear();
-                List<PoetryDb> poetryDbList1 = LitePal.where("poetryDb_id >= ?", "200").find(PoetryDb.class);
+                List<PoetryDb> poetryDbList1 = LitePal.findAll(PoetryDb.class);
                 for (PoetryDb poetryDb : poetryDbList1) {
                     poetryDbList.add(poetryDb);
                 }
@@ -80,9 +84,9 @@ public class PoetryActivity extends AppCompatActivity {
                 rotate = AnimationUtils.loadAnimation(PoetryActivity.this,R.anim.widget_rotate);
                 rotate.setFillAfter(true);
                 ibPhoto.startAnimation(rotate);
-                int officialNumbers = LitePal.where("poetryDb_id<?","200").count(PoetryDb.class);
-                int ownNumbers = LitePal.where("poetryDb_id >= ?", "200").count(PoetryDb.class);
-                officialPoetryNumber.setDetailText(String.valueOf(officialNumbers));
+//                int officialNumbers = LitePal.where("poetryDb_id<?","200").count(PoetryDb.class);
+                int ownNumbers = LitePal.findAll(PoetryDb.class).size();
+                officialPoetryNumber.setDetailText("1w+");
                 ownPoetryNumber.setDetailText(String.valueOf(ownNumbers));
                 Handler handler = new Handler();
                 handler.postDelayed(new Runnable() {
@@ -117,7 +121,7 @@ public class PoetryActivity extends AppCompatActivity {
      */
     private void showSwipeRecycleView() {
         //初始化自定义诗词列表
-        poetryDbList = LitePal.where("poetryDb_id >= ?", "200").find(PoetryDb.class);
+        poetryDbList = LitePal.findAll(PoetryDb.class);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         ownPoetryAdapter = new OwnPoetryAdapter(poetryDbList);
 
@@ -218,12 +222,21 @@ public class PoetryActivity extends AppCompatActivity {
      * 初始化GroupList
      */
     private void initGroupListView() {
-        int officialNumbers = LitePal.where("poetryDb_id<?","200").count(PoetryDb.class);
-        int ownNumbers = LitePal.where("poetryDb_id >= ?", "200").count(PoetryDb.class);
+        //检查优先级
+        int prior = PrefUtils.getInt("priorPoetry", PoetryActivity.this);
+        String sPrior;
+        if (prior == 1) {
+            sPrior = "低";
+        } else if (prior == 2) {
+            sPrior = "标准";
+        } else {
+            sPrior = "高";
+        }
+        int ownNumbers = LitePal.findAll(PoetryDb.class).size();
         officialPoetryNumber = mGroupListView.createItemView(
                 ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon05),
                 "官方诗词数",
-                String.valueOf(officialNumbers),
+                String.valueOf("1w+"),
                 QMUICommonListItemView.HORIZONTAL,
                 QMUICommonListItemView.ACCESSORY_TYPE_NONE);
         officialPoetryNumber.setTag(R.id.listitem_tag_1);
@@ -252,6 +265,14 @@ public class PoetryActivity extends AppCompatActivity {
                 QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
         buyOwnPoetry.setTag(R.id.listitem_tag_4);
 
+        priorOwnPoetry = mGroupListView.createItemView(
+                ContextCompat.getDrawable(PoetryActivity.this,R.drawable.item_icon01),
+                "自定义诗词匹配优先级",
+                sPrior,
+                QMUICommonListItemView.HORIZONTAL,
+                QMUICommonListItemView.ACCESSORY_TYPE_CHEVRON);
+        priorOwnPoetry.setTag(R.id.listitem_tag_5);
+
         QMUIGroupListView.newSection(this)
                 .setTitle("本地诗词数据库")
                 .addItemView(officialPoetryNumber,null)
@@ -261,6 +282,7 @@ public class PoetryActivity extends AppCompatActivity {
                 .setTitle("自定义诗词数据库")
                 .addItemView(addOwnPoetry,onClickListener)
                 .addItemView(buyOwnPoetry,onClickListener)
+                .addItemView(priorOwnPoetry,onClickListener)
                 .addTo(mGroupListView);
 
     }
@@ -279,8 +301,38 @@ public class PoetryActivity extends AppCompatActivity {
                 break;
             case R.id.listitem_tag_4:
                 Toast.makeText(PoetryActivity.this, "此功能正在建设中,敬请期待", Toast.LENGTH_SHORT).show();
-            default:
+            case R.id.listitem_tag_5:
+                showCheckPriorDialog();
+                break;
+                default:
                 break;
         }
     };
+
+    private void showCheckPriorDialog() {
+        final String[] check = new String[1];
+        final String[] items = {"低", "标准", "高"};
+        QMUIDialog.CheckableDialogBuilder checkableDialogBuilder = new QMUIDialog.CheckableDialogBuilder(PoetryActivity.this);
+        checkableDialogBuilder.addItems(items, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialogInterface, int i) {
+                check[0] = items[i];
+                priorOwnPoetry.setDetailText(items[i]);
+                switch (items[i]) {
+                    case "低":
+                        PrefUtils.putInt("priorPoetry", 1, PoetryActivity.this);
+                        break;
+                    case "标准":
+                        PrefUtils.putInt("priorPoetry", 2, PoetryActivity.this);
+                        break;
+                    case "高":
+                        PrefUtils.putInt("priorPoetry", 4, PoetryActivity.this);
+                        break;
+                    default:
+                        break;
+                }
+                dialogInterface.dismiss();
+            }
+        }).create().show();
+    }
 }

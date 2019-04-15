@@ -3,7 +3,6 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bluishWhite"
     android:fitsSystemWindows="true"
     android:orientation="vertical">
 
@@ -14,10 +13,20 @@
         android:layout_width="match_parent"
         android:layout_height="?attr/qmui_topbar_height" />
 
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/weather_poetry_bg"
+            android:scaleType="centerCrop"/>
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:paddingBottom="10dp">
 
         <TextView
             android:layout_marginTop="10dp"
@@ -52,8 +61,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center_horizontal"
-                android:textSize="16sp"
-                android:text="正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n正文正文正文正文\n"/>
+                android:textSize="16sp"/>
 
         </ScrollView>
 
@@ -66,9 +74,8 @@
 
 
     </LinearLayout>
-
+    </FrameLayout>
     <android.support.design.widget.TabLayout
-        android:layout_marginTop="10dp"
         android:layout_width="match_parent"
         android:layout_height="40dp"
         app:tabTextColor="#000000"

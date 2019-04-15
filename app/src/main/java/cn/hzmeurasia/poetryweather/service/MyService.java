@@ -94,7 +94,7 @@ public class MyService extends Service {
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
-                    createPoetryDatabase(dataBases[0]);
+//                    createPoetryDatabase(dataBases[0]);
                 }
             }
         });
@@ -220,39 +220,39 @@ public class MyService extends Service {
     /**
      * 获取服务器诗句数据库数据
      */
-    private void createPoetryDatabase(int dataBases) {
-        int locationOfficialPoetryDatabases = LitePal.where("poetryDb_id < ?", "200").count(PoetryDb.class);
-        if (dataBases > locationOfficialPoetryDatabases) {
-            String poetryWeatherUrl = "http://hzmeurasia.cn/poetry_weather/poetry";
-            HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    LitePal.deleteAll(PoetryDb.class);
-                    final String responsText = response.body().string();
-                    final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
-                    for (Poetry poetry : poetryWeather.poetryList) {
-                        PoetryDb poetryDb = new PoetryDb();
-                        poetryDb.setPoetryDb_id(poetry.id);
-                        poetryDb.setPoetryDb_poetry(poetry.poetry);
-                        poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
-                        poetryDb.setPoetryDb_weather(poetry.weather);
-                        Log.d(TAG, "onResponse: 作者"+poetry.author);
-                        poetryDb.setPoetryDb_author(poetry.author);
-                        poetryDb.setPoetryDb_annotation(poetry.annotation);
-                        poetryDb.setPoetryDb_qwxl(poetry.qwxl);
-                        poetryDb.setPoetryDb_jygk(poetry.jygk);
-                        poetryDb.setPoetryDb_yyql(poetry.yyql);
-                        poetryDb.save();
-                    }
-                }
-            });
-        }
-    }
+//    private void createPoetryDatabase(int dataBases) {
+//        int locationOfficialPoetryDatabases = LitePal.where("poetryDb_id < ?", "200").count(PoetryDb.class);
+//        if (dataBases > locationOfficialPoetryDatabases) {
+//            String poetryWeatherUrl = "http://hzmeurasia.cn/poetry_weather/poetry";
+//            HttpUtil.sendOkHttpRequest(poetryWeatherUrl, new Callback() {
+//                @Override
+//                public void onFailure(Call call, IOException e) {
+//
+//                }
+//
+//                @Override
+//                public void onResponse(Call call, Response response) throws IOException {
+//                    LitePal.deleteAll(PoetryDb.class);
+//                    final String responsText = response.body().string();
+//                    final PoetryWeather poetryWeather = PoetryWeatherUtil.handlePoetryWeatherResponse(responsText);
+//                    for (Poetry poetry : poetryWeather.poetryList) {
+//                        PoetryDb poetryDb = new PoetryDb();
+//                        poetryDb.setPoetryDb_id(poetry.id);
+//                        poetryDb.setPoetryDb_poetry(poetry.poetry);
+//                        poetryDb.setPoetryDb_poetry_link(poetry.poetry_link);
+//                        poetryDb.setPoetryDb_weather(poetry.weather);
+//                        Log.d(TAG, "onResponse: 作者"+poetry.author);
+//                        poetryDb.setPoetryDb_author(poetry.author);
+//                        poetryDb.setPoetryDb_annotation(poetry.annotation);
+//                        poetryDb.setPoetryDb_qwxl(poetry.qwxl);
+//                        poetryDb.setPoetryDb_jygk(poetry.jygk);
+//                        poetryDb.setPoetryDb_yyql(poetry.yyql);
+//                        poetryDb.save();
+//                    }
+//                }
+//            });
+//        }
+//    }
 
     /**
      * 获取当前程序的版本名
