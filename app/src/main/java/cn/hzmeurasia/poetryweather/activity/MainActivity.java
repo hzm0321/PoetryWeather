@@ -29,6 +29,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -215,10 +217,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
-        //沉浸式状态栏
-        QMUIStatusBarHelper.translucent(MainActivity.this);
         //绑定初始化ButterKnife
         ButterKnife.bind(this);
+        //沉浸式状态栏
+        Window window = MainActivity.this.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         //开启服务
         Intent intent = new Intent(this, MyService.class);
         startService(intent);
@@ -389,6 +392,8 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intentPoetry);
                     break;
                 default:
+                    Toast.makeText(MainActivity.this, "该页面正在开发中,敬请期待", Toast.LENGTH_SHORT).show();
+                    drawerLayout.closeDrawers();
                     break;
             }
             return true;
@@ -428,7 +433,7 @@ public class MainActivity extends AppCompatActivity {
             public void onSuccess(List<Now> list) {
                 Log.d(TAG, "onSuccess: 刷新成功"+cityDb.getCityDb_cityName()+list.get(0).getNow().getCond_txt());
                 cityDbList.get(i).setCityDb_txt(list.get(0).getNow().getCond_txt());
-                cityDbList.get(i).setCityDb_temperature(list.get(0).getNow().getFl());
+                cityDbList.get(i).setCityDb_temperature(list.get(0).getNow().getTmp()+"℃");
             }
         });
     }
@@ -458,10 +463,16 @@ public class MainActivity extends AppCompatActivity {
                 break;
             case R.id.update:
                 SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
-                if (preferences.getBoolean("isUpdate", false)) {
-                    Toast.makeText(MainActivity.this, "此软件已发布更新,请到GitHub本项目地址下载最新版", Toast.LENGTH_SHORT).show();
-                } else {
-                    Toast.makeText(MainActivity.this,"已是最新版",Toast.LENGTH_SHORT).show();
+                try {
+                    int getVersionCode = preferences.getInt("versionCode",0);
+                    int nowVersionCOde = getPackageManager().getPackageInfo(getPackageName(),0).versionCode;
+                    if (getVersionCode > nowVersionCOde) {
+                        Toast.makeText(MainActivity.this, "此软件已发布更新,请到GitHub本项目地址下载最新版", Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(MainActivity.this,"已是最新版",Toast.LENGTH_SHORT).show();
+                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    e.printStackTrace();
                 }
                 break;
             case R.id.about:
@@ -496,34 +507,21 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "您已添加过该城市", Toast.LENGTH_SHORT).show();
                     closeLoading();
                 } else {
-                    Random random = new Random();
-                    List<Integer> bgList = new ArrayList<>();
-                    bgList.add(R.drawable.main_city_bg0);
-                    bgList.add(R.drawable.main_city_bg1);
-                    bgList.add(R.drawable.main_city_bg2);
-                    int bg = bgList.get(random.nextInt(bgList.size()));
+                    SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
+                    int city_bg_number = preferences.getInt("city_bg", 0);
+                    int numCity = new Random().nextInt(city_bg_number);
+                    String cityBgUrl = "http://www.hzmeurasia.cn/city_background/main_city_bg" +
+                            numCity +
+                            ".jpg";
                     CityDb cityDb = new CityDb();
                     cityDb.setCityDb_cid(list.get(0).getBasic().getCid());
                             cityDb.setCityDb_cityName(list.get(0).getBasic().getLocation());
                             cityDb.setCityDb_txt(list.get(0).getNow().getCond_txt());
-                            cityDb.setCityDb_temperature(list.get(0).getNow().getFl()+"°");
-                            cityDb.setCityDb_imageId(bg);
+                            cityDb.setCityDb_temperature(list.get(0).getNow().getTmp()+"℃");
+                            cityDb.setCityDb_imageId(cityBgUrl);
                             cityDb.save();
                     cityDbList.add(new CityDb(list.get(0).getBasic().getCid(), list.get(0).getBasic().getLocation(),
-                            list.get(0).getNow().getCond_txt(), list.get(0).getNow().getFl(), bg));
-
-//                    for (Now now : list) {
-//                            int bg = bgList.get(random.nextInt(bgList.size()));
-//                            CityDb cityDb = new CityDb();
-//                            cityDb.setCityDb_cid(now.getBasic().getCid());
-//                            cityDb.setCityDb_cityName(now.getBasic().getLocation());
-//                            cityDb.setCityDb_txt(now.getNow().getCond_txt());
-//                            cityDb.setCityDb_temperature(now.getNow().getFl()+"°");
-//                            cityDb.setCityDb_imageId(bg);
-//                            cityDb.save();
-//                            cityDbList.add(new CityDb(now.getBasic().getCid(), now.getBasic().getLocation(),
-//                                    now.getNow().getCond_txt(), now.getNow().getFl(), bg));
-//                    }
+                            list.get(0).getNow().getCond_txt(), list.get(0).getNow().getFl(), cityBgUrl));
                     //刷新Card视图
                     cardAdapter.notifyDataSetChanged();
                     isCardEmpty();
@@ -654,26 +652,6 @@ public class MainActivity extends AppCompatActivity {
         hotCities.add(new HotCity("深圳", "广东", "101280601"));
         hotCities.add(new HotCity("杭州", "浙江", "101210101"));
         hotCities.add(new HotCity("西安", "陕西", "101050311"));
-//        CityPicker.getInstance()
-//                .setFragmentManager(getSupportFragmentManager())
-//                .enableAnimation(true)
-//                .setAnimationStyle(R.style.DefaultCityPickerAnimation)
-//                .setLocatedCity(new LocatedCity(districtName,provinceName,cityCode))
-//                .setHotCities(hotCities)
-//                .setOnPickListener(new OnPickListener() {
-//                    @Override
-//                    public void onPick(int position, City data) {
-//                        Toast.makeText(MyApplication.getContext(),data.getName(),Toast.LENGTH_SHORT).show();
-//                        //组合cityCode
-//                        String cid = "CN" + data.getCode();
-//                        //发送EventBus事件
-//                        EventBus.getDefault().post(new SearchCityEvent(cid));
-//                    }
-//                    @Override
-//                    public void onLocate() {
-//
-//                    }
-//                }).show();
         CityPicker.from(MainActivity.this)
                 .enableAnimation(true)
                 .setLocatedCity(new LocatedCity(districtName,provinceName,cityCode))
@@ -762,4 +740,6 @@ public class MainActivity extends AppCompatActivity {
         super.onResume();
         showName();
     }
+
+
 }

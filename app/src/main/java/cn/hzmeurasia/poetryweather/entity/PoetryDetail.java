@@ -26,4 +26,8 @@ public class PoetryDetail {
         this.remark = remark;
         this.shangxi = shangxi;
     }
+
+    public void setContent(String content) {
+        this.content = content;
+    }
 }

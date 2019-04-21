@@ -14,13 +14,13 @@ public class CityDb extends LitePalSupport {
     private String cityDb_cityName;
     private String cityDb_txt;
     private String cityDb_temperature;
-    private int cityDb_imageId;
+    private String cityDb_imageId;
 
     public CityDb() {
 
     }
 
-    public CityDb(String cityDb_cid, String cityDb_cityName, String cityDb_txt, String cityDb_temperature, int cityDb_imageId) {
+    public CityDb(String cityDb_cid, String cityDb_cityName, String cityDb_txt, String cityDb_temperature, String cityDb_imageId) {
         this.cityDb_cid = cityDb_cid;
         this.cityDb_cityName = cityDb_cityName;
         this.cityDb_txt = cityDb_txt;
@@ -60,11 +60,11 @@ public class CityDb extends LitePalSupport {
         this.cityDb_temperature = cityDb_temperature;
     }
 
-    public int getCityDb_imageId() {
+    public String getCityDb_imageId() {
         return cityDb_imageId;
     }
 
-    public void setCityDb_imageId(int cityDb_imageId) {
+    public void setCityDb_imageId(String cityDb_imageId) {
         this.cityDb_imageId = cityDb_imageId;
     }
 }

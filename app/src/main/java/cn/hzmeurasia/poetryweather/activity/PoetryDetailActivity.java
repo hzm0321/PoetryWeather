@@ -1,11 +1,17 @@
 package cn.hzmeurasia.poetryweather.activity;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.media.MediaPlayer;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
+import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.TabLayout;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
@@ -25,6 +31,8 @@ import com.qmuiteam.qmui.widget.QMUITabSegment;
 import com.qmuiteam.qmui.widget.QMUITopBar;
 import com.qmuiteam.qmui.widget.QMUIViewPager;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -39,8 +47,9 @@ import cn.hzmeurasia.poetryweather.util.PrefUtils;
 
 public class PoetryDetailActivity extends AppCompatActivity {
 
-
     private static final String TAG = "PoetryDetailActivity";
+    private MediaPlayer mediaPlayer = new MediaPlayer();
+
     @BindView(R.id.topbar)
     QMUITopBar mTopBar;
     @BindView(R.id.tv_poetry_title)
@@ -53,13 +62,8 @@ public class PoetryDetailActivity extends AppCompatActivity {
     TabLayout tabLayout;
     @BindView(R.id.vp_poetry)
     ViewPager viewPager;
-//    @BindView(R.id.tv_poetry_detail_translation)
-//    TextView tvTranslation;
-//    @BindView(R.id.tv_poetry_detail_remark)
-//    TextView tvRemark;
-//    @BindView(R.id.tv_poetry_detail_shangxi)
-//    TextView tvShangxi;
-
+    @BindView(R.id.fab_music)
+    FloatingActionButton fabMusic;
     PoetryDetail poetryDetail;//拿到的详细诗词数据
 
 
@@ -77,6 +81,7 @@ public class PoetryDetailActivity extends AppCompatActivity {
         initText();
         initType();
         initTab();
+        initFab();
     }
 
     //初始化状态栏
@@ -137,8 +142,44 @@ public class PoetryDetailActivity extends AppCompatActivity {
         });
     }
 
+    private void initFab() {
+        //权限
+        if (ContextCompat.checkSelfPermission(PoetryDetailActivity.this, Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(PoetryDetailActivity.this, new String[]{
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+            }, 1);
+        } else {
+            initMediaPlay();
+        }
+        fabMusic.setOnClickListener(view -> {
+            if (poetryDetail.audioUrl.length() > 1) {
+                if (mediaPlayer.isPlaying()) {
+                    mediaPlayer.reset();
+                } else {
+                    mediaPlayer.start();
+                }
+            } else {
+                Toast.makeText(PoetryDetailActivity.this,"抱歉,该音频数据库中暂未收录",Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
 
+    private void initMediaPlay() {
+        try {
+            mediaPlayer.setDataSource(poetryDetail.audioUrl);
+            mediaPlayer.prepare();//准备
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
-
-
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+        }
+    }
 }

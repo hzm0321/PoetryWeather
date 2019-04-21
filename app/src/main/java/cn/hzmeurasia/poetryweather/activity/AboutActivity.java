@@ -120,7 +120,7 @@ public class AboutActivity extends AppCompatActivity {
     //初始化QMUIGroupListView
     private void initAboutList() {
         //初始化LOGO下面的名称和版本号
-        mVersionTextView.setText("诗语天气 V1.0.1");
+        mVersionTextView.setText("诗语天气 V1.0.2");
 
         //作者
         QMUICommonListItemView itemAuthor = mAboutGroupListView.createItemView("作者");

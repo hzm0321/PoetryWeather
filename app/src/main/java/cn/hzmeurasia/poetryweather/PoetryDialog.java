@@ -29,7 +29,7 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
     private OnClickCustomButtonListener mListener;
 
     static PoetryDetail poetryDetail;
-    static String keyWord;
+    static String keyWord = "";
 
     private String poetry_link;
 
@@ -44,7 +44,11 @@ public class PoetryDialog extends BubbleDialog implements View.OnClickListener {
             stringBuilder.append(list.get(i));
             stringBuilder.append("、");
         }
-        keyWord = stringBuilder.toString().substring(0,stringBuilder.length()-1);
+        if (stringBuilder.length() > 0) {
+            keyWord = stringBuilder.toString().substring(0, stringBuilder.length() - 1);
+        } else  {
+            keyWord = "自定义诗词";
+        }
         setTransParentBackground();
         setPosition(Position.RIGHT);
         setOffsetX(100);

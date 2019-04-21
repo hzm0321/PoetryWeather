@@ -61,8 +61,6 @@ public class MyService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
-        final int[] dataBases = new int[1];
-        dataBases[0] = 0;
         LitePal.getDatabase();
         //读取control
         String controlUri = "http://hzmeurasia.cn/poetry_weather/control";
@@ -78,22 +76,26 @@ public class MyService extends Service {
                 Control control = ControlUtil.handleControlResponse(responsText);
                 if (control != null) {
                     SharedPreferences.Editor editor = getSharedPreferences("control", MODE_PRIVATE).edit();
-                    editor.putInt("dataBaseNumber",control.getDataBaseNumber());
-                    editor.putInt("weather_bg_cloud", control.getWeather_bg_cloud());
+                    editor.putInt("weather_bg_cloudy", control.getWeather_bg_cloudy());
                     editor.putInt("weather_bg_rain", control.getWeather_bg_rain());
+                    editor.putInt("weather_bg_snow", control.getWeather_bg_rain());
+                    editor.putInt("weather_bg_sunny", control.getWeather_bg_rain());
+                    editor.putInt("weather_bg_windy", control.getWeather_bg_rain());
+                    editor.putInt("versionCode", control.getVersionCode());
+                    editor.putString("versionName", control.getVersionName());
+                    editor.putInt("city_bg", control.getCity_bg());
                     editor.apply();
-                    dataBases[0] = control.getDataBaseNumber();
-                    try {
-                        Log.d(TAG, "onResponse: 服务器版本号"+control.getVersionCode());
-                        if (control.getVersionCode() > getVersionCode()) {
-                            Log.d(TAG, "onResponse: 执行了更新");
-                            SharedPreferences.Editor editor1 = getSharedPreferences("control", MODE_PRIVATE).edit();
-                            editor1.putBoolean("isUpdate", true);
-                            editor1.apply();
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+//                    try {
+//                        Log.d(TAG, "onResponse: 服务器版本号"+control.getVersionCode());
+//                        if (control.getVersionCode() > getVersionCode()) {
+//                            Log.d(TAG, "onResponse: 执行了更新");
+//                            SharedPreferences.Editor editor1 = getSharedPreferences("control", MODE_PRIVATE).edit();
+//                            editor1.putBoolean("isUpdate", true);
+//                            editor1.apply();
+//                        }
+//                    } catch (Exception e) {
+//                        e.printStackTrace();
+//                    }
 //                    createPoetryDatabase(dataBases[0]);
                 }
             }

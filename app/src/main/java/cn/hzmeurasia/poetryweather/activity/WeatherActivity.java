@@ -159,7 +159,7 @@ public class WeatherActivity extends AppCompatActivity {
     private List<View> mListView = new ArrayList<>();
     private int dateOnclickFlag = 0;
     private boolean checkPoetry = false;
-    private String nowWeather;//当前天气
+    private String nowWeather = "";//当前天气
     String findPoetry = "";//发现诗句
     PoetryDetail poetryDetail;//详细诗句
     List<String> keyWord = new ArrayList<>();
@@ -457,32 +457,83 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void loadingBg(String weather) {
         SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
-        int weather_bg_cloud = preferences.getInt("weather_bg_cloud", 0);
-        Log.d(TAG, "loadingBg: could "+weather_bg_cloud);
-        int weather_bg_rain = preferences.getInt("weather_bg_rain", 0);
                 switch(weather) {
                     case "阴":
                     case "多云":
-                        int rNumberCould = new Random().nextInt(weather_bg_cloud);
+                        int weather_bg_cloudy = preferences.getInt("weather_bg_cloudy", 0);
+                        int rNumberCould = new Random().nextInt(weather_bg_cloudy);
                         Log.d(TAG, "loadingBg: 获取到的随机数"+rNumberCould);
-                        StringBuilder stringBuilderCould = new StringBuilder();
-                        stringBuilderCould.append("http://www.hzmeurasia.cn/background/could")
-                                .append(rNumberCould)
-                                .append(".jpg");
-                        Log.d(TAG, "loadingBg: "+stringBuilderCould.toString());
+                        String stringBuilderCould = "http://www.hzmeurasia.cn/background/cloudy" +
+                                rNumberCould +
+                                ".jpg";
                         Glide.with(this)
-                                .load(stringBuilderCould.toString())
+                                .load(stringBuilderCould)
                                 .into(ivBg);
                         break;
                     case "雨":
+                    case "小雨":
+                    case "中雨":
+                    case "大雨":
+                    case "细雨":
+                    case "暴雨":
+                    case "大暴雨":
+                        int weather_bg_rain = preferences.getInt("weather_bg_rain", 0);
                         int rNumberRain = new Random().nextInt(weather_bg_rain);
-                        Log.d(TAG, "loadingBg: 获取到的随机数"+rNumberRain);
-                        StringBuilder stringBuilderRain = new StringBuilder();
-                        stringBuilderRain.append("http://www.hzmeurasia.cn/background/could")
-                                .append(rNumberRain)
-                                .append(".jpg");
+                        String stringBuilderRain = "http://www.hzmeurasia.cn/background/rain" +
+                                rNumberRain +
+                                ".jpg";
                         Glide.with(this)
-                                .load(stringBuilderRain.toString())
+                                .load(stringBuilderRain)
+                                .into(ivBg);
+                        break;
+                    case "有风":
+                    case "微风":
+                    case "和风":
+                    case "清风":
+                    case "强风":
+                    case "疾风":
+                    case "大风":
+                    case "风暴":
+                    case "飓风":
+                    case "龙卷风":
+                    case "热带风暴":
+                        int weather_bg_windy = preferences.getInt("weather_bg_windy", 0);
+                        int rNumberWindy = new Random().nextInt(weather_bg_windy);
+                        String stringBuilderWindy = "http://www.hzmeurasia.cn/background/windy" +
+                                rNumberWindy +
+                                ".jpg";
+                        Glide.with(this)
+                                .load(stringBuilderWindy)
+                                .into(ivBg);
+                        break;
+                    case "晴":
+                        int weather_bg_sunny = preferences.getInt("weather_bg_sunny", 0);
+                        int rNumberSunny = new Random().nextInt(weather_bg_sunny);
+                        String stringBuilderSunny = "http://www.hzmeurasia.cn/background/sunny" +
+                                rNumberSunny +
+                                ".jpg";
+                        Glide.with(this)
+                                .load(stringBuilderSunny)
+                                .into(ivBg);
+                        break;
+                    case "雪":
+                    case "小雪":
+                    case "中雪":
+                    case "大雪":
+                    case "暴雪":
+                    case "雨夹雪":
+                    case "雨雪天气":
+                    case "阵雨夹雪":
+                    case "阵雪":
+                    case "小到中雪":
+                    case "中到大雪":
+                        int weather_bg_snow = preferences.getInt("weather_bg_snow", 0);
+                        int rNumberSnow = new Random().nextInt(weather_bg_snow);
+                        String stringBuilderSnow = "http://www.hzmeurasia.cn/background/sunny" +
+                                rNumberSnow +
+                                ".jpg";
+                        Glide.with(this)
+                                .load(stringBuilderSnow)
                                 .into(ivBg);
                         break;
                     default:
@@ -518,7 +569,7 @@ public class WeatherActivity extends AppCompatActivity {
                     loadingBg(nowWeather);
                     Log.d(TAG, "onSuccess: 加载天气背景");
                     tvCityName.setText(now.getBasic().getLocation());
-                    temperature.append(now.getNow().getFl())
+                    temperature.append(now.getNow().getTmp())
                             .append("°");
                     tvTemperature.setText(temperature.toString());
                     tvWeather.setText(now.getNow().getCond_txt());
@@ -620,52 +671,6 @@ public class WeatherActivity extends AppCompatActivity {
     /**
      * 获取诗句
      */
-//    private void getPoetry() {
-//        String poetry = null;
-//        SharedPreferences sharedPreferences = getSharedPreferences("person", MODE_PRIVATE);
-//        String p = sharedPreferences.getString("preferenceFlag","[]");
-//        p = p.replace("[","");
-//        p = p.replace("]","");
-//        p = p.replaceAll(",", "");
-//        String qwxl = "0";
-//        String jygk = "0";
-//        String yyql = "0";
-//        if (p.contains("0")) {  qwxl="1";}
-//        if (p.contains("1")) {  jygk="1";}
-//        if (p.contains("2")) {  yyql="1";}
-//        Log.d(TAG, "getPoetry: P "+p );
-//        Log.d(TAG, "getPoetry: qjy "+ qwxl+jygk+yyql);
-//        Log.d(TAG, "getPoetry: text"+tvWeather.getText().toString());
-//        List<PoetryDb> poetryDbs = LitePal
-//                .select("poetryDb_poetry","poetryDb_author","poetryDb_annotation","poetryDb_poetry_link")
-//                .where("poetryDb_weather like ? and (poetryDb_qwxl=? or poetryDb_jygk=? or poetryDb_yyql=?)", "%"+tvWeather.getText().toString()+"%",qwxl,jygk,yyql)
-//                .find(PoetryDb.class);
-//        Log.d(TAG, "getPoetry: listSize"+poetryDbs.size());
-//        if (poetryDbs.size() >= 1) {
-//            getPoetryDb = poetryDbs.get(new Random().nextInt(poetryDbs.size()));
-//            poetry = getPoetryDb.getPoetryDb_poetry();
-//            String author = getPoetryDb.getPoetryDb_author();
-//            String annotation = getPoetryDb.getPoetryDb_annotation();
-//            String poetry_link = getPoetryDb.getPoetryDb_poetry_link();
-//            Log.d(TAG, "getPoetry: "+author);
-//            //添加缓存
-//            SharedPreferences.Editor editor = getSharedPreferences("poetry_detail", MODE_PRIVATE).edit();
-//            editor.putString("poetry_link", poetry_link);
-//            editor.putString("author", author);
-//            editor.putString("annotation", annotation);
-//            editor.apply();
-//        } else {
-//            Toast.makeText(WeatherActivity.this,"诗句获取失败",Toast.LENGTH_SHORT).show();
-//            return;
-//        }
-//        Log.d(TAG, "getPoetry: " + poetry);
-//        String[] poetrys = poetry.split(",");
-//        Animation animation = AnimationUtils.loadAnimation(this, R.anim.text_alpha);
-//        tvPoetry01.setText(poetrys[0]);
-//        tvPoetry01.startAnimation(animation);
-//        tvPoetry02.setText(poetrys[1]);
-//        tvPoetry02.startAnimation(animation);
-//    }
     private void getPoetry(){
         //随机生成一个数
         Random random = new Random();

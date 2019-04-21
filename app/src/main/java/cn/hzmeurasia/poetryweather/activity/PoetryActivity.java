@@ -301,6 +301,7 @@ public class PoetryActivity extends AppCompatActivity {
                 break;
             case R.id.listitem_tag_4:
                 Toast.makeText(PoetryActivity.this, "此功能正在建设中,敬请期待", Toast.LENGTH_SHORT).show();
+                break;
             case R.id.listitem_tag_5:
                 showCheckPriorDialog();
                 break;

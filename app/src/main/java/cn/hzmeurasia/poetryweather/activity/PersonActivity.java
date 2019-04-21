@@ -26,6 +26,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
@@ -115,6 +117,9 @@ public class PersonActivity extends AppCompatActivity {
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+        //沉浸式状态栏
+        Window window = PersonActivity.this.getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
         initHead();
         initPerson();
         initGroupListView();
@@ -340,14 +345,9 @@ public class PersonActivity extends AppCompatActivity {
 
         QMUIGroupListView.newSection(this)
                 .setTitle("个人信息")
-                .setDescription("诗词示例:\n" +
-                        "清婉秀丽: 寻寻觅觅，冷冷清清，凄凄惨惨戚戚。\n" +
-                        "激越高亢: 羽扇纶巾，谈笑间，樯橹灰飞烟灭。\n" +
-                        "语言绮丽: 新帖绣罗襦，双双金鹧鸪。")
                 .addItemView(nameListView,onClickListener)
                 .addItemView(sexListView,onClickListener)
                 .addItemView(signatureListView,onClickListener)
-                .addItemView(preferenceListView,onClickListener)
                 .addTo(mGroupListView);
 
         QMUIGroupListView.newSection(this)

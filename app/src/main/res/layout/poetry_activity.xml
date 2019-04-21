@@ -15,8 +15,8 @@
         <android.support.design.widget.CollapsingToolbarLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar"
             app:contentScrim="@color/bluishWhite"
+            app:statusBarScrim="@color/bluishWhite"
             app:layout_scrollFlags="scroll|exitUntilCollapsed"
             app:title="@string/nav_item_poetry"
             android:fitsSystemWindows="true"
