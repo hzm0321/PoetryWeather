@@ -63,7 +63,7 @@ public class MyService extends Service {
 
         LitePal.getDatabase();
         //读取control
-        String controlUri = "http://hzmeurasia.cn/poetry_weather/control";
+        String controlUri = "http://hzmeurasia.cn/PoetryWeather/config";
         HttpUtil.sendOkHttpRequest(controlUri, new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {

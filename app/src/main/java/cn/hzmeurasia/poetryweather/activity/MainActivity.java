@@ -510,7 +510,7 @@ public class MainActivity extends AppCompatActivity {
                     SharedPreferences preferences = getSharedPreferences("control", MODE_PRIVATE);
                     int city_bg_number = preferences.getInt("city_bg", 0);
                     int numCity = new Random().nextInt(city_bg_number);
-                    String cityBgUrl = "http://www.hzmeurasia.cn/city_background/main_city_bg" +
+                    String cityBgUrl = "http://www.hzmeurasia.cn/PoetryWeather/city_background/main_city_bg" +
                             numCity +
                             ".jpg";
                     CityDb cityDb = new CityDb();

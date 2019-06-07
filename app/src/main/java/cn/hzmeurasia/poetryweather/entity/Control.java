@@ -9,7 +9,6 @@ package cn.hzmeurasia.poetryweather.entity;
 public class Control {
     private int versionCode;
     private String versionName;
-    private int dataBaseNumber;
     private int city_bg;
     private int weather_bg_cloudy;
     private int weather_bg_rain;
@@ -31,14 +30,6 @@ public class Control {
 
     public void setVersionName(String versionName) {
         this.versionName = versionName;
-    }
-
-    public int getDataBaseNumber() {
-        return dataBaseNumber;
-    }
-
-    public void setDataBaseNumber(int dataBaseNumber) {
-        this.dataBaseNumber = dataBaseNumber;
     }
 
     public int getWeather_bg_cloudy() {

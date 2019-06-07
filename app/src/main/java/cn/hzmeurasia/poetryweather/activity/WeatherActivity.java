@@ -463,7 +463,7 @@ public class WeatherActivity extends AppCompatActivity {
                         int weather_bg_cloudy = preferences.getInt("weather_bg_cloudy", 0);
                         int rNumberCould = new Random().nextInt(weather_bg_cloudy);
                         Log.d(TAG, "loadingBg: 获取到的随机数"+rNumberCould);
-                        String stringBuilderCould = "http://www.hzmeurasia.cn/background/cloudy" +
+                        String stringBuilderCould = "http://www.hzmeurasia.cn/PoetryWeather/background/cloudy" +
                                 rNumberCould +
                                 ".jpg";
                         Glide.with(this)
@@ -479,7 +479,7 @@ public class WeatherActivity extends AppCompatActivity {
                     case "大暴雨":
                         int weather_bg_rain = preferences.getInt("weather_bg_rain", 0);
                         int rNumberRain = new Random().nextInt(weather_bg_rain);
-                        String stringBuilderRain = "http://www.hzmeurasia.cn/background/rain" +
+                        String stringBuilderRain = "http://www.hzmeurasia.cn/PoetryWeather/background/rain" +
                                 rNumberRain +
                                 ".jpg";
                         Glide.with(this)
@@ -499,7 +499,7 @@ public class WeatherActivity extends AppCompatActivity {
                     case "热带风暴":
                         int weather_bg_windy = preferences.getInt("weather_bg_windy", 0);
                         int rNumberWindy = new Random().nextInt(weather_bg_windy);
-                        String stringBuilderWindy = "http://www.hzmeurasia.cn/background/windy" +
+                        String stringBuilderWindy = "http://www.hzmeurasia.cn/PoetryWeather/background/windy" +
                                 rNumberWindy +
                                 ".jpg";
                         Glide.with(this)
@@ -509,7 +509,7 @@ public class WeatherActivity extends AppCompatActivity {
                     case "晴":
                         int weather_bg_sunny = preferences.getInt("weather_bg_sunny", 0);
                         int rNumberSunny = new Random().nextInt(weather_bg_sunny);
-                        String stringBuilderSunny = "http://www.hzmeurasia.cn/background/sunny" +
+                        String stringBuilderSunny = "http://www.hzmeurasia.cn/PoetryWeather/background/sunny" +
                                 rNumberSunny +
                                 ".jpg";
                         Glide.with(this)
@@ -529,7 +529,7 @@ public class WeatherActivity extends AppCompatActivity {
                     case "中到大雪":
                         int weather_bg_snow = preferences.getInt("weather_bg_snow", 0);
                         int rNumberSnow = new Random().nextInt(weather_bg_snow);
-                        String stringBuilderSnow = "http://www.hzmeurasia.cn/background/sunny" +
+                        String stringBuilderSnow = "http://www.hzmeurasia.cn/PoetryWeather/background/snow" +
                                 rNumberSnow +
                                 ".jpg";
                         Glide.with(this)
@@ -875,7 +875,7 @@ public class WeatherActivity extends AppCompatActivity {
      */
     private void loadWeatherIcon(String fileName, String code, ImageView imageView) {
         StringBuilder uri = new StringBuilder();
-        uri.append("http://www.hzmeurasia.cn/")
+        uri.append("http://www.hzmeurasia.cn/PoetryWeather/")
                 .append(fileName)
                 .append("/")
                 .append(code)
