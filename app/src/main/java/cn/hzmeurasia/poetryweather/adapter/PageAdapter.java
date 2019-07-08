@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentPagerAdapter;
 import java.util.HashMap;
 
 import cn.hzmeurasia.poetryweather.entity.PoetryDetail;
+import cn.hzmeurasia.poetryweather.fragment.FMPoetryDetailComment;
 import cn.hzmeurasia.poetryweather.fragment.FMPoetryDetailRemark;
 import cn.hzmeurasia.poetryweather.fragment.FMPoetryDetailShangXi;
 import cn.hzmeurasia.poetryweather.fragment.FMPoetryDetailTranslation;
@@ -49,6 +50,9 @@ public class PageAdapter extends FragmentPagerAdapter {
                     break;
                 case 2:
                     fragment = new FMPoetryDetailShangXi();
+                    break;
+                case 3:
+                    fragment = new FMPoetryDetailComment();
                     break;
             }
             mFragmentHashMap.put(pos, fragment);

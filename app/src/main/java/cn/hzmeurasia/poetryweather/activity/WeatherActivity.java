@@ -182,8 +182,6 @@ public class WeatherActivity extends AppCompatActivity {
                 } else {
                     Toast.makeText(WeatherActivity.this, "抱歉,该诗句诗词库中暂未收录", Toast.LENGTH_SHORT).show();
                 }
-
-
                 break;
             case R.id.btn_weather_back:
                 finish();
@@ -289,17 +287,18 @@ public class WeatherActivity extends AppCompatActivity {
         });
 
         header.setOnTwoLevelListener(new OnTwoLevelListener() {
+
             @Override
             public boolean onTwoLevel(@NonNull RefreshLayout refreshLayout) {
                 Toast.makeText(MyApplication.getContext(),"触发二楼",Toast.LENGTH_SHORT).show();
                 rfSecondFloorContent.animate().alpha(1).setDuration(2000);
-                refreshLayout.getLayout().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        header.finishTwoLevel();
-                        rfSecondFloorContent.animate().alpha(0).setDuration(1000);
-                    }
-                },5000);
+//                refreshLayout.getLayout().postDelayed(new Runnable() {
+//                    @Override
+//                    public void run() {
+//                        header.finishTwoLevel();
+//                        rfSecondFloorContent.animate().alpha(0).setDuration(1000);
+//                    }
+//                },5000);
                 return true;
             }
         });
@@ -644,10 +643,8 @@ public class WeatherActivity extends AppCompatActivity {
                     }
                 }
                 getPoetry();
-
                 closeLoading();
             }
-
         });
     }
 
@@ -902,8 +899,6 @@ public class WeatherActivity extends AppCompatActivity {
             tipDialog.dismiss();
         }
     }
-
-
 
     @Override
     protected void onDestroy() {

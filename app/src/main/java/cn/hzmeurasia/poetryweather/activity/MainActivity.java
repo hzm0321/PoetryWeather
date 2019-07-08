@@ -678,6 +678,9 @@ public class MainActivity extends AppCompatActivity {
                 }).show();
     }
 
+    /**
+     * 权限检查，申请定位所需的权限
+     */
     private void checkLocationPower() {
         List<String> permissionList = new ArrayList<>();
         if (ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

@@ -96,8 +96,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:id="@+id/fab_music"
-        android:layout_gravity="bottom|end"
-        android:layout_margin="16dp"
+        android:layout_gravity="top|right"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="60dp"
         app:backgroundTint="@color/add"
+        app:fabSize="mini"
         android:src="@drawable/ic_music_note_black_24dp"/>
 </FrameLayout>

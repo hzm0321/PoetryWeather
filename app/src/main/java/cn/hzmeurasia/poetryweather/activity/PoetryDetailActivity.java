@@ -120,6 +120,7 @@ public class PoetryDetailActivity extends AppCompatActivity {
         tabLayout.addTab(tabLayout.newTab().setText("译文"));
         tabLayout.addTab(tabLayout.newTab().setText("注释"));
         tabLayout.addTab(tabLayout.newTab().setText("赏析"));
+        tabLayout.addTab(tabLayout.newTab().setText("评论"));
         //设置adapter滑动时间
         viewPager.setAdapter(new PageAdapter(getSupportFragmentManager(), tabLayout.getTabCount(),poetryDetail));
         viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
