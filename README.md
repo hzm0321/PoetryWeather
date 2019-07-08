@@ -36,16 +36,16 @@
 
 
   [1]: https://v.qq.com/x/page/l0877whgku2.html
-  [2]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon00.png
-  [3]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon01.png
-  [4]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon02.png
-  [5]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon03.png
-  [6]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon04.png
-  [7]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/icon05.png
-  [8]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_00.jpg
-  [9]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_01.jpg
-  [10]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_02.jpg
-  [11]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_03.jpg
-  [12]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_04.jpg
-  [13]: http://hzmeurasia.cn/poetry_weather/poetry_img_readme/demo_05.jpg
+  [2]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon00.png
+  [3]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon01.png
+  [4]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon02.png
+  [5]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon03.png
+  [6]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon04.png
+  [7]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/icon05.png
+  [8]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_00.jpg
+  [9]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_01.jpg
+  [10]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_02.jpg
+  [11]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_03.jpg
+  [12]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_04.jpg
+  [13]: http://www.hzmeurasia.cn/PoetryWeather/github/poetry_img_readme/demo_05.jpg
   [14]: http://hzmeurasia.cn/
